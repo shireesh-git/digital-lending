@@ -2,6 +2,362 @@
 
 > CAM Intelligence Platform — System Architecture, Data Flow & Process Design
 
+---
+
+## Architecture Diagrams
+
+### Diagram 1 — Agentic Pipeline Overview (Compact)
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a73e8', 'primaryTextColor': '#fff', 'lineColor': '#8ab4f8', 'background': '#0d1117', 'mainBkg': '#161b22', 'nodeBorder': '#30363d', 'clusterBkg': '#13171e', 'clusterBorder': '#30363d'}}}%%
+graph LR
+    subgraph FRONTEND["Frontend"]
+        UI["Alpine.js SPA"]
+        CHAT["Analyst Chat"]
+    end
+
+    subgraph API["FastAPI · 50+ Endpoints"]
+        GW["API Gateway"]
+    end
+
+    subgraph PIPELINE["SuperAgent Pipeline"]
+        direction TB
+        A1["1 · Data Ingestion"]
+        A2["2 · PEP Screening"]
+        A3["3 · Financial Analysis"]
+        A4["4 · Validation"]
+        A5["5 · Benchmarking"]
+        A6["6 · Policy & Risk"]
+        A7["7 · Narrative"]
+        A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7
+    end
+
+    subgraph ENGINES["14 Engines"]
+        direction TB
+        EG1["Ratio · Benchmark · Validation"]
+        EG2["Policy · Fraud · ETB Analytics"]
+        EG3["CAM Builder · Renderer · LLM Renderer"]
+        EG4["OCR · Downloader · CRILC · Social · Banking"]
+    end
+
+    subgraph LLM["LLM Providers"]
+        direction TB
+        L1["Gemini 2.0 Flash"]
+        L2["Ollama · OpenAI · Anthropic"]
+    end
+
+    subgraph DATA["Data Layer"]
+        direction TB
+        D1["SQLite DB"]
+        D2["File Storage"]
+        D3["External APIs · MCP"]
+    end
+
+    subgraph OUT["Output"]
+        direction TB
+        O1["21-Section CAM"]
+        O2["PDF · One-Pager · Fact Pack"]
+    end
+
+    UI --> GW
+    CHAT --> GW
+    GW --> A1
+    PIPELINE -.-> ENGINES
+    ENGINES -.-> DATA
+    A7 -.-> LLM
+    CHAT -.-> LLM
+    A7 --> O1
+    O1 --> O2
+    GW -->|SSE| UI
+
+    classDef agent fill:#1a73e8,stroke:#4285f4,color:#fff
+    classDef engine fill:#34a853,stroke:#0d904f,color:#fff
+    classDef llm fill:#ea4335,stroke:#d93025,color:#fff
+    classDef data fill:#fbbc04,stroke:#f29900,color:#000
+    classDef output fill:#9334e6,stroke:#7627bb,color:#fff
+
+    class A1,A2,A3,A4,A5,A6,A7 agent
+    class EG1,EG2,EG3,EG4 engine
+    class L1,L2 llm
+    class D1,D2,D3 data
+    class O1,O2 output
+```
+
+### Diagram 2 — Enterprise Agentic Architecture (MCP · ML · External Integration)
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a73e8', 'primaryTextColor': '#e8eaed', 'lineColor': '#8ab4f8', 'background': '#0d1117', 'mainBkg': '#161b22', 'nodeBorder': '#30363d', 'clusterBkg': '#0d1117', 'clusterBorder': '#30363d', 'fontSize': '13px'}}}%%
+graph TB
+
+    subgraph ENTRY["🏦 Enterprise Entry Points"]
+        direction LR
+        RM["Relationship Manager<br/>Web Portal"]
+        CREDIT["Credit Analyst<br/>Review Interface"]
+        SYSTEM["Upstream Systems<br/>Core Banking / LOS"]
+    end
+
+    subgraph ORCHESTRATION["🧠 Agentic Orchestration Layer"]
+        direction TB
+        SA["<b>SuperAgent Orchestrator</b><br/>Sequential Pipeline · Context Chain<br/>SSE Streaming · Fault Tolerance"]
+        
+        subgraph AGENT_POOL["Autonomous Agent Pool"]
+            direction LR
+            AG1["DataIngestion<br/>Agent"]
+            AG2["PEP/AML<br/>Agent"]
+            AG3["Financial<br/>Analysis Agent"]
+            AG4["Validation<br/>Agent"]
+            AG5["Benchmark<br/>Agent"]
+            AG6["Policy &<br/>Risk Agent"]
+            AG7["Narrative<br/>Agent"]
+        end
+
+        SA --> AG1
+        SA --> AG2
+        SA --> AG3
+        SA --> AG4
+        SA --> AG5
+        SA --> AG6
+        SA --> AG7
+    end
+
+    subgraph MCP_LAYER["🔌 MCP Integration Layer — Model Context Protocol"]
+        direction LR
+        MCP_CLIENT["<b>MCP Client</b><br/>Session Init · tools/list<br/>tools/call · SSE Parsing"]
+        
+        subgraph MCP_TOOLS["MCP Tool Registry"]
+            direction TB
+            T1["company_lookup"]
+            T2["director_search"]
+            T3["financial_fetch"]
+            T4["compliance_check"]
+            T5["charges_register"]
+            T6["gstin_profile"]
+        end
+
+        MCP_CLIENT --> MCP_TOOLS
+    end
+
+    subgraph EXTERNAL["🌐 External Data Ecosystem"]
+        direction TB
+        
+        subgraph GOV_API["Government & Regulatory"]
+            direction LR
+            MCA["MCA V3<br/>Company Master"]
+            GST["GSTN<br/>GST Profile"]
+            RBI["RBI CRILC<br/>Fund/Non-Fund"]
+            EPFO["EPFO<br/>Compliance"]
+        end
+
+        subgraph MARKET_API["Market & Intelligence"]
+            direction LR
+            NSE["NSE/BSE<br/>Filings & Prices"]
+            RATING["CRISIL · CARE<br/>ICRA · Fitch"]
+            NEWS["News &<br/>Sentiment"]
+            SOCIAL["Social Media<br/>& ESG Signals"]
+        end
+
+        subgraph BUREAU_API["Credit Bureau"]
+            direction LR
+            CIBIL["CIBIL<br/>Commercial"]
+            EQUIFAX["Equifax<br/>Business"]
+            EXPERIAN["Experian<br/>Corporate"]
+        end
+    end
+
+    subgraph ML_AI["🤖 ML & AI Engine Layer"]
+        direction TB
+
+        subgraph LLM_PROVIDERS["LLM Providers — Pluggable"]
+            direction LR
+            GEMINI["Google Vertex AI<br/><b>Gemini 2.0 Flash</b>"]
+            OLLAMA["Ollama Local<br/><b>Qwen 2.5 32B</b>"]
+            GPT["OpenAI / Azure<br/><b>GPT-4</b>"]
+            CLAUDE["Anthropic<br/><b>Claude</b>"]
+        end
+
+        subgraph ML_ENGINES["Deterministic ML & Rule Engines"]
+            direction LR
+            RATIO["Ratio Engine<br/>20+ Metrics"]
+            FRAUD["Fraud Detection<br/>Multi-Signal"]
+            RISK["Risk Scoring<br/>Composite 0-100"]
+            BENCH["Benchmark<br/>Sector RAG"]
+        end
+
+        subgraph AI_SERVICES["AI-Powered Services"]
+            direction LR
+            OCR["Document OCR<br/>PyMuPDF + Gemini Vision"]
+            NLP["Financial NLP<br/>Entity Extraction"]
+            NARRATIVE["CAM Narrative<br/>14 LLM Sections"]
+            COPILOT["Analyst Copilot<br/>Context-Aware Chat"]
+        end
+    end
+
+    subgraph PERSISTENCE["💾 Enterprise Data Layer"]
+        direction LR
+        SQLITE["SQLite<br/>Companies · Cases<br/>Comments · Users"]
+        INMEM["In-Memory Cache<br/>Hot Stores<br/>company · case · etb"]
+        DMS["Document Store<br/>13 Categories<br/>Per Entity"]
+        GCS["GCS Bucket<br/>Cloud Storage FUSE<br/>Persistent Runtime"]
+    end
+
+    subgraph OUTPUT["📊 Enterprise Outputs"]
+        direction LR
+        CAM["21-Section CAM<br/>Markdown + PDF"]
+        FACTPACK["Fact Pack JSON<br/>38 Auditable Keys"]
+        ONEPAGER["Executive<br/>One-Pager"]
+        AUDIT["Full Audit Trail<br/>Data Lineage"]
+    end
+
+    ENTRY --> ORCHESTRATION
+    AG1 --> MCP_LAYER
+    MCP_LAYER --> EXTERNAL
+    AG1 -.->|"Direct API"| EXTERNAL
+    AG2 -.-> ML_AI
+    AG3 --> ML_ENGINES
+    AG4 --> ML_ENGINES
+    AG5 --> ML_ENGINES
+    AG6 --> ML_ENGINES
+    AG7 --> LLM_PROVIDERS
+    AG7 --> AI_SERVICES
+    COPILOT -.-> LLM_PROVIDERS
+    OCR -.-> GEMINI
+    NARRATIVE -.-> LLM_PROVIDERS
+    ML_AI -.-> PERSISTENCE
+    ORCHESTRATION -.-> PERSISTENCE
+    AG7 --> OUTPUT
+    SA -.->|"SSE Events"| ENTRY
+
+    classDef orchestrator fill:#ff6d01,stroke:#e65100,color:#fff,stroke-width:2px
+    classDef agent fill:#1a73e8,stroke:#4285f4,color:#fff,stroke-width:2px
+    classDef mcp fill:#00bcd4,stroke:#0097a7,color:#fff,stroke-width:2px
+    classDef external fill:#78909c,stroke:#546e7a,color:#fff,stroke-width:1px
+    classDef ml fill:#ea4335,stroke:#d93025,color:#fff,stroke-width:1px
+    classDef engine fill:#34a853,stroke:#0d904f,color:#fff,stroke-width:1px
+    classDef ai fill:#ab47bc,stroke:#8e24aa,color:#fff,stroke-width:1px
+    classDef data fill:#fbbc04,stroke:#f29900,color:#000,stroke-width:1px
+    classDef output fill:#9334e6,stroke:#7627bb,color:#fff,stroke-width:1px
+    classDef entry fill:#37474f,stroke:#263238,color:#fff,stroke-width:1px
+
+    class SA orchestrator
+    class AG1,AG2,AG3,AG4,AG5,AG6,AG7 agent
+    class MCP_CLIENT,T1,T2,T3,T4,T5,T6 mcp
+    class MCA,GST,RBI,EPFO,NSE,RATING,NEWS,SOCIAL,CIBIL,EQUIFAX,EXPERIAN external
+    class GEMINI,OLLAMA,GPT,CLAUDE ml
+    class RATIO,FRAUD,RISK,BENCH engine
+    class OCR,NLP,NARRATIVE,COPILOT ai
+    class SQLITE,INMEM,DMS,GCS data
+    class CAM,FACTPACK,ONEPAGER,AUDIT output
+    class RM,CREDIT,SYSTEM entry
+```
+
+### Diagram 3 — Detailed Agent-Engine Mapping
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a73e8', 'primaryTextColor': '#fff', 'primaryBorderColor': '#4285f4', 'lineColor': '#8ab4f8', 'secondaryColor': '#34a853', 'tertiaryColor': '#1e1e2e', 'background': '#0d1117', 'mainBkg': '#161b22', 'nodeBorder': '#30363d', 'clusterBkg': '#161b22', 'clusterBorder': '#30363d', 'titleColor': '#c9d1d9', 'edgeLabelBackground': '#161b22'}}}%%
+graph TB
+    subgraph USER_LAYER["🖥️ Presentation Layer"]
+        UI["Alpine.js SPA<br/>Dark Theme · Chart.js<br/>12+ Pages · SSE Real-time"]
+        CHAT["Financial Advisor Chat<br/>LLM-powered Analyst Copilot"]
+    end
+
+    subgraph API_LAYER["⚡ API Gateway — FastAPI"]
+        direction LR
+        EP_ONBOARD["POST /api/onboard<br/>CIN/PAN Onboarding"]
+        EP_PIPELINE["POST /api/cases/run<br/>SSE Pipeline Stream"]
+        EP_DOCS["Document CRUD<br/>Upload · Extract · Classify"]
+        EP_OTHER["50+ Endpoints<br/>ETB · Fraud · 360° · Config"]
+    end
+
+    subgraph ORCHESTRATOR["🧠 SuperAgent — Pipeline Orchestrator"]
+        SA["SuperAgent<br/>Sequential Pipeline<br/>Context Passing · Error Handling<br/>SSE Progress Events"]
+    end
+
+    subgraph AGENTS["🤖 7 Specialized Sub-Agents"]
+        direction TB
+        A1["1 · DataIngestionAgent<br/>DMS fetch · OCR · Extraction<br/>External APIs · MCP · ETB"]
+        A2["2 · PEPScreeningAgent<br/>PEP · Sanctions · Adverse Media"]
+        A3["3 · FinancialAnalysisAgent<br/>20+ Ratios · Trends · YoY"]
+        A4["4 · ValidationAgent<br/>Cross-doc · Bureau · GST · Regulatory"]
+        A5["5 · BenchmarkAgent<br/>Sector Peers · Size Band · RAG"]
+        A6["6 · PolicyAgent<br/>Hard Rules · Risk Score · Recommendation"]
+        A7["7 · NarrativeAgent<br/>Fact Pack · Templates · LLM Sections"]
+        A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7
+    end
+
+    subgraph ENGINES["⚙️ 14 Deterministic Engines"]
+        direction LR
+        E1["Ratio"]
+        E2["Benchmark"]
+        E3["Validation"]
+        E4["Policy"]
+        E5["Fraud"]
+        E6["ETB"]
+        E7["CAM Builder"]
+        E8["Renderer v2"]
+        E9["LLM Renderer"]
+        E10["Core Banking"]
+        E11["Social Media"]
+        E12["Doc OCR"]
+        E13["Downloader"]
+        E14["CRILC Gen"]
+    end
+
+    subgraph LLM_LAYER["🔮 LLM Providers (Pluggable)"]
+        direction LR
+        LLM_GEMINI["Vertex AI · Gemini 2.0"]
+        LLM_OLLAMA["Ollama · Qwen 2.5 32B"]
+        LLM_OTHER["OpenAI · Anthropic · Azure"]
+    end
+
+    subgraph DATA_LAYER["💾 Data & Storage"]
+        direction LR
+        DB["SQLite DB"]
+        MEMORY["In-Memory Stores"]
+        FILES["File Storage"]
+        EXTERNAL["External APIs · MCP"]
+    end
+
+    subgraph OUTPUT["📄 Outputs"]
+        direction LR
+        CAM["21-Section CAM"]
+        PDF["PDF · One-Pager"]
+        FACTPACK["Fact Pack JSON"]
+    end
+
+    UI --> API_LAYER
+    CHAT --> API_LAYER
+    EP_PIPELINE --> SA
+    SA --> A1
+    A1 -.-> E12 & E13 & E6 & E11
+    A3 -.-> E1
+    A4 -.-> E3
+    A5 -.-> E2
+    A6 -.-> E4 & E5
+    A7 -.-> E7 & E8 & E9
+    E9 -.-> LLM_LAYER
+    CHAT -.-> LLM_LAYER
+    A1 -.-> EXTERNAL
+    ENGINES -.-> DATA_LAYER
+    A7 --> OUTPUT
+    SA -->|"SSE"| UI
+
+    classDef agentNode fill:#1a73e8,stroke:#4285f4,color:#fff,stroke-width:2px
+    classDef engineNode fill:#34a853,stroke:#0d904f,color:#fff,stroke-width:1px
+    classDef llmNode fill:#ea4335,stroke:#d93025,color:#fff,stroke-width:1px
+    classDef dataNode fill:#fbbc04,stroke:#f29900,color:#000,stroke-width:1px
+    classDef outputNode fill:#9334e6,stroke:#7627bb,color:#fff,stroke-width:1px
+    classDef orchestrator fill:#ff6d01,stroke:#e65100,color:#fff,stroke-width:2px
+
+    class SA orchestrator
+    class A1,A2,A3,A4,A5,A6,A7 agentNode
+    class E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13,E14 engineNode
+    class LLM_GEMINI,LLM_OLLAMA,LLM_OTHER llmNode
+    class DB,MEMORY,FILES,EXTERNAL dataNode
+    class CAM,PDF,FACTPACK outputNode
+```
+
+---
+
 ## 1. System Architecture Overview
 
 The CAM Intelligence Platform follows a **layered architecture** with clear separation between data ingestion, analytical processing, AI orchestration, and presentation.
