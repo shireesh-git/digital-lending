@@ -1,0 +1,41 @@
+{
+  "source": "probe42",
+  "tool": "get_gst_details_by_identifier",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "gstin": "09AABCP1234R1Z6",
+    "legal_name": "PNC Infratech Limited",
+    "trade_name": "PNC Infratech Limited",
+    "registration_date": "2017-07-01",
+    "status": "Active",
+    "gst_type": "Regular",
+    "state": "Uttar Pradesh",
+    "state_code": "09",
+    "principal_place": "PNC Tower, 3/22 D, Civil Lines, Agra, UP 282002",
+    "nature_of_business": [
+      "Works Contract",
+      "Manufacturing",
+      "Services"
+    ],
+    "filing_frequency": "Monthly",
+    "annual_turnover": {
+      "FY2025": 8650,
+      "FY2024": 7956,
+      "FY2023": 7208
+    },
+    "filing_status": {
+      "FY2025": {
+        "gstr1": "All Filed",
+        "gstr3b": "All Filed",
+        "annual_return": "Filed"
+      },
+      "FY2024": {
+        "gstr1": "All Filed",
+        "gstr3b": "All Filed",
+        "annual_return": "Filed"
+      }
+    },
+    "compliance_score": 95
+  }
+}

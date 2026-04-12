@@ -1,0 +1,125 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Probe42 cache · 24 days
+        - generic [ref=e12]: LLM narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: Execution Console
+        - heading "Pipeline" [level=1] [ref=e27]
+        - paragraph [ref=e28]: Run case analysis, monitor live agent progress, and review executed outcomes from one production workflow.
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]: Target Selection
+          - heading "Run the selected borrower" [level=3] [ref=e32]
+          - paragraph [ref=e33]: Single-case execution streams agent progress in real time. Full queue execution runs the available portfolio batch.
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]: Selected company
+            - combobox [ref=e37]:
+              - option "Bharat Manufacturing Ltd (BMFG001)" [selected]
+              - option "Pinnacle Infra Projects Ltd (PINF001)"
+              - option "Sunrise Pharma Pvt Ltd (SPHR001)"
+              - option "Omega Logistics Pvt Ltd (OLOG001)"
+              - option "Tara Steels Industries Ltd (TSTL001)"
+              - option "Reliable Energy Industries Ltd (REIL001)"
+              - option "Infosys Limited (INFY001)"
+              - option "Advik Ports & SEZ Ltd (ADPT001)"
+              - option "Bajrang Finance Ltd (BJFN001)"
+              - option "Ciplex Pharmaceuticals Ltd (CIPL001)"
+              - option "Delhi Land & Realty Ltd (DLFR001)"
+              - option "JSW Alloys & Steel Ltd (JSWL001)"
+              - option "Maruti Auto Industries Ltd (MRUT001)"
+              - option "Titan Luxe Retail Ltd (TITN001)"
+              - option "National Thermal Power Corp Ltd (NTPC001)"
+              - option "Yashwant Commercial Bank Ltd (YESB001)"
+              - option "Dr. Reddy's Laboratories Limited (DRRD001)"
+              - option "The Indian Hotels Company Limited (IHCL001)"
+              - option "Apollo Hospitals Enterprise Limited (APOL001)"
+          - generic [ref=e38]:
+            - button "▶ Execute Pipeline" [ref=e39] [cursor=pointer]:
+              - generic [ref=e40]: ▶ Execute Pipeline
+            - button "Run All" [ref=e41] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: Executed Cases
+          - generic [ref=e45]: "0"
+          - generic [ref=e46]: Portfolio runs ready for review
+        - generic [ref=e47]:
+          - generic [ref=e48]: Average Score
+          - generic [ref=e49]: "0.0"
+          - generic [ref=e50]: Composite average across executed cases
+        - generic [ref=e51]:
+          - generic [ref=e52]: Approvals
+          - generic [ref=e53]: "0"
+          - generic [ref=e54]: Approve + conditional approve decisions
+        - generic [ref=e55]:
+          - generic [ref=e56]: LLM Narratives
+          - generic [ref=e57]: "0"
+          - generic [ref=e58]: Cases completed in LLM narrative mode
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]: Selected Borrower
+              - heading "Bharat Manufacturing Ltd" [level=3] [ref=e64]
+              - paragraph [ref=e65]: Use this view to confirm the selected case before execution.
+            - generic [ref=e66]: BM
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]: Entity ID
+              - strong [ref=e70]: BMFG001
+            - generic [ref=e71]:
+              - generic [ref=e72]: Sector
+              - strong [ref=e73]: Manufacturing
+            - generic [ref=e74]:
+              - generic [ref=e75]: Case Type
+              - strong [ref=e76]: NTB
+            - generic [ref=e77]:
+              - generic [ref=e78]: Amount
+              - strong [ref=e79]: Rs. 150 Cr
+          - paragraph [ref=e80]: This borrower has not been executed yet. Running the pipeline will create the first case result.
+        - generic [ref=e81]:
+          - generic [ref=e83]:
+            - generic [ref=e84]: Execution State
+            - heading "Ready to execute" [level=3] [ref=e85]
+            - paragraph [ref=e86]: Select a company and run the pipeline when ready.
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - generic [ref=e89]: Agents Registered
+              - generic [ref=e90]: "0"
+            - generic [ref=e91]:
+              - generic [ref=e92]: Conditional Approvals
+              - generic [ref=e93]: "0"
+            - generic [ref=e94]:
+              - generic [ref=e95]: Declines
+              - generic [ref=e96]: "0"
+            - generic [ref=e97]:
+              - generic [ref=e98]: Live Progress
+              - generic [ref=e99]: Idle
+      - generic [ref=e100]:
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - generic [ref=e103]: Portfolio Results
+            - heading "Execution Results" [level=3] [ref=e104]
+          - generic [ref=e105]: 0 analysed cases
+        - paragraph [ref=e106]:
+          - text: No pipelines executed yet. Select a company above and click
+          - strong [ref=e107]: Execute Pipeline
+          - text: .

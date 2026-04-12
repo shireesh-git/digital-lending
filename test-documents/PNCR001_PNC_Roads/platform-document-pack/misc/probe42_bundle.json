@@ -1,0 +1,33 @@
+{
+  "source": "probe42_bundle",
+  "entity_key": "PNCR001",
+  "cin": "L45201DL1999PLC195937",
+  "pan": "AABCP1234R",
+  "gstin": "09AABCP1234R1Z6",
+  "company_name": "PNC Infratech Limited",
+  "cache_timestamp": "2026-04-06T08:54:03Z",
+  "tools_status": {
+    "get_base_details_by_identifier": "success",
+    "get_kyc_by_identifier": "success",
+    "get_gst_details_by_identifier": "success",
+    "get_epfo_details_by_identifier": "success",
+    "get_suit_filed_cases_by_identifier": "success",
+    "get_credit_ratings_by_identifier": "success",
+    "get_legal_history_by_identifier": "success",
+    "get_open_charges_by_identifier": "success",
+    "get_data_status": "success",
+    "get_director_network_by_din": "success"
+  },
+  "summary": {
+    "company_status": "Active",
+    "listing_status": "Listed",
+    "industry": "Construction - Roads & Highways",
+    "directors_count": 5,
+    "ratings_count": 2,
+    "legal_case_count": 3,
+    "total_disputed_amount_cr": 57.8,
+    "charges_count": 8,
+    "employees": 12500,
+    "gst_compliance_score": 95
+  }
+}

@@ -1,0 +1,66 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - heading "CAM Intel" [level=2] [ref=e7]
+        - generic [ref=e8]: v2.0
+    - list [ref=e9]:
+      - listitem [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: ■
+        - text: Dashboard
+      - listitem [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 📋
+        - text: Cases
+      - listitem [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: ⚡
+        - text: Smart Onboard
+      - listitem [ref=e16] [cursor=pointer]:
+        - generic [ref=e17]: 📁
+        - text: Documents
+      - listitem [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ▶
+        - text: Pipeline
+      - listitem [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: 📄
+        - text: Reports
+      - listitem [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: ⚙
+        - text: Settings
+    - generic [ref=e25]:
+      - generic [ref=e26]: TPL
+      - generic [ref=e27]: mock
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - heading "Dashboard" [level=1] [ref=e31]
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: ▣
+          - generic [ref=e35]:
+            - generic [ref=e36]: Analysed
+            - generic [ref=e37]: "0"
+        - generic [ref=e38]:
+          - generic [ref=e39]: ✓
+          - generic [ref=e40]:
+            - generic [ref=e41]: Approved
+            - generic [ref=e42]: "0"
+        - generic [ref=e43]:
+          - generic [ref=e44]: ✗
+          - generic [ref=e45]:
+            - generic [ref=e46]: Declined
+            - generic [ref=e47]: "0"
+        - generic [ref=e48]:
+          - generic [ref=e49]: ⚠
+          - generic [ref=e50]:
+            - generic [ref=e51]: Referred
+            - generic [ref=e52]: "0"
+      - generic [ref=e53]:
+        - heading "Risk Grade Distribution" [level=3] [ref=e55]
+        - heading "Score Breakdown (Latest)" [level=3] [ref=e59]
+      - generic [ref=e62]:
+        - heading "Analysed Cases" [level=3] [ref=e63]
+        - paragraph [ref=e64]:
+          - text: No cases analysed yet. Go to
+          - link "Pipeline" [ref=e65] [cursor=pointer]:
+            - /url: "#"
+          - text: to run analysis.

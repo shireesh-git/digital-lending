@@ -1,0 +1,36 @@
+{
+  "source": "probe42",
+  "tool": "get_legal_history_by_identifier",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "criminal_cases": 0,
+    "civil_cases": 3,
+    "tax_cases": 1,
+    "regulatory_matters": 0,
+    "details": [
+      {
+        "type": "Civil",
+        "court": "NCLAT",
+        "amount_cr": 45,
+        "status": "Pending"
+      },
+      {
+        "type": "Civil",
+        "court": "HC Allahabad",
+        "amount_cr": 12,
+        "status": "Pending"
+      },
+      {
+        "type": "Tax",
+        "court": "ITAT Agra",
+        "amount_cr": 8.5,
+        "status": "Favorable — department appeal dismissed"
+      }
+    ],
+    "wilful_defaulter": false,
+    "fraud_classification": false,
+    "insolvency_proceedings": false
+  }
+}

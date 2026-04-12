@@ -1,0 +1,184 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Probe42 cache · 24 days
+        - generic [ref=e12]: LLM narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Credit Appraisal Storyline
+          - heading "Reimagining Credit Appraisal with AI" [level=1] [ref=e27]
+          - paragraph [ref=e28]: From verified data ingestion to decision-ready CAMs, the journey now follows one guided flow instead of scattered pages and repeated data pulls.
+          - generic [ref=e29]:
+            - button "+ Create New CAM" [ref=e30] [cursor=pointer]
+            - button "Open Final CAM Workspace" [ref=e31] [cursor=pointer]
+        - generic [ref=e32]:
+          - article [ref=e33]:
+            - heading "AI Data Aggregation" [level=3] [ref=e34]
+            - paragraph [ref=e35]: Unified ingestion from Probe42, regulatory data, documents, and internal banking inputs.
+          - article [ref=e36]:
+            - heading "Financial & Risk Analysis" [level=3] [ref=e37]
+            - paragraph [ref=e38]: Ratios, trend scans, validation exceptions, and risk indicators in one credit view.
+          - article [ref=e39]:
+            - heading "CAM Auto-Generation" [level=3] [ref=e40]
+            - paragraph [ref=e41]: Structured CAM drafts generated section-wise with policy aligned formatting.
+          - article [ref=e42]:
+            - heading "Decision Support" [level=3] [ref=e43]
+            - paragraph [ref=e44]: Scorecards, conditions, and recommendation logic ready for analyst review.
+          - article [ref=e45]:
+            - heading "Workflow & Compliance" [level=3] [ref=e46]
+            - paragraph [ref=e47]: RM gaps, upload tracking, comments, and traceable case progression.
+      - generic [ref=e48]:
+        - article [ref=e49]:
+          - generic [ref=e50]: CAMs in Progress
+          - strong [ref=e51]: "13"
+        - article [ref=e52]:
+          - generic [ref=e53]: Completed
+          - strong [ref=e54]: "6"
+        - article [ref=e55]:
+          - generic [ref=e56]: Average Score
+          - strong [ref=e57]: "60.4"
+        - article [ref=e58]:
+          - generic [ref=e59]: Approval Rate
+          - strong [ref=e60]: 17%
+        - article [ref=e61]:
+          - generic [ref=e62]: High Risk Cases
+          - strong [ref=e63]: "3"
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: Live Portfolio
+              - heading "Active CAM Pipeline" [level=3] [ref=e69]
+            - button "Open Pipeline" [ref=e70] [cursor=pointer]
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Data Ingestion" [level=4] [ref=e73]
+              - article [ref=e130]:
+                - strong [ref=e131]: Tara Steels Industries Ltd
+                - paragraph [ref=e132]: Working Capital · Rs. 2,500 Cr
+                - text: Pending execution · Updated 11:05
+              - article [ref=e133]:
+                - strong [ref=e134]: Reliable Energy Industries Ltd
+                - paragraph [ref=e135]: Working Capital · Rs. 5,000 Cr
+                - text: Pending execution · Updated 10:40
+            - generic [ref=e81]:
+              - heading "Financial Analysis" [level=4] [ref=e82]
+              - article [ref=e136]:
+                - strong [ref=e137]: Bharat Manufacturing Ltd
+                - paragraph [ref=e138]: Working Capital · Rs. 150 Cr
+                - text: B Risk · Updated 10:15
+              - article [ref=e139]:
+                - strong [ref=e140]: Infosys Limited
+                - paragraph [ref=e141]: Working Capital · Rs. 500 Cr
+                - text: A Risk · Updated 09:50
+            - generic [ref=e84]:
+              - heading "CAM Drafting" [level=4] [ref=e85]
+              - article [ref=e142]:
+                - strong [ref=e143]: Apollo Hospitals Enterprise Limited
+                - paragraph [ref=e144]: Working Capital · Rs. 750 Cr
+                - text: B Risk · Updated 09:15
+            - generic [ref=e87]:
+              - heading "Review / Approval" [level=4] [ref=e88]
+              - article [ref=e145]:
+                - strong [ref=e146]: Sunrise Pharma Pvt Ltd
+                - paragraph [ref=e147]: Working Capital · Rs. 75 Cr
+                - text: C Risk · Updated 08:50
+        - complementary [ref=e90]:
+          - generic [ref=e91]:
+            - heading "Risk Alerts" [level=4] [ref=e92]
+            - list [ref=e93]:
+              - listitem [ref=e94]: No high-risk alerts open right now
+              - listitem [ref=e95]: Document coverage gaps are being tracked separately
+              - listitem [ref=e96]: Probe42 cache is active for repeat case access
+          - generic [ref=e97]:
+            - heading "AI Insights" [level=4] [ref=e98]
+            - list [ref=e99]:
+              - listitem [ref=e148]: 6 CAMs now have reusable case intelligence and Probe-backed context
+              - listitem [ref=e101]: Document gaps are isolated to RM uploads rather than repeat public-data pulls
+              - listitem [ref=e149]: Cache TTL is set to 24 days
+      - generic [ref=e103]:
+        - article [ref=e104]:
+          - generic [ref=e106]:
+            - generic [ref=e107]: Audit Trail
+            - heading "Recent CAM Activity" [level=3] [ref=e108]
+          - table [ref=e109]:
+            - rowgroup [ref=e110]:
+              - row "Company Stage Updated Status" [ref=e111]:
+                - columnheader "Company" [ref=e112]
+                - columnheader "Stage" [ref=e113]
+                - columnheader "Updated" [ref=e114]
+                - columnheader "Status" [ref=e115]
+            - rowgroup [ref=e150]:
+              - row "Apollo Hospitals Enterprise Limited Final Review Pending decline" [ref=e151]:
+                - cell "Apollo Hospitals Enterprise Limited" [ref=e152]
+                - cell "Final Review" [ref=e153]
+                - cell "Pending" [ref=e154]
+                - cell "decline" [ref=e155]:
+                  - generic [ref=e156]: decline
+              - row "Bharat Manufacturing Ltd Final Review Pending conditional approve" [ref=e157]:
+                - cell "Bharat Manufacturing Ltd" [ref=e158]
+                - cell "Final Review" [ref=e159]
+                - cell "Pending" [ref=e160]
+                - cell "conditional approve" [ref=e161]:
+                  - generic [ref=e162]: conditional approve
+              - row "Infosys Limited Final Review Pending decline" [ref=e163]:
+                - cell "Infosys Limited" [ref=e164]
+                - cell "Final Review" [ref=e165]
+                - cell "Pending" [ref=e166]
+                - cell "decline" [ref=e167]:
+                  - generic [ref=e168]: decline
+              - row "Omega Logistics Pvt Ltd Final Review Pending decline" [ref=e169]:
+                - cell "Omega Logistics Pvt Ltd" [ref=e170]
+                - cell "Final Review" [ref=e171]
+                - cell "Pending" [ref=e172]
+                - cell "decline" [ref=e173]:
+                  - generic [ref=e174]: decline
+        - article [ref=e117]:
+          - generic [ref=e119]:
+            - generic [ref=e120]: Work Queue
+            - heading "My Assigned CAMs" [level=3] [ref=e121]
+          - table [ref=e122]:
+            - rowgroup [ref=e123]:
+              - row "Company Priority Stage Due" [ref=e124]:
+                - columnheader "Company" [ref=e125]
+                - columnheader "Priority" [ref=e126]
+                - columnheader "Stage" [ref=e127]
+                - columnheader "Due" [ref=e128]
+            - rowgroup [ref=e175]:
+              - row "Bharat Manufacturing Ltd High Final Review Today" [ref=e176]:
+                - cell "Bharat Manufacturing Ltd" [ref=e177]
+                - cell "High" [ref=e178]
+                - cell "Final Review" [ref=e179]
+                - cell "Today" [ref=e180]
+              - row "Infosys Limited Medium Final Review Tomorrow" [ref=e181]:
+                - cell "Infosys Limited" [ref=e182]
+                - cell "Medium" [ref=e183]
+                - cell "Final Review" [ref=e184]
+                - cell "Tomorrow" [ref=e185]
+              - row "Apollo Hospitals Enterprise Limited Medium Final Review +2 days" [ref=e186]:
+                - cell "Apollo Hospitals Enterprise Limited" [ref=e187]
+                - cell "Medium" [ref=e188]
+                - cell "Final Review" [ref=e189]
+                - cell "+2 days" [ref=e190]
+              - row "Sunrise Pharma Pvt Ltd Low Final Review +3 days" [ref=e191]:
+                - cell "Sunrise Pharma Pvt Ltd" [ref=e192]
+                - cell "Low" [ref=e193]
+                - cell "Final Review" [ref=e194]
+                - cell "+3 days" [ref=e195]

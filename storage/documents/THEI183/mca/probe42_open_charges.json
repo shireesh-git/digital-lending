@@ -1,0 +1,254 @@
+{
+  "metadata": {
+    "old_identifier": null,
+    "api_version": "1.0",
+    "last_updated": "2026-03-13"
+  },
+  "data": [
+    {
+      "id": 90164075,
+      "date": "2000-09-19",
+      "holder_name": "BANK OF INDIA",
+      "amount": 10000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90234669,
+      "date": "2000-06-28",
+      "holder_name": "ICICI LIMITED",
+      "amount": 293800000,
+      "status": "Creation"
+    },
+    {
+      "id": 90218133,
+      "date": "1997-10-10",
+      "holder_name": "CENTRAL BANK OF INDIA",
+      "amount": 15000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90163555,
+      "date": "1997-06-27",
+      "holder_name": "CENTURION BANK",
+      "amount": 80000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90218081,
+      "date": "1997-04-05",
+      "holder_name": "CITIBANK N.A",
+      "amount": 50000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90160916,
+      "date": "1997-03-20",
+      "holder_name": "DRESDNER BANK",
+      "amount": 3000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90163505,
+      "date": "1997-03-20",
+      "holder_name": "DRESDNER BANK",
+      "amount": 107610000,
+      "status": "Creation"
+    },
+    {
+      "id": 90216994,
+      "date": "1996-09-29",
+      "holder_name": "CANARA BANK",
+      "amount": 3000000,
+      "status": "Modification"
+    },
+    {
+      "id": 90218030,
+      "date": "1996-09-02",
+      "holder_name": "ANZ GRINDLAYS BANK",
+      "amount": 350000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90218028,
+      "date": "1996-08-29",
+      "holder_name": "BENARES STATE BANK LIMITED",
+      "amount": 17500000,
+      "status": "Creation"
+    },
+    {
+      "id": 90222557,
+      "date": "1995-11-03",
+      "holder_name": "INDIAN BANK",
+      "amount": 1494000,
+      "status": "Creation"
+    },
+    {
+      "id": 90217831,
+      "date": "1994-09-01",
+      "holder_name": "SCICI LIMITED",
+      "amount": 187300000,
+      "status": "Creation"
+    },
+    {
+      "id": 90219971,
+      "date": "1994-04-25",
+      "holder_name": "SCICI LIMITED",
+      "amount": 1085800000,
+      "status": "Creation"
+    },
+    {
+      "id": 90162821,
+      "date": "1993-12-10",
+      "holder_name": "BANK OF BARODA",
+      "amount": 20000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90216186,
+      "date": "1993-05-20",
+      "holder_name": "CENTRAL BANK OF INDIA",
+      "amount": 150000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90217683,
+      "date": "1993-05-20",
+      "holder_name": "BANK OF BARODA",
+      "amount": 5000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90219573,
+      "date": "1993-05-20",
+      "holder_name": "BANK OF BARODA",
+      "amount": 5000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90217594,
+      "date": "1992-07-04",
+      "holder_name": "IDBI BANK LIMITED",
+      "amount": 150000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90221914,
+      "date": "1991-06-03",
+      "holder_name": "INDIAN BANK",
+      "amount": 1500000,
+      "status": "Creation"
+    },
+    {
+      "id": 90161781,
+      "date": "1991-03-27",
+      "holder_name": "STATE BANK OF INDIA",
+      "amount": 500000,
+      "status": "Modification"
+    },
+    {
+      "id": 90216153,
+      "date": "1990-06-25",
+      "holder_name": "CENTRAL BANK OF INDIA",
+      "amount": 150000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90162061,
+      "date": "1990-06-09",
+      "holder_name": "AMERICAN EXPRESS BANK LIMITED",
+      "amount": 10000000,
+      "status": "Modification"
+    },
+    {
+      "id": 90221661,
+      "date": "1989-10-14",
+      "holder_name": "VIJAYA BANK",
+      "amount": 5000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90217336,
+      "date": "1989-09-12",
+      "holder_name": "ICICI LIMITED",
+      "amount": 20000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90221617,
+      "date": "1989-06-06",
+      "holder_name": "ORIENTAL BANK OF COMMERCE",
+      "amount": 20000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90217238,
+      "date": "1988-06-17",
+      "holder_name": "ICICI LIMITED",
+      "amount": 15350000,
+      "status": "Creation"
+    },
+    {
+      "id": 90161722,
+      "date": "1988-03-03",
+      "holder_name": "THE INDUSTRIAL CREDIT AND INVESTMENT CORPORATION OF INDIA LIMITED",
+      "amount": 5500000,
+      "status": "Modification"
+    },
+    {
+      "id": 90216785,
+      "date": "1987-09-25",
+      "holder_name": "ICICI LIMITED",
+      "amount": 225043,
+      "status": "Modification"
+    },
+    {
+      "id": 90217041,
+      "date": "1987-03-23",
+      "holder_name": "CENTRAL BANK OF INDIA",
+      "amount": 150000000,
+      "status": "Modification"
+    },
+    {
+      "id": 90221325,
+      "date": "1987-03-05",
+      "holder_name": "TOURISM FINANCE CORPORATION OF INDIA LIMITED",
+      "amount": 55000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90161951,
+      "date": "1986-10-23",
+      "holder_name": "STATE BANK OF INDIA",
+      "amount": 1500000,
+      "status": "Modification"
+    },
+    {
+      "id": 90166987,
+      "date": "1985-01-16",
+      "holder_name": "ECONOMIC DEVELOPMENT CORPORATION OF GOA DAMAN AND DIU LIMITED",
+      "amount": 4500000,
+      "status": "Creation"
+    },
+    {
+      "id": 90166954,
+      "date": "1977-11-05",
+      "holder_name": "THE INDUSTRIAL CREDIT AND INVESTMENT CORPORATION OF INDIA LIMITED",
+      "amount": 1000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90161455,
+      "date": "1977-07-21",
+      "holder_name": "THE INDUSTRIAL CREDIT AND INVESTMENT CORPORATION OF INDIA LIMITED",
+      "amount": 4000000,
+      "status": "Creation"
+    },
+    {
+      "id": 90160707,
+      "date": "1976-03-11",
+      "holder_name": "AMERICAN EXPRESS BANKING CORPORATION",
+      "amount": 12740000,
+      "status": "Creation"
+    }
+  ]
+}

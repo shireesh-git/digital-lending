@@ -1,0 +1,93 @@
+{
+  "source": "probe42",
+  "tool": "get_director_network_by_din",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "directors": [
+      {
+        "din": "00056994",
+        "name": "YOGESH KUMAR JAIN",
+        "designation": "Chairman & Managing Director",
+        "appointment_date": "2007-09-26",
+        "shareholding_pct": 45.2,
+        "other_directorships": [
+          {
+            "cin": "U45200UP2000PLC10000",
+            "company": "PNC Highways Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          },
+          {
+            "cin": "U45200UP2001PLC10001",
+            "company": "PNC Buildcon Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          }
+        ]
+      },
+      {
+        "din": "00057760",
+        "name": "NAVEEN KUMAR JAIN",
+        "designation": "Whole-Time Director",
+        "appointment_date": "2007-09-26",
+        "shareholding_pct": 12.8,
+        "other_directorships": [
+          {
+            "cin": "U45200UP2000PLC10000",
+            "company": "PNC Highways Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          },
+          {
+            "cin": "U45200UP2001PLC10001",
+            "company": "PNC Buildcon Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          }
+        ]
+      },
+      {
+        "din": "07889421",
+        "name": "CHANDRA PRAKASH JAIN",
+        "designation": "Executive Director (Projects)",
+        "appointment_date": "2007-09-26",
+        "shareholding_pct": 5.1,
+        "other_directorships": [
+          {
+            "cin": "U45200UP2000PLC10000",
+            "company": "PNC Highways Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          },
+          {
+            "cin": "U45200UP2001PLC10001",
+            "company": "PNC Buildcon Pvt Ltd",
+            "designation": "Director",
+            "status": "Active"
+          }
+        ]
+      },
+      {
+        "din": "09823456",
+        "name": "RUCHI BISHT",
+        "designation": "Independent Director",
+        "appointment_date": "2022-04-15",
+        "shareholding_pct": 0.0,
+        "other_directorships": []
+      },
+      {
+        "din": "08901234",
+        "name": "ARUN KUMAR SINGH",
+        "designation": "Independent Director",
+        "appointment_date": "2022-04-15",
+        "shareholding_pct": 0.0,
+        "other_directorships": []
+      }
+    ],
+    "total_directors": 5,
+    "independent_directors": 2,
+    "executive_directors": 3
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "source": "probe42",
+  "tool": "get_epfo_details_by_identifier",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "establishment_count": 28,
+    "total_employees": 12500,
+    "employee_trend": [
+      {
+        "year": 2025,
+        "count": 12500
+      },
+      {
+        "year": 2024,
+        "count": 11200
+      },
+      {
+        "year": 2023,
+        "count": 9800
+      }
+    ],
+    "compliance": "Regular — No defaults in last 36 months"
+  }
+}

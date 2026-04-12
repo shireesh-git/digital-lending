@@ -1,0 +1,180 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6] [cursor=pointer]:
+      - img "probe42-app-logo" [ref=e7]
+      - paragraph [ref=e8]: "|"
+      - paragraph [ref=e9]:
+        - text: API
+        - superscript [ref=e10]: Beta
+    - navigation [ref=e13]:
+      - link "Home" [ref=e14] [cursor=pointer]:
+        - /url: "#/portal/home"
+      - link "Explore API" [ref=e15] [cursor=pointer]:
+        - /url: "#/portal/explore-api"
+      - link "Contact us" [ref=e16] [cursor=pointer]:
+        - /url: "#/portal/support"
+      - link "Pricing" [ref=e17] [cursor=pointer]:
+        - /url: "#/portal/pricing"
+      - link "Login" [ref=e18] [cursor=pointer]:
+        - /url: "#/user/login"
+      - link "Signup" [ref=e19] [cursor=pointer]:
+        - /url: "#/user/signup"
+  - generic [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e26]:
+        - img "api-image.png" [ref=e28]
+        - generic [ref=e29]:
+          - heading "Company Information Plugged into your Applications" [level=2] [ref=e30]:
+            - text: Company Information
+            - text: Plugged into your Applications
+          - paragraph [ref=e31]: Unparalleled corporate insights, combining our proprietary corporate data with AI
+          - generic [ref=e32]:
+            - button "Get Free API Key" [ref=e33] [cursor=pointer]
+            - button "Contact us" [ref=e34] [cursor=pointer]
+      - generic [ref=e36]:
+        - list [ref=e37]:
+          - listitem [ref=e38]:
+            - heading "2.2 Million" [level=1] [ref=e39]
+            - paragraph [ref=e40]: Active Indian Companies
+          - listitem [ref=e41]:
+            - heading "744 Plus" [level=1] [ref=e42]
+            - paragraph [ref=e43]: Information Sources
+          - listitem [ref=e44]:
+            - heading "250 TB" [level=1] [ref=e45]
+            - paragraph [ref=e46]: AI models on top of this data
+          - listitem [ref=e47]:
+            - heading "99.9% Uptime" [level=1] [ref=e48]
+            - paragraph [ref=e49]: Trusted Reliability
+        - paragraph [ref=e50]: Probe deploys cutting-edge algorithms to obtain comprehensive, validated data on 2.2 Million Indian Corporates.
+    - generic [ref=e51]:
+      - generic: 
+      - generic: 
+    - generic [ref=e54]:
+      - heading "Use cases" [level=1] [ref=e55]
+      - separator [ref=e56]
+      - paragraph [ref=e57]: Our API simplifies customer acquisition, onboarding, compliance checks, and ongoing monitoring to enhance retention and streamline operations.
+      - generic [ref=e60]:
+        - button "" [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: 
+        - list [ref=e63]:
+          - listitem [ref=e64]:
+            - paragraph [ref=e65]: CRM Plug-in
+            - img "assets/images/home/crm.webp" [ref=e66]
+            - separator [ref=e67]
+            - paragraph [ref=e68]: Qualify your leads; plug in the details directly to CRM
+            - button "Learn More" [ref=e69] [cursor=pointer]
+          - listitem [ref=e70]:
+            - paragraph [ref=e71]: KYC & Onboarding
+            - img "assets/images/home/kyc.webp" [ref=e72]
+            - separator [ref=e73]
+            - paragraph [ref=e74]: Fast track onboarding with instant access to company vitals
+            - button "Learn More" [ref=e75] [cursor=pointer]
+          - listitem [ref=e76]:
+            - paragraph [ref=e77]: Employer Categorization
+            - img "assets/images/home/employer-org.webp" [ref=e78]
+            - separator [ref=e79]
+            - paragraph [ref=e80]: "Personal Loan or Credit Cards: Auto employer categorization"
+            - button "Learn More" [ref=e81] [cursor=pointer]
+        - button "" [ref=e82] [cursor=pointer]:
+          - generic [ref=e83]: 
+    - generic [ref=e86]:
+      - heading "How it works" [level=1] [ref=e87]
+      - separator [ref=e88]
+      - generic [ref=e91]:
+        - button "" [ref=e92] [cursor=pointer]:
+          - generic [ref=e93]: 
+        - list [ref=e94]:
+          - listitem [ref=e95]:
+            - paragraph [ref=e96]: Sign up to portal
+            - img "assets/images/home/signup.webp" [ref=e97]
+            - separator [ref=e98]
+            - paragraph [ref=e99]: Register with simple steps to start your API journey with us. Complete online application form with necessary details and submit.
+          - listitem [ref=e100]:
+            - paragraph [ref=e101]: Generate API Key
+            - img "assets/images/home/api-key.webp" [ref=e102]
+            - separator [ref=e103]
+            - paragraph [ref=e104]: After your sign-up request is approved, you will receive an activation link to sign in to our API portal and generate the secret API key.
+          - listitem [ref=e105]:
+            - paragraph [ref=e106]: Test and go Live
+            - img "assets/images/home/test-go-live.webp" [ref=e107]
+            - separator [ref=e108]
+            - paragraph [ref=e109]: Experiment, develop and test your development with trial credits; apply for live credits and go live. Sandbox will be provided for ongoing testing.
+        - button "" [ref=e110] [cursor=pointer]:
+          - generic [ref=e111]: 
+    - generic [ref=e114]:
+      - heading "Explore the benefits of our APIs" [level=1] [ref=e115]
+      - separator [ref=e116]
+      - list [ref=e117]:
+        - listitem [ref=e118]:
+          - img "assets/images/home/developer.png" [ref=e119]
+          - paragraph [ref=e120]: Easy to integrate
+        - listitem [ref=e121]:
+          - img "assets/images/home/detailed-documentation.png" [ref=e122]
+          - paragraph [ref=e123]: Detailed Documentation
+        - listitem [ref=e124]:
+          - img "assets/images/home/secure-endpoints.webp" [ref=e125]
+          - paragraph [ref=e126]: Secure Endpoints
+        - listitem [ref=e127]:
+          - img "assets/images/home/try-it-now.webp" [ref=e128]
+          - paragraph [ref=e129]: Try it now API feature
+        - listitem [ref=e130]:
+          - img "assets/images/home/tailored-use-cases.webp" [ref=e131]
+          - paragraph [ref=e132]: APIs tailored to use cases
+      - paragraph [ref=e133]: The top 5 banks in the country use our APIs to enhance their credit disbursement, sales, compliance, and portfolio monitoring data needs.
+    - generic [ref=e136]:
+      - heading "API Technology Foundations" [level=1] [ref=e137]
+      - separator [ref=e138]
+      - list [ref=e139]:
+        - listitem [ref=e140]:
+          - generic [ref=e141]:
+            - img "assets/images/home/technology_foundations/aws_infrastructure.png" [ref=e142]
+            - paragraph [ref=e143]: Built on AWS Infrastructure
+          - separator [ref=e144]
+          - paragraph [ref=e145]: The platform is hosted on Amazon Web Services (AWS), offering high availability, scalability, and global reach through secure cloud infrastructure.
+        - listitem [ref=e146]:
+          - generic [ref=e147]:
+            - img "assets/images/home/technology_foundations/advanced_authentication.png" [ref=e148]
+            - paragraph [ref=e149]: "Advanced authentication: API Keys, HTTPS"
+          - separator [ref=e150]
+          - paragraph [ref=e151]: Secure access with HTTPS encryption and API key-based authentication ensures safe and restricted usage of your APIs.
+        - listitem [ref=e152]:
+          - generic [ref=e153]:
+            - img "assets/images/home/technology_foundations/aws_gateway.png" [ref=e154]
+            - paragraph [ref=e155]: Hosted & secured on the Amazon API Gateway
+          - separator [ref=e156]
+          - paragraph [ref=e157]: API requests are handled securely through Amazon API Gateway, enabling rate-limiting, authorization, and monitoring.
+        - listitem [ref=e158]:
+          - generic [ref=e159]:
+            - img "assets/images/home/technology_foundations/easy_plug_and_play.png" [ref=e160]
+            - paragraph [ref=e161]: RESTful API, JSON, easy plug-and-play
+          - separator [ref=e162]
+          - paragraph [ref=e163]: Lightweight REST API with JSON responses allows simple integration into any frontend or backend stack with minimal setup.
+        - listitem [ref=e164]:
+          - generic [ref=e165]:
+            - img "assets/images/home/technology_foundations/aes_128.png" [ref=e166]
+            - paragraph [ref=e167]: Industry standard algorithms for encryption
+          - separator [ref=e168]
+          - paragraph [ref=e169]: Industry-standard AES 128-bit CBC and AES 256-bit CBC encryptions ensures secure data transfer and confidentiality.
+        - listitem [ref=e170]:
+          - generic [ref=e171]:
+            - img "assets/images/home/technology_foundations/easy_integration.png" [ref=e172]
+            - paragraph [ref=e173]: Easy integrations to CRM, ERP & other apps
+          - separator [ref=e174]
+          - paragraph [ref=e175]: Quickly connect with major CRMs, ERPs, and third-party systems using standardized interfaces for seamless automation.
+    - generic [ref=e177]:
+      - heading "Get started with Probe API's today" [level=1] [ref=e178]
+      - button "Sign up for free trial" [ref=e179] [cursor=pointer]
+      - paragraph [ref=e180]: Come experience and build something awesome!
+  - generic [ref=e185]:
+    - img "footer-logo" [ref=e186]
+    - generic [ref=e187]:
+      - link "Terms Of Use" [ref=e188] [cursor=pointer]:
+        - /url: "#/portal/terms-of-use"
+        - heading "Terms Of Use" [level=4] [ref=e189]
+      - link "Privacy Policy" [ref=e190] [cursor=pointer]:
+        - /url: "#/portal/privacy-policy"
+        - heading "Privacy Policy" [level=4] [ref=e191]
+      - link "Contact Us" [ref=e192] [cursor=pointer]:
+        - /url: "#/portal/support"
+        - heading "Contact Us" [level=4] [ref=e193]
+    - paragraph [ref=e194]: Copyright © 2026 Probe Information Services. All rights reserved.

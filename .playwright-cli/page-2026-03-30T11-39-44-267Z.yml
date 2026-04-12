@@ -1,0 +1,287 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Probe42 cache · 24 days
+        - generic [ref=e12]: LLM narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [active] [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e196]:
+      - generic [ref=e198]:
+        - generic [ref=e199]: Execution Console
+        - heading "Pipeline" [level=1] [ref=e200]
+        - paragraph [ref=e201]: Run case analysis, monitor live agent progress, and review executed outcomes from one production workflow.
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - generic [ref=e204]: Target Selection
+          - heading "Run the selected borrower" [level=3] [ref=e205]
+          - paragraph [ref=e206]: Single-case execution streams agent progress in real time. Full queue execution runs the available portfolio batch.
+        - generic [ref=e207]:
+          - generic [ref=e208]:
+            - generic [ref=e209]: Selected company
+            - combobox [ref=e210]:
+              - option "Bharat Manufacturing Ltd (BMFG001)" [selected]
+              - option "Pinnacle Infra Projects Ltd (PINF001)"
+              - option "Sunrise Pharma Pvt Ltd (SPHR001)"
+              - option "Omega Logistics Pvt Ltd (OLOG001)"
+              - option "Tara Steels Industries Ltd (TSTL001)"
+              - option "Reliable Energy Industries Ltd (REIL001)"
+              - option "INFOSYS LIMITED (INFY001)"
+              - option "Advik Ports & SEZ Ltd (ADPT001)"
+              - option "Bajrang Finance Ltd (BJFN001)"
+              - option "Ciplex Pharmaceuticals Ltd (CIPL001)"
+              - option "Delhi Land & Realty Ltd (DLFR001)"
+              - option "JSW Alloys & Steel Ltd (JSWL001)"
+              - option "Maruti Auto Industries Ltd (MRUT001)"
+              - option "Titan Luxe Retail Ltd (TITN001)"
+              - option "National Thermal Power Corp Ltd (NTPC001)"
+              - option "Yashwant Commercial Bank Ltd (YESB001)"
+              - option "Dr. Reddy's Laboratories Limited (DRRD001)"
+              - option "The Indian Hotels Company Limited (IHCL001)"
+              - option "Apollo Hospitals Enterprise Limited (APOL001)"
+          - generic [ref=e211]:
+            - button "▶ Execute Pipeline" [ref=e212] [cursor=pointer]:
+              - generic [ref=e213]: ▶ Execute Pipeline
+            - button "Run All" [ref=e214] [cursor=pointer]
+      - generic [ref=e215]:
+        - generic [ref=e216]:
+          - generic [ref=e217]: Executed Cases
+          - generic [ref=e218]: "6"
+          - generic [ref=e219]: Portfolio runs ready for review
+        - generic [ref=e220]:
+          - generic [ref=e221]: Average Score
+          - generic [ref=e222]: "59.4"
+          - generic [ref=e223]: Composite average across executed cases
+        - generic [ref=e224]:
+          - generic [ref=e225]: Approvals
+          - generic [ref=e226]: "1"
+          - generic [ref=e227]: Approve + conditional approve decisions
+        - generic [ref=e228]:
+          - generic [ref=e229]: LLM Narratives
+          - generic [ref=e230]: "2"
+          - generic [ref=e231]: Cases completed in LLM narrative mode
+      - generic [ref=e232]:
+        - generic [ref=e233]:
+          - generic [ref=e234]:
+            - generic [ref=e235]:
+              - generic [ref=e236]: Selected Borrower
+              - heading "Bharat Manufacturing Ltd" [level=3] [ref=e237]
+              - paragraph [ref=e238]: Use this view to confirm the selected case before execution.
+            - generic [ref=e239]: BM
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - generic [ref=e242]: Entity ID
+              - strong [ref=e243]: BMFG001
+            - generic [ref=e244]:
+              - generic [ref=e245]: Sector
+              - strong [ref=e246]: Manufacturing
+            - generic [ref=e247]:
+              - generic [ref=e248]: Case Type
+              - strong [ref=e249]: NTB
+            - generic [ref=e250]:
+              - generic [ref=e251]: Amount
+              - strong [ref=e252]: 150 Cr
+          - generic [ref=e253]:
+            - generic [ref=e254]: conditional approve
+            - generic [ref=e255]:
+              - strong [ref=e256]: "75.5"
+              - generic [ref=e257]: composite score
+            - generic [ref=e258]: B
+        - generic [ref=e259]:
+          - generic [ref=e261]:
+            - generic [ref=e262]: Execution State
+            - heading "Ready to execute" [level=3] [ref=e263]
+            - paragraph [ref=e264]: Select a company and run the pipeline when ready.
+          - generic [ref=e265]:
+            - generic [ref=e266]:
+              - generic [ref=e267]: Agents Registered
+              - generic [ref=e268]: "7"
+            - generic [ref=e269]:
+              - generic [ref=e270]: Conditional Approvals
+              - generic [ref=e271]: "1"
+            - generic [ref=e272]:
+              - generic [ref=e273]: Declines
+              - generic [ref=e274]: "4"
+            - generic [ref=e275]:
+              - generic [ref=e276]: Live Progress
+              - generic [ref=e277]: Idle
+      - generic [ref=e278]:
+        - generic [ref=e279]:
+          - generic [ref=e280]:
+            - generic [ref=e281]: Portfolio Results
+            - heading "Execution Results" [level=3] [ref=e282]
+          - generic [ref=e283]: 6 analysed cases
+        - table [ref=e285]:
+          - rowgroup [ref=e286]:
+            - row "Company Sector Grade Score Recommendation Mode Actions" [ref=e287]:
+              - columnheader "Company" [ref=e288]
+              - columnheader "Sector" [ref=e289]
+              - columnheader "Grade" [ref=e290]
+              - columnheader "Score" [ref=e291]
+              - columnheader "Recommendation" [ref=e292]
+              - columnheader "Mode" [ref=e293]
+              - columnheader "Actions" [ref=e294]
+          - rowgroup [ref=e295]:
+            - row "BM Bharat Manufacturing Ltd BMFG001 • internal Manufacturing B 75.5 composite conditional approve TEMPLATE Re-run View" [ref=e296]:
+              - cell "BM Bharat Manufacturing Ltd BMFG001 • internal" [ref=e297]:
+                - generic [ref=e298]:
+                  - generic [ref=e299]: BM
+                  - generic [ref=e300]:
+                    - generic [ref=e301]: Bharat Manufacturing Ltd
+                    - generic [ref=e302]:
+                      - generic [ref=e303]: BMFG001
+                      - generic [ref=e304]: •
+                      - generic [ref=e305]: internal
+              - cell "Manufacturing" [ref=e306]:
+                - generic [ref=e307]: Manufacturing
+              - cell "B" [ref=e308]:
+                - generic [ref=e309]: B
+              - cell "75.5 composite" [ref=e310]:
+                - generic [ref=e311]:
+                  - strong [ref=e312]: "75.5"
+                  - generic [ref=e313]: composite
+              - cell "conditional approve" [ref=e314]:
+                - generic [ref=e315]: conditional approve
+              - cell "TEMPLATE" [ref=e316]:
+                - generic [ref=e317]: TEMPLATE
+              - cell "Re-run View" [ref=e318]:
+                - button "Re-run" [ref=e319] [cursor=pointer]
+                - button "View" [ref=e320] [cursor=pointer]
+            - row "IL INFOSYS LIMITED INFY001 • Probe42 v2 It Services A 80.1 composite refer LLM Re-run View" [ref=e321]:
+              - cell "IL INFOSYS LIMITED INFY001 • Probe42 v2" [ref=e322]:
+                - generic [ref=e323]:
+                  - generic [ref=e324]: IL
+                  - generic [ref=e325]:
+                    - generic [ref=e326]: INFOSYS LIMITED
+                    - generic [ref=e327]:
+                      - generic [ref=e328]: INFY001
+                      - generic [ref=e329]: •
+                      - generic [ref=e330]: Probe42 v2
+              - cell "It Services" [ref=e331]:
+                - generic [ref=e332]: It Services
+              - cell "A" [ref=e333]:
+                - generic [ref=e334]: A
+              - cell "80.1 composite" [ref=e335]:
+                - generic [ref=e336]:
+                  - strong [ref=e337]: "80.1"
+                  - generic [ref=e338]: composite
+              - cell "refer" [ref=e339]:
+                - generic [ref=e340]: refer
+              - cell "LLM" [ref=e341]:
+                - generic [ref=e342]: LLM
+              - cell "Re-run View" [ref=e343]:
+                - button "Re-run" [ref=e344] [cursor=pointer]
+                - button "View" [ref=e345] [cursor=pointer]
+            - row "AH Apollo Hospitals Enterprise Limited APOL001 • internal Healthcare B 73.5 composite decline LLM Re-run View" [ref=e346]:
+              - cell "AH Apollo Hospitals Enterprise Limited APOL001 • internal" [ref=e347]:
+                - generic [ref=e348]:
+                  - generic [ref=e349]: AH
+                  - generic [ref=e350]:
+                    - generic [ref=e351]: Apollo Hospitals Enterprise Limited
+                    - generic [ref=e352]:
+                      - generic [ref=e353]: APOL001
+                      - generic [ref=e354]: •
+                      - generic [ref=e355]: internal
+              - cell "Healthcare" [ref=e356]:
+                - generic [ref=e357]: Healthcare
+              - cell "B" [ref=e358]:
+                - generic [ref=e359]: B
+              - cell "73.5 composite" [ref=e360]:
+                - generic [ref=e361]:
+                  - strong [ref=e362]: "73.5"
+                  - generic [ref=e363]: composite
+              - cell "decline" [ref=e364]:
+                - generic [ref=e365]: decline
+              - cell "LLM" [ref=e366]:
+                - generic [ref=e367]: LLM
+              - cell "Re-run View" [ref=e368]:
+                - button "Re-run" [ref=e369] [cursor=pointer]
+                - button "View" [ref=e370] [cursor=pointer]
+            - row "SP Sunrise Pharma Pvt Ltd SPHR001 • internal Pharma C 53.2 composite decline TEMPLATE Re-run View" [ref=e371]:
+              - cell "SP Sunrise Pharma Pvt Ltd SPHR001 • internal" [ref=e372]:
+                - generic [ref=e373]:
+                  - generic [ref=e374]: SP
+                  - generic [ref=e375]:
+                    - generic [ref=e376]: Sunrise Pharma Pvt Ltd
+                    - generic [ref=e377]:
+                      - generic [ref=e378]: SPHR001
+                      - generic [ref=e379]: •
+                      - generic [ref=e380]: internal
+              - cell "Pharma" [ref=e381]:
+                - generic [ref=e382]: Pharma
+              - cell "C" [ref=e383]:
+                - generic [ref=e384]: C
+              - cell "53.2 composite" [ref=e385]:
+                - generic [ref=e386]:
+                  - strong [ref=e387]: "53.2"
+                  - generic [ref=e388]: composite
+              - cell "decline" [ref=e389]:
+                - generic [ref=e390]: decline
+              - cell "TEMPLATE" [ref=e391]:
+                - generic [ref=e392]: TEMPLATE
+              - cell "Re-run View" [ref=e393]:
+                - button "Re-run" [ref=e394] [cursor=pointer]
+                - button "View" [ref=e395] [cursor=pointer]
+            - row "PI Pinnacle Infra Projects Ltd PINF001 • internal Infrastructure D 37.2 composite decline TEMPLATE Re-run View" [ref=e396]:
+              - cell "PI Pinnacle Infra Projects Ltd PINF001 • internal" [ref=e397]:
+                - generic [ref=e398]:
+                  - generic [ref=e399]: PI
+                  - generic [ref=e400]:
+                    - generic [ref=e401]: Pinnacle Infra Projects Ltd
+                    - generic [ref=e402]:
+                      - generic [ref=e403]: PINF001
+                      - generic [ref=e404]: •
+                      - generic [ref=e405]: internal
+              - cell "Infrastructure" [ref=e406]:
+                - generic [ref=e407]: Infrastructure
+              - cell "D" [ref=e408]:
+                - generic [ref=e409]: D
+              - cell "37.2 composite" [ref=e410]:
+                - generic [ref=e411]:
+                  - strong [ref=e412]: "37.2"
+                  - generic [ref=e413]: composite
+              - cell "decline" [ref=e414]:
+                - generic [ref=e415]: decline
+              - cell "TEMPLATE" [ref=e416]:
+                - generic [ref=e417]: TEMPLATE
+              - cell "Re-run View" [ref=e418]:
+                - button "Re-run" [ref=e419] [cursor=pointer]
+                - button "View" [ref=e420] [cursor=pointer]
+            - row "OL Omega Logistics Pvt Ltd OLOG001 • internal Logistics D 37 composite decline TEMPLATE Re-run View" [ref=e421]:
+              - cell "OL Omega Logistics Pvt Ltd OLOG001 • internal" [ref=e422]:
+                - generic [ref=e423]:
+                  - generic [ref=e424]: OL
+                  - generic [ref=e425]:
+                    - generic [ref=e426]: Omega Logistics Pvt Ltd
+                    - generic [ref=e427]:
+                      - generic [ref=e428]: OLOG001
+                      - generic [ref=e429]: •
+                      - generic [ref=e430]: internal
+              - cell "Logistics" [ref=e431]:
+                - generic [ref=e432]: Logistics
+              - cell "D" [ref=e433]:
+                - generic [ref=e434]: D
+              - cell "37 composite" [ref=e435]:
+                - generic [ref=e436]:
+                  - strong [ref=e437]: "37"
+                  - generic [ref=e438]: composite
+              - cell "decline" [ref=e439]:
+                - generic [ref=e440]: decline
+              - cell "TEMPLATE" [ref=e441]:
+                - generic [ref=e442]: TEMPLATE
+              - cell "Re-run View" [ref=e443]:
+                - button "Re-run" [ref=e444] [cursor=pointer]
+                - button "View" [ref=e445] [cursor=pointer]

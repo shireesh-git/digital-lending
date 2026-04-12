@@ -1,0 +1,22 @@
+.git/
+.gitignore
+.venv/
+.pytest_cache/
+.playwright-cli/
+__pycache__/
+tests/
+postman/
+output/
+
+runtime-db/
+storage/cache/
+test-documents/
+downloaded document/*
+!downloaded document/CAM/
+/documents/
+*.md
+!IDEA.MD
+*.log
+node_modules/
+dist/
+build/

@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "old_identifier": null,
+    "api_version": "1.0",
+    "last_updated": "2026-03-13"
+  },
+  "data": {
+    "entity_identifier": "L74999MH1902PLC000183",
+    "legal_name": "THE INDIAN HOTELS COMPANY LIMITED",
+    "status": "Active",
+    "date_of_incorporation": "1902-04-01",
+    "registered_address": {
+      "address_line": "MANDLIK HOUSE, MANDLIK ROAD, ",
+      "city": "MUMBAI- 400 001.",
+      "pincode": "400001",
+      "state": "Maharashtra"
+    }
+  }
+}

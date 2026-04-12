@@ -1,0 +1,28 @@
+{
+  "entity_id": "PNCR001",
+  "company_name": "PNC Infratech Limited",
+  "cin": "L45201DL1999PLC195937",
+  "pan": "AABCP1234R",
+  "generated": "2026-04-06",
+  "total_documents": 52,
+  "source": "website_download + synthetic_generation",
+  "real_documents": [
+    "annual_report_fy2023.pdf",
+    "annual_report_fy2024.pdf",
+    "annual_report_fy2025.pdf"
+  ],
+  "categories": [
+    "banking",
+    "bureau",
+    "collateral",
+    "exchange",
+    "financials",
+    "gst",
+    "kyc",
+    "legal",
+    "mca",
+    "misc",
+    "ratings",
+    "request"
+  ]
+}

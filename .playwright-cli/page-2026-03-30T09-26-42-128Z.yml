@@ -1,0 +1,144 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - heading "CAM Intel" [level=2] [ref=e7]
+        - generic [ref=e8]: v2.0
+    - list [ref=e9]:
+      - listitem [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: ■
+        - text: Dashboard
+      - listitem [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 📋
+        - text: Cases
+      - listitem [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: ⚡
+        - text: Smart Onboard
+      - listitem [ref=e16] [cursor=pointer]:
+        - generic [ref=e17]: 📁
+        - text: Documents
+      - listitem [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ▶
+        - text: Pipeline
+      - listitem [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: 📄
+        - text: Reports
+      - listitem [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: ⚙
+        - text: Settings
+    - generic [ref=e25]:
+      - generic [ref=e26]: LLM
+      - generic [ref=e27]: ollama
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - heading "Dashboard" [level=1] [ref=e31]
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: ▣
+          - generic [ref=e35]:
+            - generic [ref=e36]: Analysed
+            - generic [ref=e37]: "6"
+        - generic [ref=e38]:
+          - generic [ref=e39]: ✓
+          - generic [ref=e40]:
+            - generic [ref=e41]: Approved
+            - generic [ref=e42]: "1"
+        - generic [ref=e43]:
+          - generic [ref=e44]: ✗
+          - generic [ref=e45]:
+            - generic [ref=e46]: Declined
+            - generic [ref=e47]: "5"
+        - generic [ref=e48]:
+          - generic [ref=e49]: ⚠
+          - generic [ref=e50]:
+            - generic [ref=e51]: Referred
+            - generic [ref=e52]: "0"
+      - generic [ref=e53]:
+        - heading "Risk Grade Distribution" [level=3] [ref=e55]
+        - heading "Score Breakdown (Latest)" [level=3] [ref=e59]
+      - generic [ref=e62]:
+        - heading "Analysed Cases" [level=3] [ref=e63]
+        - table [ref=e66]:
+          - rowgroup [ref=e67]:
+            - row "Company Sector Type Amount (Cr) Grade Recommendation Actions" [ref=e68]:
+              - columnheader "Company" [ref=e69]
+              - columnheader "Sector" [ref=e70]
+              - columnheader "Type" [ref=e71]
+              - columnheader "Amount (Cr)" [ref=e72]
+              - columnheader "Grade" [ref=e73]
+              - columnheader "Recommendation" [ref=e74]
+              - columnheader "Actions" [ref=e75]
+          - rowgroup [ref=e76]:
+            - row "Bharat Manufacturing Ltd manufacturing NTB 150 B conditional approve View" [ref=e77]:
+              - cell "Bharat Manufacturing Ltd" [ref=e78]
+              - cell "manufacturing" [ref=e79]:
+                - generic [ref=e80]: manufacturing
+              - cell "NTB" [ref=e81]
+              - cell "150" [ref=e82]
+              - cell "B" [ref=e83]:
+                - generic [ref=e84]: B
+              - cell "conditional approve" [ref=e85]:
+                - generic [ref=e86]: conditional approve
+              - cell "View" [ref=e87]:
+                - button "View" [ref=e88] [cursor=pointer]
+            - row "Pinnacle Infra Projects Ltd infrastructure NTB 350 D decline View" [ref=e89]:
+              - cell "Pinnacle Infra Projects Ltd" [ref=e90]
+              - cell "infrastructure" [ref=e91]:
+                - generic [ref=e92]: infrastructure
+              - cell "NTB" [ref=e93]
+              - cell "350" [ref=e94]
+              - cell "D" [ref=e95]:
+                - generic [ref=e96]: D
+              - cell "decline" [ref=e97]:
+                - generic [ref=e98]: decline
+              - cell "View" [ref=e99]:
+                - button "View" [ref=e100] [cursor=pointer]
+            - row "Sunrise Pharma Pvt Ltd pharma NTB 75 C decline View" [ref=e101]:
+              - cell "Sunrise Pharma Pvt Ltd" [ref=e102]
+              - cell "pharma" [ref=e103]:
+                - generic [ref=e104]: pharma
+              - cell "NTB" [ref=e105]
+              - cell "75" [ref=e106]
+              - cell "C" [ref=e107]:
+                - generic [ref=e108]: C
+              - cell "decline" [ref=e109]:
+                - generic [ref=e110]: decline
+              - cell "View" [ref=e111]:
+                - button "View" [ref=e112] [cursor=pointer]
+            - row "Omega Logistics Pvt Ltd logistics ETB 25 D decline View" [ref=e113]:
+              - cell "Omega Logistics Pvt Ltd" [ref=e114]
+              - cell "logistics" [ref=e115]:
+                - generic [ref=e116]: logistics
+              - cell "ETB" [ref=e117]
+              - cell "25" [ref=e118]
+              - cell "D" [ref=e119]:
+                - generic [ref=e120]: D
+              - cell "decline" [ref=e121]:
+                - generic [ref=e122]: decline
+              - cell "View" [ref=e123]:
+                - button "View" [ref=e124] [cursor=pointer]
+            - row "Infosys Limited it_services NTB 500 A decline View" [ref=e125]:
+              - cell "Infosys Limited" [ref=e126]
+              - cell "it_services" [ref=e127]:
+                - generic [ref=e128]: it_services
+              - cell "NTB" [ref=e129]
+              - cell "500" [ref=e130]
+              - cell "A" [ref=e131]:
+                - generic [ref=e132]: A
+              - cell "decline" [ref=e133]:
+                - generic [ref=e134]: decline
+              - cell "View" [ref=e135]:
+                - button "View" [ref=e136] [cursor=pointer]
+            - row "Apollo Hospitals Enterprise Limited healthcare NTB 750 B decline View" [ref=e137]:
+              - cell "Apollo Hospitals Enterprise Limited" [ref=e138]
+              - cell "healthcare" [ref=e139]:
+                - generic [ref=e140]: healthcare
+              - cell "NTB" [ref=e141]
+              - cell "750" [ref=e142]
+              - cell "B" [ref=e143]:
+                - generic [ref=e144]: B
+              - cell "decline" [ref=e145]:
+                - generic [ref=e146]: decline
+              - cell "View" [ref=e147]:
+                - button "View" [ref=e148] [cursor=pointer]

@@ -1,0 +1,284 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - heading "Settings" [level=1] [ref=e25]
+      - generic [ref=e26]:
+        - button "LLM Provider" [ref=e27] [cursor=pointer]
+        - button "Engines" [ref=e28] [cursor=pointer]
+        - button "Benchmarks" [ref=e29] [cursor=pointer]
+        - button "Rules" [active] [ref=e30] [cursor=pointer]
+      - generic [ref=e77]:
+        - heading "Policy Rules" [level=3] [ref=e78]
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e82]:
+              - generic [ref=e83]: Policy Group
+              - heading "Hard Rules" [level=4] [ref=e84]
+            - generic [ref=e85]:
+              - generic [ref=e87]:
+                - generic [ref=e88]: Nested Rules
+                - heading "Wilful Defaulter" [level=5] [ref=e89]
+                - generic [ref=e90]:
+                  - generic [ref=e92]:
+                    - generic [ref=e93]: Enabled
+                    - generic [ref=e96] [cursor=pointer]: Enabled
+                  - generic [ref=e98]:
+                    - generic [ref=e99]: Description
+                    - textbox [ref=e100]: Borrower must not be flagged as Wilful Defaulter
+              - generic [ref=e102]:
+                - generic [ref=e103]: Nested Rules
+                - heading "Company Active" [level=5] [ref=e104]
+                - generic [ref=e105]:
+                  - generic [ref=e107]:
+                    - generic [ref=e108]: Enabled
+                    - generic [ref=e111] [cursor=pointer]: Enabled
+                  - generic [ref=e113]:
+                    - generic [ref=e114]: Description
+                    - textbox [ref=e115]: Company status must be Active in MCA records
+              - generic [ref=e117]:
+                - generic [ref=e118]: Nested Rules
+                - heading "No Critical Exceptions" [level=5] [ref=e119]
+                - generic [ref=e120]:
+                  - generic [ref=e122]:
+                    - generic [ref=e123]: Enabled
+                    - generic [ref=e126] [cursor=pointer]: Enabled
+                  - generic [ref=e128]:
+                    - generic [ref=e129]: Description
+                    - textbox [ref=e130]: No unresolved CRITICAL validation exceptions
+              - generic [ref=e132]:
+                - generic [ref=e133]: Nested Rules
+                - heading "KYC Complete" [level=5] [ref=e134]
+                - generic [ref=e135]:
+                  - generic [ref=e137]:
+                    - generic [ref=e138]: Enabled
+                    - generic [ref=e141] [cursor=pointer]: Enabled
+                  - generic [ref=e143]:
+                    - generic [ref=e144]: Applies to
+                    - textbox [ref=e145]: NTB
+                  - generic [ref=e147]:
+                    - generic [ref=e148]: Description
+                    - textbox [ref=e149]: KYC package must be complete for NTB
+              - generic [ref=e151]:
+                - generic [ref=e152]: Nested Rules
+                - heading "Bureau Status" [level=5] [ref=e153]
+                - generic [ref=e154]:
+                  - generic [ref=e156]:
+                    - generic [ref=e157]: Enabled
+                    - generic [ref=e160] [cursor=pointer]: Enabled
+                  - generic [ref=e162]:
+                    - generic [ref=e163]: Blocked Statuses
+                    - textbox [ref=e164]: SMA-2, Substandard, Doubtful, Loss
+                  - generic [ref=e166]:
+                    - generic [ref=e167]: Description
+                    - textbox [ref=e168]: Bureau status must not be SMA-2 or worse
+              - generic [ref=e170]:
+                - generic [ref=e171]: Nested Rules
+                - heading "Min Vintage" [level=5] [ref=e172]
+                - generic [ref=e173]:
+                  - generic [ref=e175]:
+                    - generic [ref=e176]: Enabled
+                    - generic [ref=e179] [cursor=pointer]: Enabled
+                  - generic [ref=e181]:
+                    - generic [ref=e182]: Applies to
+                    - textbox [ref=e183]: NTB
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: Min Years
+                    - spinbutton [ref=e187]: "3"
+                  - generic [ref=e189]:
+                    - generic [ref=e190]: Description
+                    - textbox [ref=e191]: Company must be at least 3 years old for NTB
+          - generic [ref=e192]:
+            - generic [ref=e194]:
+              - generic [ref=e195]: Policy Group
+              - heading "Scoring" [level=4] [ref=e196]
+            - generic [ref=e197]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: Base Financial Score
+                - spinbutton [ref=e201]: "70"
+              - generic [ref=e203]:
+                - generic [ref=e204]: Base Conduct Score
+                - spinbutton [ref=e205]: "75"
+              - generic [ref=e207]:
+                - generic [ref=e208]: Base Governance Score
+                - spinbutton [ref=e209]: "70"
+              - generic [ref=e211]:
+                - generic [ref=e212]: Base Market Score
+                - spinbutton [ref=e213]: "70"
+              - generic [ref=e215]:
+                - generic [ref=e216]: Benchmark Penalty High
+                - spinbutton [ref=e217]: "8"
+              - generic [ref=e219]:
+                - generic [ref=e220]: Benchmark Penalty Medium
+                - spinbutton [ref=e221]: "4"
+              - generic [ref=e223]:
+                - generic [ref=e224]: Benchmark Bonus Per Better
+                - spinbutton [ref=e225]: "2"
+              - generic [ref=e227]:
+                - generic [ref=e228]: Nested Rules
+                - heading "Financial Penalties" [level=5] [ref=e229]
+                - generic [ref=e230]:
+                  - generic [ref=e232]:
+                    - generic [ref=e233]: Rule Values
+                    - heading "Icr Critical" [level=6] [ref=e234]
+                    - generic [ref=e235]:
+                      - generic [ref=e236]:
+                        - generic [ref=e237]: Threshold
+                        - spinbutton [ref=e238]: "1.5"
+                      - generic [ref=e239]:
+                        - generic [ref=e240]: Penalty
+                        - spinbutton [ref=e241]: "15"
+                  - generic [ref=e243]:
+                    - generic [ref=e244]: Rule Values
+                    - heading "Icr Warning" [level=6] [ref=e245]
+                    - generic [ref=e246]:
+                      - generic [ref=e247]:
+                        - generic [ref=e248]: Threshold
+                        - spinbutton [ref=e249]: "2"
+                      - generic [ref=e250]:
+                        - generic [ref=e251]: Penalty
+                        - spinbutton [ref=e252]: "8"
+                  - generic [ref=e254]:
+                    - generic [ref=e255]: Rule Values
+                    - heading "Icr Bonus" [level=6] [ref=e256]
+                    - generic [ref=e257]:
+                      - generic [ref=e258]:
+                        - generic [ref=e259]: Threshold
+                        - spinbutton [ref=e260]: "4"
+                      - generic [ref=e261]:
+                        - generic [ref=e262]: Bonus
+                        - spinbutton [ref=e263]: "5"
+                  - generic [ref=e265]:
+                    - generic [ref=e266]: Rule Values
+                    - heading "De Critical" [level=6] [ref=e267]
+                    - generic [ref=e268]:
+                      - generic [ref=e269]:
+                        - generic [ref=e270]: Threshold
+                        - spinbutton [ref=e271]: "3"
+                      - generic [ref=e272]:
+                        - generic [ref=e273]: Penalty
+                        - spinbutton [ref=e274]: "10"
+                  - generic [ref=e276]:
+                    - generic [ref=e277]: Rule Values
+                    - heading "De Warning" [level=6] [ref=e278]
+                    - generic [ref=e279]:
+                      - generic [ref=e280]:
+                        - generic [ref=e281]: Threshold
+                        - spinbutton [ref=e282]: "2"
+                      - generic [ref=e283]:
+                        - generic [ref=e284]: Penalty
+                        - spinbutton [ref=e285]: "5"
+                  - generic [ref=e287]:
+                    - generic [ref=e288]: Rule Values
+                    - heading "Cr Critical" [level=6] [ref=e289]
+                    - generic [ref=e290]:
+                      - generic [ref=e291]:
+                        - generic [ref=e292]: Threshold
+                        - spinbutton [ref=e293]: "1"
+                      - generic [ref=e294]:
+                        - generic [ref=e295]: Penalty
+                        - spinbutton [ref=e296]: "10"
+                  - generic [ref=e298]:
+                    - generic [ref=e299]: Rule Values
+                    - heading "Cr Warning" [level=6] [ref=e300]
+                    - generic [ref=e301]:
+                      - generic [ref=e302]:
+                        - generic [ref=e303]: Threshold
+                        - spinbutton [ref=e304]: "1.1"
+                      - generic [ref=e305]:
+                        - generic [ref=e306]: Penalty
+                        - spinbutton [ref=e307]: "5"
+                  - generic [ref=e309]:
+                    - generic [ref=e310]: Rule Values
+                    - heading "Dscr Critical" [level=6] [ref=e311]
+                    - generic [ref=e312]:
+                      - generic [ref=e313]:
+                        - generic [ref=e314]: Threshold
+                        - spinbutton [ref=e315]: "1"
+                      - generic [ref=e316]:
+                        - generic [ref=e317]: Penalty
+                        - spinbutton [ref=e318]: "15"
+                  - generic [ref=e320]:
+                    - generic [ref=e321]: Rule Values
+                    - heading "Dscr Warning" [level=6] [ref=e322]
+                    - generic [ref=e323]:
+                      - generic [ref=e324]:
+                        - generic [ref=e325]: Threshold
+                        - spinbutton [ref=e326]: "1.2"
+                      - generic [ref=e327]:
+                        - generic [ref=e328]: Penalty
+                        - spinbutton [ref=e329]: "8"
+                  - generic [ref=e331]:
+                    - generic [ref=e332]: Rule Values
+                    - heading "Dscr Bonus" [level=6] [ref=e333]
+                    - generic [ref=e334]:
+                      - generic [ref=e335]:
+                        - generic [ref=e336]: Threshold
+                        - spinbutton [ref=e337]: "1.5"
+                      - generic [ref=e338]:
+                        - generic [ref=e339]: Bonus
+                        - spinbutton [ref=e340]: "5"
+              - generic [ref=e342]:
+                - generic [ref=e343]: Nested Rules
+                - heading "Conduct Thresholds" [level=5] [ref=e344]
+                - generic [ref=e345]:
+                  - generic [ref=e347]:
+                    - generic [ref=e348]: Cheque Returns High
+                    - spinbutton [ref=e349]: "20"
+                  - generic [ref=e351]:
+                    - generic [ref=e352]: Cheque Returns Medium
+                    - spinbutton [ref=e353]: "10"
+                  - generic [ref=e355]:
+                    - generic [ref=e356]: Dpd Critical
+                    - spinbutton [ref=e357]: "60"
+                  - generic [ref=e359]:
+                    - generic [ref=e360]: Dpd High
+                    - spinbutton [ref=e361]: "30"
+                  - generic [ref=e363]:
+                    - generic [ref=e364]: Dpd Medium
+                    - spinbutton [ref=e365]: "15"
+                  - generic [ref=e367]:
+                    - generic [ref=e368]: Utilization Critical
+                    - spinbutton [ref=e369]: "95"
+                  - generic [ref=e371]:
+                    - generic [ref=e372]: Utilization High
+                    - spinbutton [ref=e373]: "90"
+                  - generic [ref=e375]:
+                    - generic [ref=e376]: Covenant Breach Penalty
+                    - spinbutton [ref=e377]: "8"
+          - generic [ref=e378]:
+            - generic [ref=e380]:
+              - generic [ref=e381]: Policy Group
+              - heading "Recommendation" [level=4] [ref=e382]
+            - generic [ref=e383]:
+              - generic [ref=e385]:
+                - generic [ref=e386]: Standard Covenants
+                - textbox [ref=e387]: Minimum Current Ratio >= 1.25x, Maximum Debt/Equity <= 2.5x, Minimum DSCR >= 1.20x, Maximum Cheque Returns <= 5 per quarter
+              - generic [ref=e389]:
+                - generic [ref=e390]: Enhanced Covenants
+                - textbox [ref=e391]: Quarterly financial submission within 45 days, No dividend payment without bank NOC
+              - generic [ref=e393]:
+                - generic [ref=e394]: Monitoring Standard
+                - textbox [ref=e395]: Quarterly review of financial covenants, Monthly stock/receivable statements
+              - generic [ref=e397]:
+                - generic [ref=e398]: Monitoring Enhanced
+                - textbox [ref=e399]: Enhanced media/news monitoring — weekly
+        - button "Save Rules" [ref=e400] [cursor=pointer]

@@ -1,0 +1,245 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Documents" [level=1] [ref=e25]
+        - generic [ref=e26]:
+          - combobox [ref=e27]:
+            - option "Select company"
+            - option "Apollo Hospitals Enterprise Limited (APOL001)" [selected]
+            - option "Infosys Limited (INFY001)"
+            - option "The Indian Hotels Company Limited (IHCL001)"
+            - option "Madras Fertilizers Limited (MFL001)"
+            - option "MRF Limited (MRF001)"
+          - combobox [ref=e28]:
+            - option "Upload to Financials" [selected]
+            - option "Upload to KYC"
+            - option "Upload to Banking"
+            - option "Upload to Request"
+            - option "Upload to Collateral"
+            - option "Upload to Legal"
+            - option "Upload to GST"
+            - option "Upload to Exchange"
+          - button "Upload File" [ref=e64] [cursor=pointer]:
+            - generic [ref=e30]: Upload File
+          - button "Run Extraction" [ref=e31] [cursor=pointer]
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Visible Files
+          - generic [ref=e35]: "9"
+        - generic [ref=e36]:
+          - generic [ref=e37]: Upload Coverage
+          - generic [ref=e38]: 40%
+        - generic [ref=e39]:
+          - generic [ref=e40]: Public Records
+          - generic [ref=e41]: "10"
+        - generic [ref=e42]:
+          - generic [ref=e43]: Extractions
+          - generic [ref=e44]: "0"
+      - paragraph [ref=e65]: Showing 9 visible files and hiding 37 legacy/system artifacts.
+      - paragraph [ref=e45]: Verified public records are cached automatically. Use this workspace for RM and internal uploads that should override or complement the public baseline.
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - heading "Uploaded And Reference Documents" [level=3] [ref=e48]
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]:
+                - heading "KYC & Identity Documents" [level=4] [ref=e69]
+                - generic [ref=e70]: 100%
+              - generic [ref=e71]:
+                - generic [ref=e72]:
+                  - generic [ref=e73]:
+                    - generic [ref=e74]: board_resolution_borrowing.pdf
+                    - generic [ref=e75]:
+                      - generic [ref=e76]: document
+                      - generic [ref=e77]: Local File
+                  - button "Open" [ref=e78] [cursor=pointer]
+                - generic [ref=e79]:
+                  - generic [ref=e80]:
+                    - generic [ref=e81]: certificate_of_incorporation.pdf
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: document
+                      - generic [ref=e84]: Local File
+                  - button "Open" [ref=e85] [cursor=pointer]
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - generic [ref=e88]: pan_card.pdf
+                    - generic [ref=e89]:
+                      - generic [ref=e90]: document
+                      - generic [ref=e91]: Local File
+                  - button "Open" [ref=e92] [cursor=pointer]
+                - paragraph [ref=e93]: 1 legacy or system artifacts hidden in this category.
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - heading "Financial Statements & Reports" [level=4] [ref=e96]
+                - generic [ref=e97]: 75%
+              - generic [ref=e98]:
+                - generic [ref=e99]:
+                  - generic [ref=e100]:
+                    - generic [ref=e101]: annual_report_fy2023.pdf
+                    - generic [ref=e102]:
+                      - generic [ref=e103]: document
+                      - generic [ref=e104]: Local File
+                  - button "Open" [ref=e105] [cursor=pointer]
+                - generic [ref=e106]:
+                  - generic [ref=e107]:
+                    - generic [ref=e108]: annual_report_fy2024.pdf
+                    - generic [ref=e109]:
+                      - generic [ref=e110]: document
+                      - generic [ref=e111]: Local File
+                  - button "Open" [ref=e112] [cursor=pointer]
+                - generic [ref=e113]:
+                  - generic [ref=e114]:
+                    - generic [ref=e115]: annual_report_fy2025.pdf
+                    - generic [ref=e116]:
+                      - generic [ref=e117]: document
+                      - generic [ref=e118]: Local File
+                  - button "Open" [ref=e119] [cursor=pointer]
+                - generic [ref=e120]:
+                  - generic [ref=e121]:
+                    - generic [ref=e122]: audited_financial_statements.pdf
+                    - generic [ref=e123]:
+                      - generic [ref=e124]: document
+                      - generic [ref=e125]: Local File
+                  - button "Open" [ref=e126] [cursor=pointer]
+                - generic [ref=e127]:
+                  - generic [ref=e128]:
+                    - generic [ref=e129]: provisional_financials_fy2025.xlsx
+                    - generic [ref=e130]:
+                      - generic [ref=e131]: document
+                      - generic [ref=e132]: Local File
+                  - button "Open" [ref=e133] [cursor=pointer]
+                - generic [ref=e134]:
+                  - generic [ref=e135]:
+                    - generic [ref=e136]: unaudited_results_fy2026.pdf
+                    - generic [ref=e137]:
+                      - generic [ref=e138]: document
+                      - generic [ref=e139]: Local File
+                  - button "Open" [ref=e140] [cursor=pointer]
+                - generic [ref=e141]:
+                  - generic [ref=e142]: Suggested uploads
+                  - generic [ref=e143]: debt_schedule.xlsx
+                - paragraph [ref=e144]: 2 legacy or system artifacts hidden in this category.
+            - generic [ref=e145]:
+              - generic [ref=e146]:
+                - heading "Collateral & Valuation Documents" [level=4] [ref=e147]
+                - generic [ref=e148]: 0%
+              - generic [ref=e149]:
+                - paragraph [ref=e150]: No uploaded or reference documents in this category yet.
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Suggested uploads
+                  - generic [ref=e153]: valuation_report.pdf
+                - paragraph [ref=e154]: 1 legacy or system artifacts hidden in this category.
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - heading "Banking Statements & Sanctions" [level=4] [ref=e157]
+                - generic [ref=e158]: 0%
+              - generic [ref=e159]:
+                - paragraph [ref=e160]: No uploaded or reference documents in this category yet.
+                - generic [ref=e161]:
+                  - generic [ref=e162]: Suggested uploads
+                  - generic [ref=e163]: bank_statement_6m.pdf
+                  - generic [ref=e164]: bank_statement_fy2025.pdf
+                  - generic [ref=e165]: sanction_letter.pdf
+                  - generic [ref=e166]: existing_facility_details.pdf
+                - paragraph [ref=e167]: 3 legacy or system artifacts hidden in this category.
+            - generic [ref=e168]:
+              - generic [ref=e169]:
+                - heading "Exchange & Stock Filings" [level=4] [ref=e170]
+                - generic [ref=e171]: 0%
+              - generic [ref=e172]:
+                - paragraph [ref=e173]: No uploaded or reference documents in this category yet.
+                - generic [ref=e174]:
+                  - generic [ref=e175]: Suggested uploads
+                  - generic [ref=e176]: quarterly_results_q3fy2025.pdf
+                  - generic [ref=e177]: corporate_governance_report.pdf
+                - paragraph [ref=e178]: 3 legacy or system artifacts hidden in this category.
+            - generic [ref=e179]:
+              - generic [ref=e180]:
+                - heading "Loan Request Documents" [level=4] [ref=e181]
+                - generic [ref=e182]: 0%
+              - generic [ref=e183]:
+                - paragraph [ref=e184]: No uploaded or reference documents in this category yet.
+                - generic [ref=e185]:
+                  - generic [ref=e186]: Suggested uploads
+                  - generic [ref=e187]: request_note.pdf
+                - paragraph [ref=e188]: 1 legacy or system artifacts hidden in this category.
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "Verified Public Records" [level=3] [ref=e51]
+            - generic [ref=e189]:
+              - generic [ref=e190]: Cached public-record baseline for this borrower. Ratings, GST, legal history, charges, KYC, and freshness come from this source layer.
+              - generic [ref=e191]:
+                - generic [ref=e192]: Company master
+                - generic [ref=e193]: available
+              - generic [ref=e194]:
+                - generic [ref=e195]: KYC and directors
+                - generic [ref=e196]: available
+              - generic [ref=e197]:
+                - generic [ref=e198]: Ratings
+                - generic [ref=e199]: available
+              - generic [ref=e200]:
+                - generic [ref=e201]: GST profile
+                - generic [ref=e202]: available
+              - generic [ref=e203]:
+                - generic [ref=e204]: Legal history
+                - generic [ref=e205]: available
+              - generic [ref=e206]:
+                - generic [ref=e207]: Open charges
+                - generic [ref=e208]: available
+              - generic [ref=e209]:
+                - generic [ref=e210]: EPFO profile
+                - generic [ref=e211]: available
+              - generic [ref=e212]:
+                - generic [ref=e213]: Suit-filed cases
+                - generic [ref=e214]: available
+              - generic [ref=e215]:
+                - generic [ref=e216]: Director network
+                - generic [ref=e217]: available
+              - generic [ref=e218]:
+                - generic [ref=e219]: Freshness
+                - generic [ref=e220]: available
+          - generic [ref=e53]:
+            - heading "Data Gaps" [level=3] [ref=e54]
+            - generic [ref=e221]:
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - generic [ref=e224]: Detailed debt schedule and lender-wise exposure
+                  - generic [ref=e225]: financials
+                - generic [ref=e226]: RM upload
+              - generic [ref=e227]:
+                - generic [ref=e228]:
+                  - generic [ref=e229]: CMA data / projections / repayment assumptions
+                  - generic [ref=e230]: request
+                - generic [ref=e231]: RM upload
+            - paragraph [ref=e232]: Hidden artifacts are excluded from gap analysis.
+          - generic [ref=e56]:
+            - heading "Operation History" [level=3] [ref=e57]
+            - paragraph [ref=e58]: No recorded document operations yet.
+          - generic [ref=e59]:
+            - heading "Reference Packs" [level=3] [ref=e60]
+            - generic [ref=e234]:
+              - generic [ref=e235]: Apollo Hosp
+              - generic [ref=e236]: Apollo Hosp_AR_22-23.pdf
+              - generic [ref=e237]: Apollo Hosp_AR_23-24.pdf
+              - generic [ref=e238]: Apollo Hosp_AR_24-25.pdf
+              - generic [ref=e239]: Apollo Hosp_Unaudited-2025-26.pdf

@@ -1,0 +1,240 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Final CAM Workspace" [level=1] [ref=e25]
+        - combobox [ref=e27]:
+          - option "Select company"
+          - option "Infosys Limited (INFY001)" [selected]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - heading "Verified Case Snapshot" [level=3] [ref=e46]
+            - paragraph [ref=e47]: This case carries a cached public-record snapshot so reports and chat reuse the same entity pull instead of repeating external fetches.
+          - generic [ref=e48]: Snapshot Ready
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - strong [ref=e51]: "Coverage:"
+            - text: full
+          - generic [ref=e52]:
+            - strong [ref=e53]: "Cache State:"
+            - text: hit
+          - generic [ref=e54]:
+            - strong [ref=e55]: "Rating:"
+            - text: AAA
+          - generic [ref=e56]:
+            - strong [ref=e57]: "Legal Cases:"
+            - text: "50"
+          - generic [ref=e58]:
+            - strong [ref=e59]: "Open Charges:"
+            - text: "0"
+          - generic [ref=e60]:
+            - strong [ref=e61]: "Freshness Modules:"
+            - text: "9"
+      - generic [ref=e28]:
+        - button "📄 CAM Report" [ref=e29] [cursor=pointer]
+        - button "📊 One-Page Memo" [ref=e30] [cursor=pointer]
+        - button "◉ 360° View" [active] [ref=e31] [cursor=pointer]
+        - button "✉ Financial Advisor" [ref=e32] [cursor=pointer]
+      - generic [ref=e62]:
+        - button "Load 360°" [ref=e64] [cursor=pointer]:
+          - generic [ref=e65]: Load 360°
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - generic [ref=e69]: 360 Snapshot
+              - heading "Infosys Limited" [level=2] [ref=e70]
+              - paragraph [ref=e71]: INFOSYS LIMITED is a listed company incorporated in Karnataka, operating in Information Technology. The current proposal is ₹500.0 Cr of working capital with case recommendation REFER and risk grade B. External rating stands at AAA; open charges are 0. Market stance is stable with watch items with 1 watch item(s). Strong revenue growth of 17615.3% YoY. 4 high-severity red flag(s) remain open. Sell-side attractiveness is medium-high, with guided pricing around 8.25% p.a.
+              - generic [ref=e72]:
+                - generic [ref=e73]: "Recommendation: Refer"
+                - generic [ref=e74]: "Market stance: Stable with watch items"
+                - generic [ref=e75]: "Rating: AAA"
+                - generic [ref=e76]: "Open charges: 0"
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: Recommendation
+                - generic [ref=e81]: Refer
+                - generic [ref=e82]: Current case decision
+              - generic [ref=e83]:
+                - generic [ref=e84]: Risk Grade
+                - generic [ref=e85]: B
+                - generic [ref=e86]: Composite credit outcome
+              - generic [ref=e87]:
+                - generic [ref=e88]: Composite Score
+                - generic [ref=e89]: "76.4"
+                - generic [ref=e90]: Financial, conduct, governance, market
+              - generic [ref=e91]:
+                - generic [ref=e92]: High Severity Flags
+                - generic [ref=e93]: "4"
+                - generic [ref=e94]: Critical and high watch items
+          - generic [ref=e95]:
+            - button "Overview" [ref=e96] [cursor=pointer]
+            - button "Financials" [ref=e97] [cursor=pointer]
+            - button "Credit Risk" [ref=e98] [cursor=pointer]
+            - button "Banking" [ref=e99] [cursor=pointer]
+            - button "Market Intel" [ref=e100] [cursor=pointer]
+            - button "Sell Perspective" [ref=e101] [cursor=pointer]
+            - button "Red Flags" [ref=e102] [cursor=pointer]
+          - generic [ref=e103]:
+            - generic [ref=e105]:
+              - generic [ref=e106]: Identity
+              - heading "Company Overview" [level=3] [ref=e107]
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - heading "Corporate Identity" [level=4] [ref=e110]
+                - generic [ref=e111]:
+                  - generic [ref=e112]:
+                    - strong [ref=e113]: "CIN:"
+                    - text: L85110KA1981PLC013115
+                  - generic [ref=e114]:
+                    - strong [ref=e115]: "PAN:"
+                    - text: AAACI3456C
+                  - generic [ref=e116]:
+                    - strong [ref=e117]: "GSTIN:"
+                    - text: 29AAACI3456C1Z4
+                  - generic [ref=e118]:
+                    - strong [ref=e119]: "Status:"
+                    - text: Active
+                  - generic [ref=e120]:
+                    - strong [ref=e121]: "Incorporated:"
+                    - text: 1981-07-02
+                  - generic [ref=e122]:
+                    - strong [ref=e123]: "Listed:"
+                    - text: Listed
+                  - generic [ref=e124]:
+                    - strong [ref=e125]: "Registered State:"
+                    - text: Karnataka
+                  - generic [ref=e126]:
+                    - strong [ref=e127]: "Employees:"
+                    - text: 1,40,000
+              - generic [ref=e128]:
+                - heading "Management & Positioning" [level=4] [ref=e129]
+                - generic [ref=e130]:
+                  - generic [ref=e131]:
+                    - strong [ref=e132]: "Entity ID:"
+                    - text: INFY001
+                  - generic [ref=e133]:
+                    - strong [ref=e134]: "Sector:"
+                    - text: Information Technology
+                  - generic [ref=e135]:
+                    - strong [ref=e136]: "Registered Office:"
+                    - text: ELECTRONICS CITY,HOSUR ROAD, BANGALORE, KARNATAKA, Karnataka, 560100
+                  - generic [ref=e137]:
+                    - strong [ref=e138]: "Market Position:"
+                    - text: Top-tier information technology player with listed franchise, ~12.0% peer market share, AAA external rating.
+                  - generic [ref=e139]:
+                    - strong [ref=e140]: "Relationship View:"
+                    - text: Strategic large-corporate relationship with treasury, fee, and board-level wallet potential
+            - heading "Management & Board" [level=4] [ref=e141]
+            - table [ref=e143]:
+              - rowgroup [ref=e144]:
+                - row "Name Designation DIN Status Other Directorships" [ref=e145]:
+                  - columnheader "Name" [ref=e146]
+                  - columnheader "Designation" [ref=e147]
+                  - columnheader "DIN" [ref=e148]
+                  - columnheader "Status" [ref=e149]
+                  - columnheader "Other Directorships" [ref=e150]
+              - rowgroup [ref=e151]:
+                - row "Govind Vaidiram IYER Director 00169343 Board / KMP 11" [ref=e152]:
+                  - cell "Govind Vaidiram IYER" [ref=e153]
+                  - cell "Director" [ref=e154]
+                  - cell "00169343" [ref=e155]
+                  - cell "Board / KMP" [ref=e156]:
+                    - generic [ref=e157]: Board / KMP
+                  - cell "11" [ref=e158]
+                - row "Salil Satish Parekh CEO 00000000 Board / KMP 0" [ref=e159]:
+                  - cell "Salil Satish Parekh" [ref=e160]
+                  - cell "CEO" [ref=e161]
+                  - cell "00000000" [ref=e162]
+                  - cell "Board / KMP" [ref=e163]:
+                    - generic [ref=e164]: Board / KMP
+                  - cell "0" [ref=e165]
+                - row "Suryanarayana ANUR Gurugopala RAJU Manikantha Company Secretary 00000000 Board / KMP 0" [ref=e166]:
+                  - cell "Suryanarayana ANUR Gurugopala RAJU Manikantha" [ref=e167]
+                  - cell "Company Secretary" [ref=e168]
+                  - cell "00000000" [ref=e169]
+                  - cell "Board / KMP" [ref=e170]:
+                    - generic [ref=e171]: Board / KMP
+                  - cell "0" [ref=e172]
+                - row "Jayesh Dhanvantkumar Sanghrajka CFO 00000000 Board / KMP 0" [ref=e173]:
+                  - cell "Jayesh Dhanvantkumar Sanghrajka" [ref=e174]
+                  - cell "CFO" [ref=e175]
+                  - cell "00000000" [ref=e176]
+                  - cell "Board / KMP" [ref=e177]:
+                    - generic [ref=e178]: Board / KMP
+                  - cell "0" [ref=e179]
+                - row "Helene Marie Jacqueline Madeleine Auriol Potier Director 10166891 Board / KMP 1" [ref=e180]:
+                  - cell "Helene Marie Jacqueline Madeleine Auriol Potier" [ref=e181]
+                  - cell "Director" [ref=e182]
+                  - cell "10166891" [ref=e183]
+                  - cell "Board / KMP" [ref=e184]:
+                    - generic [ref=e185]: Board / KMP
+                  - cell "1" [ref=e186]
+                - row "Salil Satish Parekh Managing Director 01876159 Promoter / Executive 6" [ref=e187]:
+                  - cell "Salil Satish Parekh" [ref=e188]
+                  - cell "Managing Director" [ref=e189]
+                  - cell "01876159" [ref=e190]
+                  - cell "Promoter / Executive" [ref=e191]:
+                    - generic [ref=e192]: Promoter / Executive
+                  - cell "6" [ref=e193]
+                - row "Bobby Kanubhai Parikh Director 00019437 Board / KMP 16" [ref=e194]:
+                  - cell "Bobby Kanubhai Parikh" [ref=e195]
+                  - cell "Director" [ref=e196]
+                  - cell "00019437" [ref=e197]
+                  - cell "Board / KMP" [ref=e198]:
+                    - generic [ref=e199]: Board / KMP
+                  - cell "16" [ref=e200]
+                - row "Chitra Nayak Director 09101763 Board / KMP 1" [ref=e201]:
+                  - cell "Chitra Nayak" [ref=e202]
+                  - cell "Director" [ref=e203]
+                  - cell "09101763" [ref=e204]
+                  - cell "Board / KMP" [ref=e205]:
+                    - generic [ref=e206]: Board / KMP
+                  - cell "1" [ref=e207]
+                - row "Michael Nelson Gibbs Director 08177291 Board / KMP 2" [ref=e208]:
+                  - cell "Michael Nelson Gibbs" [ref=e209]
+                  - cell "Director" [ref=e210]
+                  - cell "08177291" [ref=e211]
+                  - cell "Board / KMP" [ref=e212]:
+                    - generic [ref=e213]: Board / KMP
+                  - cell "2" [ref=e214]
+                - row "Nandan Mohan Nilekani Director 00041245 Board / KMP 7" [ref=e215]:
+                  - cell "Nandan Mohan Nilekani" [ref=e216]
+                  - cell "Director" [ref=e217]
+                  - cell "00041245" [ref=e218]
+                  - cell "Board / KMP" [ref=e219]:
+                    - generic [ref=e220]: Board / KMP
+                  - cell "7" [ref=e221]
+                - row "Sundaram Damodarannair Director 00016304 Board / KMP 29" [ref=e222]:
+                  - cell "Sundaram Damodarannair" [ref=e223]
+                  - cell "Director" [ref=e224]
+                  - cell "00016304" [ref=e225]
+                  - cell "Board / KMP" [ref=e226]:
+                    - generic [ref=e227]: Board / KMP
+                  - cell "29" [ref=e228]
+                - row "Nitin Paranjpe Director 00045204 Board / KMP 0" [ref=e229]:
+                  - cell "Nitin Paranjpe" [ref=e230]
+                  - cell "Director" [ref=e231]
+                  - cell "00045204" [ref=e232]
+                  - cell "Board / KMP" [ref=e233]:
+                    - generic [ref=e234]: Board / KMP
+                  - cell "0" [ref=e235]

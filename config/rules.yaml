@@ -1,0 +1,75 @@
+# ═══════════════════════════════════════════════════════════════════════
+# Policy Rules & Thresholds — Edit Here, No Code Changes Needed
+# ═══════════════════════════════════════════════════════════════════════
+
+hard_rules:
+  wilful_defaulter:
+    enabled: true
+    description: "Borrower must not be flagged as Wilful Defaulter"
+  company_active:
+    enabled: true
+    description: "Company status must be Active in MCA records"
+  no_critical_exceptions:
+    enabled: true
+    description: "No unresolved CRITICAL validation exceptions"
+  kyc_complete:
+    enabled: true
+    applies_to: "NTB"
+    description: "KYC package must be complete for NTB"
+  bureau_status:
+    enabled: true
+    blocked_statuses:
+      - "SMA-2"
+      - "Substandard"
+      - "Doubtful"
+      - "Loss"
+    description: "Bureau status must not be SMA-2 or worse"
+  min_vintage:
+    enabled: true
+    applies_to: "NTB"
+    min_years: 3
+    description: "Company must be at least 3 years old for NTB"
+
+scoring:
+  base_financial_score: 70
+  base_conduct_score: 75
+  base_governance_score: 70
+  base_market_score: 70
+  benchmark_penalty_high: 8
+  benchmark_penalty_medium: 4
+  benchmark_bonus_per_better: 2
+  financial_penalties:
+    icr_critical: { threshold: 1.5, penalty: 15 }
+    icr_warning: { threshold: 2.0, penalty: 8 }
+    icr_bonus: { threshold: 4.0, bonus: 5 }
+    de_critical: { threshold: 3.0, penalty: 10 }
+    de_warning: { threshold: 2.0, penalty: 5 }
+    cr_critical: { threshold: 1.0, penalty: 10 }
+    cr_warning: { threshold: 1.1, penalty: 5 }
+    dscr_critical: { threshold: 1.0, penalty: 15 }
+    dscr_warning: { threshold: 1.2, penalty: 8 }
+    dscr_bonus: { threshold: 1.5, bonus: 5 }
+  conduct_thresholds:
+    cheque_returns_high: 20
+    cheque_returns_medium: 10
+    dpd_critical: 60
+    dpd_high: 30
+    dpd_medium: 15
+    utilization_critical: 95
+    utilization_high: 90
+    covenant_breach_penalty: 8
+
+recommendation:
+  standard_covenants:
+    - "Minimum Current Ratio >= 1.25x"
+    - "Maximum Debt/Equity <= 2.5x"
+    - "Minimum DSCR >= 1.20x"
+    - "Maximum Cheque Returns <= 5 per quarter"
+  enhanced_covenants:
+    - "Quarterly financial submission within 45 days"
+    - "No dividend payment without bank NOC"
+  monitoring_standard:
+    - "Quarterly review of financial covenants"
+    - "Monthly stock/receivable statements"
+  monitoring_enhanced:
+    - "Enhanced media/news monitoring — weekly"

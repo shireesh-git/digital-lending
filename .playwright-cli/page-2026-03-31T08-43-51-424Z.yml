@@ -1,0 +1,183 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Final CAM Workspace" [level=1] [ref=e25]
+        - combobox [ref=e27]:
+          - option "Select company"
+          - option "Infosys Limited (INFY001)" [selected]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - heading "Verified Case Snapshot" [level=3] [ref=e46]
+            - paragraph [ref=e47]: This case carries a cached public-record snapshot so reports and chat reuse the same entity pull instead of repeating external fetches.
+          - generic [ref=e48]: Snapshot Ready
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - strong [ref=e51]: "Coverage:"
+            - text: full
+          - generic [ref=e52]:
+            - strong [ref=e53]: "Cache State:"
+            - text: hit
+          - generic [ref=e54]:
+            - strong [ref=e55]: "Rating:"
+            - text: AAA
+          - generic [ref=e56]:
+            - strong [ref=e57]: "Legal Cases:"
+            - text: "50"
+          - generic [ref=e58]:
+            - strong [ref=e59]: "Open Charges:"
+            - text: "0"
+          - generic [ref=e60]:
+            - strong [ref=e61]: "Freshness Modules:"
+            - text: "9"
+      - generic [ref=e28]:
+        - button "📄 CAM Report" [ref=e29] [cursor=pointer]
+        - button "📊 One-Page Memo" [ref=e30] [cursor=pointer]
+        - button "◉ 360° View" [ref=e31] [cursor=pointer]
+        - button "✉ Financial Advisor" [ref=e32] [cursor=pointer]
+      - generic [ref=e62]:
+        - button "Load 360°" [ref=e64] [cursor=pointer]:
+          - generic [ref=e65]: Load 360°
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]: 360 Snapshot
+              - heading "Infosys Limited" [level=2] [ref=e72]
+              - paragraph [ref=e73]: INFOSYS LIMITED is a listed company incorporated in Karnataka, operating in Information Technology. The current proposal is ₹500.0 Cr of working capital with case recommendation REFER and risk grade B. External rating stands at AAA; open charges are 0. Market stance is stable with watch items with 1 watch item(s). Strong revenue growth of 17615.3% YoY. 4 high-severity red flag(s) remain open. Sell-side attractiveness is medium-high, with guided pricing around 8.25% p.a.
+              - generic [ref=e74]:
+                - generic [ref=e75]: "Recommendation: Refer"
+                - generic [ref=e76]: "Market stance: Stable with watch items"
+                - generic [ref=e77]: "Rating: AAA"
+                - generic [ref=e78]: "Open charges: 0"
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - generic [ref=e82]: Recommendation
+                - generic [ref=e83]: Refer
+                - generic [ref=e84]: Current case decision
+              - generic [ref=e85]:
+                - generic [ref=e86]: Risk Grade
+                - generic [ref=e87]: B
+                - generic [ref=e88]: Composite credit outcome
+              - generic [ref=e89]:
+                - generic [ref=e90]: Composite Score
+                - generic [ref=e91]: "76.4"
+                - generic [ref=e92]: Financial, conduct, governance, market
+              - generic [ref=e93]:
+                - generic [ref=e94]: High Severity Flags
+                - generic [ref=e95]: "4"
+                - generic [ref=e96]: Critical and high watch items
+          - generic [ref=e97]:
+            - button "Overview" [ref=e98] [cursor=pointer]
+            - button "Financials" [ref=e99] [cursor=pointer]
+            - button "Credit Risk" [ref=e100] [cursor=pointer]
+            - button "Banking" [ref=e101] [cursor=pointer]
+            - button "Market Intel" [ref=e102] [cursor=pointer]
+            - button "Sell Perspective" [active] [ref=e103] [cursor=pointer]
+            - button "Red Flags" [ref=e104] [cursor=pointer]
+          - generic [ref=e350]:
+            - generic [ref=e352]:
+              - generic [ref=e353]: Commercial Lens
+              - heading "Sell-Side Perspective" [level=3] [ref=e354]
+              - generic [ref=e355]: Pricing, target wallet, and cross-sell positioning based on the executed case and current banking footprint.
+            - generic [ref=e356]:
+              - generic [ref=e357]:
+                - generic [ref=e358]: Deal Attractiveness
+                - generic [ref=e359]: Medium-high
+                - generic [ref=e360]: Commercial desirability of the case
+              - generic [ref=e361]:
+                - generic [ref=e362]: Target Wallet
+                - generic [ref=e363]: "750"
+                - generic [ref=e364]: Target relationship size (Cr)
+              - generic [ref=e365]:
+                - generic [ref=e366]: Existing Exposure
+                - generic [ref=e367]: "3625"
+                - generic [ref=e368]: Current facility base (Cr)
+              - generic [ref=e369]:
+                - generic [ref=e370]: Fee Income Potential
+                - generic [ref=e371]: "187.5"
+                - generic [ref=e372]: Estimated processing-fee pool (lakhs)
+            - generic [ref=e373]:
+              - generic [ref=e374]:
+                - heading "Pricing Guidance" [level=4] [ref=e375]
+                - generic [ref=e376]:
+                  - generic [ref=e377]: Suggested Lending Rate
+                  - generic [ref=e378]: 8.25%
+                - generic [ref=e379]:
+                  - generic [ref=e380]: Current Case Pricing
+                  - generic [ref=e381]: MCLR + 0.80% = 9.20% p.a.
+                - generic [ref=e382]:
+                  - generic [ref=e383]: Processing Fee
+                  - generic [ref=e384]: 0.25% of limit (min ₹25,000)
+                - generic [ref=e385]:
+                  - generic [ref=e386]: Commitment Charge
+                  - generic [ref=e387]: 0.50% p.a. on undrawn
+                - generic [ref=e388]:
+                  - generic [ref=e389]: Pricing Gap
+                  - generic [ref=e390]: 745 bps
+              - generic [ref=e391]:
+                - heading "Relationship Strategy" [level=4] [ref=e392]
+                - paragraph [ref=e393]: Strategic large-corporate relationship with treasury, fee, and board-level wallet potential
+                - paragraph [ref=e395]: "Medium High risk-reward profile. Market stance: Stable with watch items. Strong revenue growth of 17615.3% YoY. Key watch item: PAT inconsistent for FY2025. PBT(35424.00) - Tax(20.00) = 35404.00 but PAT = 27234.00. Current proposal pricing: MCLR + 0.80% = 9.20% p.a.. Target wallet: ₹750.0 Cr."
+            - generic [ref=e396]:
+              - generic [ref=e397]:
+                - heading "Wallet Share View" [level=4] [ref=e398]
+                - generic [ref=e399]:
+                  - generic [ref=e400]: Total Banking Exposure
+                  - generic [ref=e401]: Rs. 3,625 Cr
+                - generic [ref=e402]:
+                  - generic [ref=e403]: Current Outstanding
+                  - generic [ref=e404]: Rs. 3,225 Cr
+                - generic [ref=e405]:
+                  - generic [ref=e406]: Active Facilities / Lenders
+                  - generic [ref=e407]: "5"
+                - generic [ref=e408]:
+                  - generic [ref=e409]: Average Ticket
+                  - generic [ref=e410]: Rs. 725 Cr
+                - generic [ref=e411]:
+                  - generic [ref=e412]: Target Wallet
+                  - generic [ref=e413]: Rs. 750 Cr
+              - generic [ref=e414]:
+                - heading "Cross-Sell Opportunities" [level=4] [ref=e415]
+                - table [ref=e417]:
+                  - rowgroup [ref=e418]:
+                    - row "Product Potential (Cr) Rationale" [ref=e419]:
+                      - columnheader "Product" [ref=e420]
+                      - columnheader "Potential (Cr)" [ref=e421]
+                      - columnheader "Rationale" [ref=e422]
+                  - rowgroup [ref=e423]:
+                    - row "Cash Management Services 258 Collections, payment rails, and escrow operating flows can deepen the primary relationship." [ref=e424]:
+                      - cell "Cash Management Services" [ref=e425]
+                      - cell "258" [ref=e426]
+                      - cell "Collections, payment rails, and escrow operating flows can deepen the primary relationship." [ref=e427]
+                    - row "Salary Accounts (CASA) 30 Large employee base (~140,000) supports payroll banking and retail cross-sell." [ref=e428]:
+                      - cell "Salary Accounts (CASA)" [ref=e429]
+                      - cell "30" [ref=e430]
+                      - cell "Large employee base (~140,000) supports payroll banking and retail cross-sell." [ref=e431]
+                    - row "FX & Treasury Solutions 30 Global delivery and cross-border client receipts support hedging and treasury products." [ref=e432]:
+                      - cell "FX & Treasury Solutions" [ref=e433]
+                      - cell "30" [ref=e434]
+                      - cell "Global delivery and cross-border client receipts support hedging and treasury products." [ref=e435]
+                    - row "Trade / Supply Chain Solutions 25 Vendor financing, collections, and supply-chain programs can expand wallet share beyond the lead facility." [ref=e436]:
+                      - cell "Trade / Supply Chain Solutions" [ref=e437]
+                      - cell "25" [ref=e438]
+                      - cell "Vendor financing, collections, and supply-chain programs can expand wallet share beyond the lead facility." [ref=e439]

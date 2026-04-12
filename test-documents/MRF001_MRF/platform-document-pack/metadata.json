@@ -1,0 +1,31 @@
+{
+  "entity_id": "MRF001",
+  "created_at": "2026-03-30T22:16:38.696083",
+  "document_index": {
+    "financials/annual_report_fy2024.pdf": {
+      "filename": "annual_report_fy2024.pdf",
+      "category": "financials",
+      "source": "reference_library",
+      "indexed_at": "2026-03-30T22:16:38.713663"
+    },
+    "financials/annual_report_fy2025.pdf": {
+      "filename": "annual_report_fy2025.pdf",
+      "category": "financials",
+      "source": "reference_library",
+      "indexed_at": "2026-03-30T22:16:38.730860"
+    },
+    "financials/annual_report_fy2023.pdf": {
+      "filename": "annual_report_fy2023.pdf",
+      "category": "financials",
+      "source": "reference_library",
+      "indexed_at": "2026-03-30T22:16:38.749935"
+    },
+    "financials/unaudited_results_fy2026.pdf": {
+      "filename": "unaudited_results_fy2026.pdf",
+      "category": "financials",
+      "source": "reference_library",
+      "indexed_at": "2026-03-30T22:16:38.764951"
+    }
+  },
+  "fetch_status": {}
+}

@@ -1,0 +1,93 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - heading "CAM Intel" [level=2] [ref=e7]
+        - generic [ref=e8]: v2.0
+    - list [ref=e9]:
+      - listitem [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: ■
+        - text: Dashboard
+      - listitem [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 📋
+        - text: Cases
+      - listitem [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: ⚡
+        - text: Smart Onboard
+      - listitem [ref=e16] [cursor=pointer]:
+        - generic [ref=e17]: 📁
+        - text: Documents
+      - listitem [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ▶
+        - text: Pipeline
+      - listitem [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: 📄
+        - text: Reports
+      - listitem [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: ⚙
+        - text: Settings
+    - generic [ref=e25]:
+      - generic [ref=e26]: LLM
+      - generic [ref=e27]: ollama
+  - main [ref=e28]:
+    - generic [ref=e410]:
+      - heading "Settings" [level=1] [ref=e412]
+      - generic [ref=e413]:
+        - button "LLM Provider" [ref=e414] [cursor=pointer]
+        - button "Engines" [ref=e415] [cursor=pointer]
+        - button "Benchmarks" [ref=e416] [cursor=pointer]
+        - button "Rules" [ref=e417] [cursor=pointer]
+      - generic [ref=e418]:
+        - heading "LLM Configuration" [level=3] [ref=e419]
+        - generic [ref=e420]:
+          - generic [ref=e421]:
+            - generic [ref=e422]: Active Provider
+            - combobox [ref=e423]:
+              - option "Mock (Deterministic)"
+              - option "OpenAI GPT-4"
+              - option "Anthropic Claude"
+              - option "Azure OpenAI"
+              - option "Ollama (Local) (current)" [selected]
+          - generic [ref=e424]:
+            - generic [ref=e425]: Narrative Mode
+            - combobox [ref=e426]:
+              - option "Template (fast, deterministic)"
+              - option "LLM (AI-generated narrative)" [selected]
+        - generic [ref=e427]:
+          - button "Save" [ref=e428] [cursor=pointer]
+          - button "Test Connection" [ref=e429] [cursor=pointer]
+        - generic [ref=e430]:
+          - heading "Available Providers" [level=4] [ref=e431]
+          - table [ref=e432]:
+            - rowgroup [ref=e433]:
+              - row "Provider Model Status" [ref=e434]:
+                - columnheader "Provider" [ref=e435]
+                - columnheader "Model" [ref=e436]
+                - columnheader "Status" [ref=e437]
+            - rowgroup [ref=e438]:
+              - row "Mock (Deterministic) -- available" [ref=e439]:
+                - cell "Mock (Deterministic)" [ref=e440]
+                - cell "--" [ref=e441]
+                - cell "available" [ref=e442]:
+                  - generic [ref=e443]: available
+              - row "OpenAI GPT-4 -- available" [ref=e444]:
+                - cell "OpenAI GPT-4" [ref=e445]
+                - cell "--" [ref=e446]
+                - cell "available" [ref=e447]:
+                  - generic [ref=e448]: available
+              - row "Anthropic Claude -- available" [ref=e449]:
+                - cell "Anthropic Claude" [ref=e450]
+                - cell "--" [ref=e451]
+                - cell "available" [ref=e452]:
+                  - generic [ref=e453]: available
+              - row "Azure OpenAI -- available" [ref=e454]:
+                - cell "Azure OpenAI" [ref=e455]
+                - cell "--" [ref=e456]
+                - cell "available" [ref=e457]:
+                  - generic [ref=e458]: available
+              - row "Ollama (Local) -- active" [ref=e459]:
+                - cell "Ollama (Local)" [ref=e460]
+                - cell "--" [ref=e461]
+                - cell "active" [ref=e462]:
+                  - generic [ref=e463]: active

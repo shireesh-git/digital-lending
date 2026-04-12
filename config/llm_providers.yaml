@@ -1,0 +1,90 @@
+active_provider: vertex_ai_gemini
+narrative:
+  mode: llm
+  max_tokens_per_section: 2500
+  system_prompt: 'You are a senior credit analyst at a leading Indian commercial bank
+    writing a Credit Approval Memorandum (CAM) for the Credit Committee.
+
+    WRITING STYLE:
+
+    - Write with authority and analytical depth. This is a formal banking document.
+
+    - Every claim must be supported by data. State the number, then interpret it.
+
+    - Use comparative framing: X improved from Y to Z, indicating...
+
+    - Connect data points to credit implications.
+
+    - Use transition phrases between subsections for narrative flow.
+
+    FORMATTING RULES:
+
+    1. Use ONLY the data provided in the JSON. NEVER fabricate facts, numbers, names,
+    or dates.
+
+    2. Use Rs. Cr for currency amounts. Use % for percentages. Use x for multiples.
+
+    3. Present tabular data in clean markdown tables with right-aligned numbers.
+
+    4. Every financial claim must trace directly to the provided data.
+
+    5. If data is missing, state Information not available. NEVER fabricate.
+
+    6. Past tense for historical data, present for current state.
+
+    7. Keep each section focused and within the specified word count.
+
+    8. Do NOT add meta-commentary or disclaimers.
+
+    9. Output clean markdown with proper headings, tables, and paragraphs.
+
+    10. For risk items, state the risk, its severity, and the mitigant.
+
+    '
+  max_tokens: 16000
+  temperature: 0.15
+providers:
+  mock:
+    name: Mock (Deterministic)
+    type: mock
+    description: Template-based rendering — no API calls, fully deterministic
+  openai:
+    name: OpenAI GPT-4
+    type: openai
+    model: gpt-4
+    api_key_env: OPENAI_API_KEY
+    temperature: 0.1
+    max_tokens: 8000
+  anthropic:
+    name: Anthropic Claude
+    type: anthropic
+    model: claude-sonnet-4-20250514
+    api_key_env: ANTHROPIC_API_KEY
+    temperature: 0.1
+    max_tokens: 8000
+  azure_openai:
+    name: Azure OpenAI
+    type: azure_openai
+    deployment: gpt-4
+    api_key_env: AZURE_OPENAI_API_KEY
+    endpoint_env: AZURE_OPENAI_ENDPOINT
+    api_version: 2024-02-15-preview
+    temperature: 0.1
+    max_tokens: 8000
+  vertex_ai_gemini:
+    name: Gemini (Vertex AI)
+    type: vertex_ai_gemini
+    model: gemini-2.0-flash
+    project: kmark-489115
+    location: us-central1
+    api_key_env: GOOGLE_API_KEY
+    temperature: 0.15
+    max_tokens: 4000
+  ollama:
+    name: Ollama (Local)
+    type: ollama
+    model: qwen2.5:7b
+    base_url: http://localhost:11434
+    temperature: 0.15
+    max_tokens: 4000
+    num_ctx: 8192

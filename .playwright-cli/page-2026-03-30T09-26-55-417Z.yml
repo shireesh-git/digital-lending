@@ -1,0 +1,419 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - heading "CAM Intel" [level=2] [ref=e7]
+        - generic [ref=e8]: v2.0
+    - list [ref=e9]:
+      - listitem [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: ■
+        - text: Dashboard
+      - listitem [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 📋
+        - text: Cases
+      - listitem [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: ⚡
+        - text: Smart Onboard
+      - listitem [ref=e16] [cursor=pointer]:
+        - generic [ref=e17]: 📁
+        - text: Documents
+      - listitem [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ▶
+        - text: Pipeline
+      - listitem [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: 📄
+        - text: Reports
+      - listitem [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: ⚙
+        - text: Settings
+    - generic [ref=e25]:
+      - generic [ref=e26]: LLM
+      - generic [ref=e27]: ollama
+  - main [ref=e28]:
+    - generic [ref=e150]:
+      - generic [ref=e151]:
+        - heading "Documents" [level=1] [ref=e152]
+        - generic [ref=e153]:
+          - combobox [ref=e154]:
+            - option "Select company"
+            - option "Bharat Manufacturing Ltd (BMFG001)" [selected]
+            - option "Pinnacle Infra Projects Ltd (PINF001)"
+            - option "Sunrise Pharma Pvt Ltd (SPHR001)"
+            - option "Omega Logistics Pvt Ltd (OLOG001)"
+            - option "Tara Steels Industries Ltd (TSTL001)"
+            - option "Reliable Energy Industries Ltd (REIL001)"
+            - option "Infosys Limited (INFY001)"
+            - option "Advik Ports & SEZ Ltd (ADPT001)"
+            - option "Bajrang Finance Ltd (BJFN001)"
+            - option "Ciplex Pharmaceuticals Ltd (CIPL001)"
+            - option "Delhi Land & Realty Ltd (DLFR001)"
+            - option "JSW Alloys & Steel Ltd (JSWL001)"
+            - option "Maruti Auto Industries Ltd (MRUT001)"
+            - option "Titan Luxe Retail Ltd (TITN001)"
+            - option "National Thermal Power Corp Ltd (NTPC001)"
+            - option "Yashwant Commercial Bank Ltd (YESB001)"
+            - option "Dr. Reddy's Laboratories Limited (DRRD001)"
+            - option "The Indian Hotels Company Limited (IHCL001)"
+            - option "Apollo Hospitals Enterprise Limited (APOL001)"
+          - button "Generate Pack" [ref=e155] [cursor=pointer]:
+            - generic [ref=e156]: Generate Pack
+          - button "Backfill All" [ref=e157] [cursor=pointer]
+          - button "Run Extraction" [ref=e158] [cursor=pointer]
+      - generic [ref=e159]:
+        - generic [ref=e160]:
+          - generic [ref=e161]: Active Files
+          - generic [ref=e162]: "19"
+        - generic [ref=e163]:
+          - generic [ref=e164]: Required Coverage
+          - generic [ref=e165]: 66.7%
+        - generic [ref=e166]:
+          - generic [ref=e167]: Source Records
+          - generic [ref=e168]: "0"
+        - generic [ref=e169]:
+          - generic [ref=e170]: Extractions
+          - generic [ref=e171]: "0"
+      - paragraph [ref=e172]: Showing 19 active files and hiding 23 legacy/system artifacts.
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - heading "Document Coverage" [level=3] [ref=e175]
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - heading "KYC & Identity Documents" [level=4] [ref=e179]
+                - generic [ref=e180]: 100%
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - generic [ref=e183]:
+                    - generic [ref=e184]: board_resolution.txt
+                    - generic [ref=e185]:
+                      - generic [ref=e186]: document
+                      - generic [ref=e187]: Local File
+                  - button "Open" [ref=e188] [cursor=pointer]
+                - generic [ref=e189]:
+                  - generic [ref=e190]:
+                    - generic [ref=e191]: board_resolution_borrowing.pdf
+                    - generic [ref=e192]:
+                      - generic [ref=e193]: document
+                      - generic [ref=e194]: Local File
+                  - button "Open" [ref=e195] [cursor=pointer]
+                - generic [ref=e196]:
+                  - generic [ref=e197]:
+                    - generic [ref=e198]: certificate_of_incorporation.pdf
+                    - generic [ref=e199]:
+                      - generic [ref=e200]: document
+                      - generic [ref=e201]: Local File
+                  - button "Open" [ref=e202] [cursor=pointer]
+                - generic [ref=e203]:
+                  - generic [ref=e204]:
+                    - generic [ref=e205]: certificate_of_incorporation.txt
+                    - generic [ref=e206]:
+                      - generic [ref=e207]: document
+                      - generic [ref=e208]: Local File
+                  - button "Open" [ref=e209] [cursor=pointer]
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - generic [ref=e212]: gst_registration.txt
+                    - generic [ref=e213]:
+                      - generic [ref=e214]: document
+                      - generic [ref=e215]: Local File
+                  - button "Open" [ref=e216] [cursor=pointer]
+                - generic [ref=e217]:
+                  - generic [ref=e218]:
+                    - generic [ref=e219]: pan_card.pdf
+                    - generic [ref=e220]:
+                      - generic [ref=e221]: document
+                      - generic [ref=e222]: Local File
+                  - button "Open" [ref=e223] [cursor=pointer]
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - generic [ref=e226]: pan_card.txt
+                    - generic [ref=e227]:
+                      - generic [ref=e228]: document
+                      - generic [ref=e229]: Local File
+                  - button "Open" [ref=e230] [cursor=pointer]
+            - generic [ref=e231]:
+              - generic [ref=e232]:
+                - heading "Financial Statements & Reports" [level=4] [ref=e233]
+                - generic [ref=e234]: 100%
+              - generic [ref=e235]:
+                - generic [ref=e236]:
+                  - generic [ref=e237]:
+                    - generic [ref=e238]: annual_report_fy2024.pdf
+                    - generic [ref=e239]:
+                      - generic [ref=e240]: document
+                      - generic [ref=e241]: Local File
+                  - button "Open" [ref=e242] [cursor=pointer]
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - generic [ref=e245]: audited_bs_fy2024.txt
+                    - generic [ref=e246]:
+                      - generic [ref=e247]: document
+                      - generic [ref=e248]: Local File
+                  - button "Open" [ref=e249] [cursor=pointer]
+                - generic [ref=e250]:
+                  - generic [ref=e251]:
+                    - generic [ref=e252]: audited_financial_statements.pdf
+                    - generic [ref=e253]:
+                      - generic [ref=e254]: document
+                      - generic [ref=e255]: Local File
+                  - button "Open" [ref=e256] [cursor=pointer]
+                - generic [ref=e257]:
+                  - generic [ref=e258]:
+                    - generic [ref=e259]: debt_schedule.xlsx
+                    - generic [ref=e260]:
+                      - generic [ref=e261]: document
+                      - generic [ref=e262]: Local File
+                  - button "Open" [ref=e263] [cursor=pointer]
+                - generic [ref=e264]:
+                  - generic [ref=e265]:
+                    - generic [ref=e266]: provisional_financials_fy2025.xlsx
+                    - generic [ref=e267]:
+                      - generic [ref=e268]: document
+                      - generic [ref=e269]: Local File
+                  - button "Open" [ref=e270] [cursor=pointer]
+                - paragraph [ref=e271]: 2 legacy or system artifacts hidden in this category.
+            - generic [ref=e272]:
+              - generic [ref=e273]:
+                - heading "Credit Bureau Reports" [level=4] [ref=e274]
+                - generic [ref=e275]: 0%
+              - generic [ref=e276]:
+                - paragraph [ref=e277]: No files in this category yet.
+                - generic [ref=e278]:
+                  - generic [ref=e279]: Missing
+                  - generic [ref=e280]: commercial_bureau_report.pdf
+                  - generic [ref=e281]: crilc_report.pdf
+                - paragraph [ref=e282]: 4 legacy or system artifacts hidden in this category.
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - heading "Legal & Compliance Documents" [level=4] [ref=e285]
+                - generic [ref=e286]: 100%
+              - generic [ref=e287]:
+                - paragraph [ref=e288]: No files in this category yet.
+                - paragraph [ref=e289]: 2 legacy or system artifacts hidden in this category.
+            - generic [ref=e290]:
+              - generic [ref=e291]:
+                - heading "Collateral & Valuation Documents" [level=4] [ref=e292]
+                - generic [ref=e293]: 100%
+              - generic [ref=e295]:
+                - generic [ref=e296]:
+                  - generic [ref=e297]: valuation_report.pdf
+                  - generic [ref=e298]:
+                    - generic [ref=e299]: document
+                    - generic [ref=e300]: Local File
+                - button "Open" [ref=e301] [cursor=pointer]
+            - generic [ref=e302]:
+              - generic [ref=e303]:
+                - heading "Credit Rating Documents" [level=4] [ref=e304]
+                - generic [ref=e305]: 100%
+              - generic [ref=e306]:
+                - generic [ref=e307]:
+                  - generic [ref=e308]:
+                    - generic [ref=e309]: credit_rating_report.pdf
+                    - generic [ref=e310]:
+                      - generic [ref=e311]: document
+                      - generic [ref=e312]: Local File
+                  - button "Open" [ref=e313] [cursor=pointer]
+                - paragraph [ref=e314]: 2 legacy or system artifacts hidden in this category.
+            - generic [ref=e315]:
+              - generic [ref=e316]:
+                - heading "GST Returns & Compliance" [level=4] [ref=e317]
+                - generic [ref=e318]: 33.3%
+              - generic [ref=e319]:
+                - generic [ref=e320]:
+                  - generic [ref=e321]:
+                    - generic [ref=e322]: gst_registration_certificate.pdf
+                    - generic [ref=e323]:
+                      - generic [ref=e324]: document
+                      - generic [ref=e325]: Local File
+                  - button "Open" [ref=e326] [cursor=pointer]
+                - generic [ref=e327]:
+                  - generic [ref=e328]: Missing
+                  - generic [ref=e329]: gstr3b_summary.pdf
+                  - generic [ref=e330]: gstr1_summary.pdf
+                - paragraph [ref=e331]: 4 legacy or system artifacts hidden in this category.
+            - generic [ref=e332]:
+              - generic [ref=e333]:
+                - heading "MCA Filings & Annual Returns" [level=4] [ref=e334]
+                - generic [ref=e335]: 100%
+              - generic [ref=e336]:
+                - paragraph [ref=e337]: No files in this category yet.
+                - paragraph [ref=e338]: 7 legacy or system artifacts hidden in this category.
+            - generic [ref=e339]:
+              - generic [ref=e340]:
+                - heading "Banking Statements & Sanctions" [level=4] [ref=e341]
+                - generic [ref=e342]: 25%
+              - generic [ref=e343]:
+                - generic [ref=e344]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]: bank_statement_fy2025.pdf
+                    - generic [ref=e347]:
+                      - generic [ref=e348]: document
+                      - generic [ref=e349]: Local File
+                  - button "Open" [ref=e350] [cursor=pointer]
+                - generic [ref=e351]:
+                  - generic [ref=e352]: Missing
+                  - generic [ref=e353]: bank_statement_6m.pdf
+                  - generic [ref=e354]: sanction_letter.pdf
+                  - generic [ref=e355]: existing_facility_details.pdf
+            - generic [ref=e356]:
+              - generic [ref=e357]:
+                - heading "Exchange & Stock Filings" [level=4] [ref=e358]
+                - generic [ref=e359]: 100%
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - generic [ref=e362]:
+                    - generic [ref=e363]: corporate_governance_report.pdf
+                    - generic [ref=e364]:
+                      - generic [ref=e365]: document
+                      - generic [ref=e366]: Local File
+                  - button "Open" [ref=e367] [cursor=pointer]
+                - generic [ref=e368]:
+                  - generic [ref=e369]:
+                    - generic [ref=e370]: quarterly_results_q3fy2025.pdf
+                    - generic [ref=e371]:
+                      - generic [ref=e372]: document
+                      - generic [ref=e373]: Local File
+                  - button "Open" [ref=e374] [cursor=pointer]
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - heading "Loan Request Documents" [level=4] [ref=e377]
+                - generic [ref=e378]: 100%
+              - generic [ref=e380]:
+                - generic [ref=e381]:
+                  - generic [ref=e382]: request_note.pdf
+                  - generic [ref=e383]:
+                    - generic [ref=e384]: document
+                    - generic [ref=e385]: Local File
+                - button "Open" [ref=e386] [cursor=pointer]
+            - generic [ref=e387]:
+              - generic [ref=e388]:
+                - heading "Miscellaneous Supporting Documents" [level=4] [ref=e389]
+                - generic [ref=e390]: 100%
+              - generic [ref=e391]:
+                - paragraph [ref=e392]: No files in this category yet.
+                - paragraph [ref=e393]: 2 legacy or system artifacts hidden in this category.
+        - generic [ref=e394]:
+          - generic [ref=e395]:
+            - heading "Data Gaps" [level=3] [ref=e396]
+            - generic [ref=e398]:
+              - generic [ref=e399]:
+                - generic [ref=e400]: CMA data / projections / repayment assumptions
+                - generic [ref=e401]: request
+              - generic [ref=e402]: RM upload
+            - paragraph [ref=e403]: Hidden artifacts are excluded from gap analysis.
+          - generic [ref=e404]:
+            - heading "Operation History" [level=3] [ref=e405]
+            - table [ref=e406]:
+              - rowgroup [ref=e407]:
+                - row "Type Status When Summary" [ref=e408]:
+                  - columnheader "Type" [ref=e409]
+                  - columnheader "Status" [ref=e410]
+                  - columnheader "When" [ref=e411]
+                  - columnheader "Summary" [ref=e412]
+              - rowgroup [ref=e413]:
+                - row "single_company_generation success 26/3/2026, 4:29:33 pm Generated 21 artifacts for INFY001" [ref=e414]:
+                  - cell "single_company_generation" [ref=e415]
+                  - cell "success" [ref=e416]:
+                    - generic [ref=e417]: success
+                  - cell "26/3/2026, 4:29:33 pm" [ref=e418]
+                  - cell "Generated 21 artifacts for INFY001" [ref=e419]
+                - 'row "bulk_company_generation success 23/3/2026, 9:43:52 pm Bulk generation: 15 generated, 0 skipped, 0 failed" [ref=e420]':
+                  - cell "bulk_company_generation" [ref=e421]
+                  - cell "success" [ref=e422]:
+                    - generic [ref=e423]: success
+                  - cell "23/3/2026, 9:43:52 pm" [ref=e424]
+                  - 'cell "Bulk generation: 15 generated, 0 skipped, 0 failed" [ref=e425]'
+                - row "single_company_generation success 23/3/2026, 9:43:52 pm Generated 21 artifacts for IHCL001" [ref=e426]:
+                  - cell "single_company_generation" [ref=e427]
+                  - cell "success" [ref=e428]:
+                    - generic [ref=e429]: success
+                  - cell "23/3/2026, 9:43:52 pm" [ref=e430]
+                  - cell "Generated 21 artifacts for IHCL001" [ref=e431]
+                - row "single_company_generation success 23/3/2026, 9:43:50 pm Generated 21 artifacts for DRRD001" [ref=e432]:
+                  - cell "single_company_generation" [ref=e433]
+                  - cell "success" [ref=e434]:
+                    - generic [ref=e435]: success
+                  - cell "23/3/2026, 9:43:50 pm" [ref=e436]
+                  - cell "Generated 21 artifacts for DRRD001" [ref=e437]
+                - row "single_company_generation success 23/3/2026, 9:43:49 pm Generated 21 artifacts for YESB001" [ref=e438]:
+                  - cell "single_company_generation" [ref=e439]
+                  - cell "success" [ref=e440]:
+                    - generic [ref=e441]: success
+                  - cell "23/3/2026, 9:43:49 pm" [ref=e442]
+                  - cell "Generated 21 artifacts for YESB001" [ref=e443]
+                - row "single_company_generation success 23/3/2026, 9:43:41 pm Generated 21 artifacts for NTPC001" [ref=e444]:
+                  - cell "single_company_generation" [ref=e445]
+                  - cell "success" [ref=e446]:
+                    - generic [ref=e447]: success
+                  - cell "23/3/2026, 9:43:41 pm" [ref=e448]
+                  - cell "Generated 21 artifacts for NTPC001" [ref=e449]
+                - row "single_company_generation success 23/3/2026, 9:43:31 pm Generated 21 artifacts for TITN001" [ref=e450]:
+                  - cell "single_company_generation" [ref=e451]
+                  - cell "success" [ref=e452]:
+                    - generic [ref=e453]: success
+                  - cell "23/3/2026, 9:43:31 pm" [ref=e454]
+                  - cell "Generated 21 artifacts for TITN001" [ref=e455]
+                - row "single_company_generation success 23/3/2026, 9:43:23 pm Generated 21 artifacts for MRUT001" [ref=e456]:
+                  - cell "single_company_generation" [ref=e457]
+                  - cell "success" [ref=e458]:
+                    - generic [ref=e459]: success
+                  - cell "23/3/2026, 9:43:23 pm" [ref=e460]
+                  - cell "Generated 21 artifacts for MRUT001" [ref=e461]
+                - row "single_company_generation success 23/3/2026, 9:43:14 pm Generated 21 artifacts for JSWL001" [ref=e462]:
+                  - cell "single_company_generation" [ref=e463]
+                  - cell "success" [ref=e464]:
+                    - generic [ref=e465]: success
+                  - cell "23/3/2026, 9:43:14 pm" [ref=e466]
+                  - cell "Generated 21 artifacts for JSWL001" [ref=e467]
+                - row "single_company_generation success 23/3/2026, 9:43:05 pm Generated 21 artifacts for DLFR001" [ref=e468]:
+                  - cell "single_company_generation" [ref=e469]
+                  - cell "success" [ref=e470]:
+                    - generic [ref=e471]: success
+                  - cell "23/3/2026, 9:43:05 pm" [ref=e472]
+                  - cell "Generated 21 artifacts for DLFR001" [ref=e473]
+                - row "single_company_generation success 23/3/2026, 9:42:56 pm Generated 21 artifacts for CIPL001" [ref=e474]:
+                  - cell "single_company_generation" [ref=e475]
+                  - cell "success" [ref=e476]:
+                    - generic [ref=e477]: success
+                  - cell "23/3/2026, 9:42:56 pm" [ref=e478]
+                  - cell "Generated 21 artifacts for CIPL001" [ref=e479]
+                - row "single_company_generation success 23/3/2026, 9:42:48 pm Generated 21 artifacts for BJFN001" [ref=e480]:
+                  - cell "single_company_generation" [ref=e481]
+                  - cell "success" [ref=e482]:
+                    - generic [ref=e483]: success
+                  - cell "23/3/2026, 9:42:48 pm" [ref=e484]
+                  - cell "Generated 21 artifacts for BJFN001" [ref=e485]
+                - row "single_company_generation success 23/3/2026, 9:42:47 pm Generated 21 artifacts for ADPT001" [ref=e486]:
+                  - cell "single_company_generation" [ref=e487]
+                  - cell "success" [ref=e488]:
+                    - generic [ref=e489]: success
+                  - cell "23/3/2026, 9:42:47 pm" [ref=e490]
+                  - cell "Generated 21 artifacts for ADPT001" [ref=e491]
+                - row "single_company_generation success 23/3/2026, 9:42:38 pm Generated 21 artifacts for REIL001" [ref=e492]:
+                  - cell "single_company_generation" [ref=e493]
+                  - cell "success" [ref=e494]:
+                    - generic [ref=e495]: success
+                  - cell "23/3/2026, 9:42:38 pm" [ref=e496]
+                  - cell "Generated 21 artifacts for REIL001" [ref=e497]
+                - row "single_company_generation success 23/3/2026, 9:42:29 pm Generated 21 artifacts for TSTL001" [ref=e498]:
+                  - cell "single_company_generation" [ref=e499]
+                  - cell "success" [ref=e500]:
+                    - generic [ref=e501]: success
+                  - cell "23/3/2026, 9:42:29 pm" [ref=e502]
+                  - cell "Generated 21 artifacts for TSTL001" [ref=e503]
+                - row "single_company_generation success 23/3/2026, 9:42:21 pm Generated 21 artifacts for APOL001" [ref=e504]:
+                  - cell "single_company_generation" [ref=e505]
+                  - cell "success" [ref=e506]:
+                    - generic [ref=e507]: success
+                  - cell "23/3/2026, 9:42:21 pm" [ref=e508]
+                  - cell "Generated 21 artifacts for APOL001" [ref=e509]
+                - row "single_company_generation success 23/3/2026, 9:42:20 pm Generated 21 artifacts for INFY001" [ref=e510]:
+                  - cell "single_company_generation" [ref=e511]
+                  - cell "success" [ref=e512]:
+                    - generic [ref=e513]: success
+                  - cell "23/3/2026, 9:42:20 pm" [ref=e514]
+                  - cell "Generated 21 artifacts for INFY001" [ref=e515]
+          - generic [ref=e516]:
+            - heading "Reference Packs" [level=3] [ref=e517]
+            - paragraph [ref=e518]: No company-specific reference documents available.

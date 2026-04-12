@@ -1,0 +1,157 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - heading "CAM Intel" [level=2] [ref=e7]
+        - generic [ref=e8]: v2.0
+    - list [ref=e9]:
+      - listitem [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: ■
+        - text: Dashboard
+      - listitem [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 📋
+        - text: Cases
+      - listitem [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: ⚡
+        - text: Smart Onboard
+      - listitem [ref=e16] [cursor=pointer]:
+        - generic [ref=e17]: 📁
+        - text: Documents
+      - listitem [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ▶
+        - text: Pipeline
+      - listitem [ref=e20] [cursor=pointer]:
+        - generic [ref=e21]: 📄
+        - text: Reports
+      - listitem [ref=e22] [cursor=pointer]:
+        - generic [ref=e23]: ⚙
+        - text: Settings
+    - generic [ref=e25]:
+      - generic [ref=e26]: LLM
+      - generic [ref=e27]: ollama
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Intake + Enrichment
+        - heading "Smart Company Onboarding" [level=1] [ref=e33]
+        - paragraph [ref=e34]: Resolve one identifier, reuse a cached Probe42 bundle, and prepare the case for CAM, document review, and analyst chat without redundant calls.
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]: Live Integration
+          - heading "Probe42 v2 MCP Workflow" [level=2] [ref=e38]
+          - paragraph [ref=e39]: Low-call resolve, single-entity cached enrichment, RM gap capture, and downstream pipeline reuse are all handled in one guided flow built for credit operations.
+          - generic [ref=e40]:
+            - generic [ref=e41]: Resolve
+            - generic [ref=e42]: Probe pull
+            - generic [ref=e43]: Gap capture
+            - generic [ref=e44]: CAM
+            - generic [ref=e45]: Chat
+        - generic [ref=e46]:
+          - generic [ref=e48]: Probe Key Required
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - generic [ref=e51]: Transport
+              - strong [ref=e52]: mcp
+            - generic [ref=e53]:
+              - generic [ref=e54]: Provider
+              - strong [ref=e55]: probe42_mcp_v2
+            - generic [ref=e56]:
+              - generic [ref=e57]: Default Profile
+              - strong [ref=e58]: lean
+            - generic [ref=e59]:
+              - generic [ref=e60]: Cache TTL
+              - strong [ref=e61]: 24h
+            - generic [ref=e62]:
+              - generic [ref=e63]: Discovered Tools
+              - strong [ref=e64]: "0"
+            - generic [ref=e65]:
+              - generic [ref=e66]: Call Pattern
+              - strong [ref=e67]: 1 entity, 1 lean bundle
+      - generic [ref=e68]:
+        - button "⚡ Smart Onboard" [ref=e69] [cursor=pointer]
+        - button "✍ Manual Entry" [ref=e70] [cursor=pointer]
+      - generic [ref=e71]:
+        - generic [ref=e73]:
+          - generic [ref=e75]:
+            - generic [ref=e76]: Primary Intake
+            - heading "Enter One Identifier" [level=3] [ref=e77]
+            - paragraph [ref=e78]: Provide PAN, GSTIN, CIN, Entity ID, or company name. Preview stays cheap; onboarding reuses the cached lean Probe42 bundle for CAM.
+          - generic [ref=e80]:
+            - generic [ref=e81]: Company Identifier *
+            - textbox "e.g. AABCB1234F or 27AABCB1234F1Z5 or Bharat Manufacturing" [ref=e82]
+            - paragraph [ref=e83]: The system will resolve the entity first, then attach Probe42 and document gaps to the same borrower record.
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e86]: "1"
+              - generic [ref=e87]:
+                - generic [ref=e88]: Resolve identity
+                - generic [ref=e89]: Low-call preview to validate the borrower match.
+            - generic [ref=e90]:
+              - generic [ref=e91]: "2"
+              - generic [ref=e92]:
+                - generic [ref=e93]: Pull lean Probe bundle
+                - generic [ref=e94]: KYC, legal, charges, ratings, and freshness in one cached fetch.
+            - generic [ref=e95]:
+              - generic [ref=e96]: "3"
+              - generic [ref=e97]:
+                - generic [ref=e98]: Create draft financial context
+                - generic [ref=e99]: Seed the case so CAM generation can start as soon as uploads land.
+            - generic [ref=e100]:
+              - generic [ref=e101]: "4"
+              - generic [ref=e102]:
+                - generic [ref=e103]: Capture RM gaps
+                - generic [ref=e104]: Surface only the missing borrower documents the RM still needs to provide.
+            - generic [ref=e105]:
+              - generic [ref=e106]: "5"
+              - generic [ref=e107]:
+                - generic [ref=e108]: Run CAM and chat
+                - generic [ref=e109]: The same onboarded case flows into pipeline execution and analyst review.
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - generic [ref=e113]: Case Type *
+              - combobox [ref=e114]:
+                - option "NTB - New to Bank" [selected]
+                - option "ETB - Existing to Bank"
+            - generic [ref=e115]:
+              - generic [ref=e116]: Facility Type
+              - combobox [ref=e117]
+            - generic [ref=e118]:
+              - generic [ref=e119]: Amount Requested (Cr)
+              - spinbutton [ref=e120]
+            - generic [ref=e121]:
+              - generic [ref=e122]: Purpose
+              - textbox "e.g. Working capital augmentation" [ref=e123]
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - generic [ref=e127]: Supplementary Input
+              - heading "CRILC report availability" [level=4] [ref=e128]
+              - paragraph [ref=e129]: Mark whether internal CRILC is already available so the downstream case reflects the correct ETB coverage.
+            - generic [ref=e132] [cursor=pointer]: Not available
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - button "⚡ Auto-Fetch & Onboard" [disabled] [ref=e135]:
+                - generic [ref=e136]: ⚡ Auto-Fetch & Onboard
+              - button "Preview Resolve" [disabled] [ref=e137]
+            - paragraph [ref=e138]: Preview resolve validates the entity match without starting full onboarding or pipeline execution.
+        - complementary [ref=e139]:
+          - generic [ref=e140]:
+            - generic [ref=e141]: Automation Scope
+            - heading "What gets populated automatically" [level=3] [ref=e142]
+            - list [ref=e143]:
+              - listitem [ref=e144]: KYC and company master profile
+              - listitem [ref=e145]: Legal history, open charges, and ratings snapshot
+              - listitem [ref=e146]: Case shell for CAM, reports, and analyst chat
+              - listitem [ref=e147]: Provider-aware document gap tracking for RM follow-up
+          - generic [ref=e148]:
+            - generic [ref=e149]: Required RM Inputs
+            - heading "What still needs borrower documents" [level=3] [ref=e150]
+            - list [ref=e151]:
+              - listitem [ref=e152]: Audited financial statements and latest provisional numbers
+              - listitem [ref=e153]: Debt schedule and lender-wise exposure
+              - listitem [ref=e154]: Board resolution or borrowing approval
+              - listitem [ref=e155]: CMA, projections, and repayment assumptions
+          - generic [ref=e156]:
+            - generic [ref=e157]: Resolve Preview
+            - heading "Validate the borrower before onboarding" [level=3] [ref=e158]
+            - paragraph [ref=e159]: Use preview resolve to confirm the company match and inspect the Probe identity snapshot before you commit the full onboarding flow.

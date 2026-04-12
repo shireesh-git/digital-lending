@@ -1,0 +1,123 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e130]:
+      - generic [ref=e131]:
+        - button "← Back to Cases" [ref=e132] [cursor=pointer]
+        - heading "Apollo Hospitals Enterprise Limited" [level=1] [ref=e133]
+        - generic [ref=e134]: Refer
+      - generic [ref=e135]:
+        - generic [ref=e136]:
+          - generic [ref=e137]: Composite
+          - generic [ref=e138]: "66.7"
+          - generic [ref=e139]: Grade B
+        - generic [ref=e140]:
+          - generic [ref=e141]: Financial
+          - generic [ref=e142]: "59"
+        - generic [ref=e143]:
+          - generic [ref=e144]: Conduct
+          - generic [ref=e145]: "70"
+        - generic [ref=e146]:
+          - generic [ref=e147]: Governance
+          - generic [ref=e148]: "77"
+        - generic [ref=e149]:
+          - generic [ref=e150]: Market
+          - generic [ref=e151]: "68"
+      - generic [ref=e152]:
+        - button "Summary" [ref=e153] [cursor=pointer]
+        - button "CAM" [ref=e154] [cursor=pointer]
+        - button "Validation" [ref=e155] [cursor=pointer]
+        - button "Policy" [active] [ref=e156] [cursor=pointer]
+        - button "Documents" [ref=e157] [cursor=pointer]
+        - button "Extraction" [ref=e158] [cursor=pointer]
+        - button "ETB" [ref=e159] [cursor=pointer]
+        - button "Pipeline Log" [ref=e160] [cursor=pointer]
+        - button "Fact Pack" [ref=e161] [cursor=pointer]
+      - table [ref=e194]:
+        - rowgroup [ref=e195]:
+          - row "Check Result Details" [ref=e196]:
+            - columnheader "Check" [ref=e197]
+            - columnheader "Result" [ref=e198]
+            - columnheader "Details" [ref=e199]
+        - rowgroup [ref=e200]:
+          - row "Wilful defaulter screening HR_WILFUL_DEFAULTER PASS Clear" [ref=e201]:
+            - cell "Wilful defaulter screening HR_WILFUL_DEFAULTER" [ref=e202]:
+              - generic [ref=e203]: Wilful defaulter screening
+              - generic [ref=e204]: HR_WILFUL_DEFAULTER
+            - cell "PASS" [ref=e205]:
+              - generic [ref=e206]: PASS
+            - cell "Clear" [ref=e207]
+          - 'row "Active company status HR_COMPANY_ACTIVE PASS Company status: Active" [ref=e208]':
+            - cell "Active company status HR_COMPANY_ACTIVE" [ref=e209]:
+              - generic [ref=e210]: Active company status
+              - generic [ref=e211]: HR_COMPANY_ACTIVE
+            - cell "PASS" [ref=e212]:
+              - generic [ref=e213]: PASS
+            - 'cell "Company status: Active" [ref=e214]'
+          - row "Critical validation clearance HR_NO_CRITICAL_EXCEPTIONS PASS No critical exceptions" [ref=e215]:
+            - cell "Critical validation clearance HR_NO_CRITICAL_EXCEPTIONS" [ref=e216]:
+              - generic [ref=e217]: Critical validation clearance
+              - generic [ref=e218]: HR_NO_CRITICAL_EXCEPTIONS
+            - cell "PASS" [ref=e219]:
+              - generic [ref=e220]: PASS
+            - cell "No critical exceptions" [ref=e221]
+          - row "KYC package completeness HR_KYC_COMPLETE PASS KYC documents verified" [ref=e222]:
+            - cell "KYC package completeness HR_KYC_COMPLETE" [ref=e223]:
+              - generic [ref=e224]: KYC package completeness
+              - generic [ref=e225]: HR_KYC_COMPLETE
+            - cell "PASS" [ref=e226]:
+              - generic [ref=e227]: PASS
+            - cell "KYC documents verified" [ref=e228]
+          - 'row "Public-record stress screening HR_BUREAU_STATUS PASS Bureau DPD status: Standard" [ref=e229]':
+            - cell "Public-record stress screening HR_BUREAU_STATUS" [ref=e230]:
+              - generic [ref=e231]: Public-record stress screening
+              - generic [ref=e232]: HR_BUREAU_STATUS
+            - cell "PASS" [ref=e233]:
+              - generic [ref=e234]: PASS
+            - 'cell "Bureau DPD status: Standard" [ref=e235]'
+          - 'row "Minimum business vintage HR_MIN_VINTAGE PASS Company age: 46.3 years" [ref=e236]':
+            - cell "Minimum business vintage HR_MIN_VINTAGE" [ref=e237]:
+              - generic [ref=e238]: Minimum business vintage
+              - generic [ref=e239]: HR_MIN_VINTAGE
+            - cell "PASS" [ref=e240]:
+              - generic [ref=e241]: PASS
+            - 'cell "Company age: 46.3 years" [ref=e242]'
+          - row "Fraud registry screening HR_FRAUD_REGISTRY PASS Clear — no fraud flag" [ref=e243]:
+            - cell "Fraud registry screening HR_FRAUD_REGISTRY" [ref=e244]:
+              - generic [ref=e245]: Fraud registry screening
+              - generic [ref=e246]: HR_FRAUD_REGISTRY
+            - cell "PASS" [ref=e247]:
+              - generic [ref=e248]: PASS
+            - cell "Clear — no fraud flag" [ref=e249]
+          - row "RBI defaulter screening HR_RBI_DEFAULTER PASS Clear" [ref=e250]:
+            - cell "RBI defaulter screening HR_RBI_DEFAULTER" [ref=e251]:
+              - generic [ref=e252]: RBI defaulter screening
+              - generic [ref=e253]: HR_RBI_DEFAULTER
+            - cell "PASS" [ref=e254]:
+              - generic [ref=e255]: PASS
+            - cell "Clear" [ref=e256]
+          - 'row "Suit-filed exposure threshold HR_SUIT_FILED PASS Suit filed: ₹0.0 Cr (0.0% of exposure)" [ref=e257]':
+            - cell "Suit-filed exposure threshold HR_SUIT_FILED" [ref=e258]:
+              - generic [ref=e259]: Suit-filed exposure threshold
+              - generic [ref=e260]: HR_SUIT_FILED
+            - cell "PASS" [ref=e261]:
+              - generic [ref=e262]: PASS
+            - 'cell "Suit filed: ₹0.0 Cr (0.0% of exposure)" [ref=e263]'

@@ -1,0 +1,26 @@
+{
+  "source": "probe42",
+  "tool": "get_data_status",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "data_availability": {
+      "base_details": true,
+      "kyc": true,
+      "gst": true,
+      "epfo": true,
+      "legal_cases": true,
+      "credit_ratings": true,
+      "open_charges": true,
+      "director_network": true,
+      "financial_statements": true
+    },
+    "last_updated": {
+      "mca": "2026-03-15",
+      "gst": "2026-03-31",
+      "epfo": "2026-02-28",
+      "court_records": "2026-01-31"
+    }
+  }
+}

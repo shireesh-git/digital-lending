@@ -1,0 +1,46 @@
+{
+  "source": "probe42",
+  "tool": "get_credit_ratings_by_identifier",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "ratings": [
+      {
+        "agency": "CARE Ratings",
+        "instrument": "Long-Term Bank Facilities",
+        "rating": "CARE AA-",
+        "outlook": "Stable",
+        "amount_cr": 6200,
+        "action": "Reaffirmed",
+        "date": "2025-11-15"
+      },
+      {
+        "agency": "CARE Ratings",
+        "instrument": "Short-Term Bank Facilities",
+        "rating": "CARE A1+",
+        "outlook": null,
+        "amount_cr": 1550,
+        "action": "Reaffirmed",
+        "date": "2025-11-15"
+      }
+    ],
+    "rating_history": [
+      {
+        "date": "2024-11-10",
+        "rating": "CARE AA-",
+        "action": "Reaffirmed"
+      },
+      {
+        "date": "2023-11-08",
+        "rating": "CARE AA-",
+        "action": "Upgraded from A+"
+      },
+      {
+        "date": "2022-10-15",
+        "rating": "CARE A+",
+        "action": "Reaffirmed"
+      }
+    ]
+  }
+}

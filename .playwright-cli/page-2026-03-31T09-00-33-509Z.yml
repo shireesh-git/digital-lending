@@ -1,0 +1,169 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "Final CAM Workspace" [level=1] [ref=e25]
+        - combobox [ref=e27]:
+          - option "Select company"
+          - option "Infosys Limited (INFY001)" [selected]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - heading "Verified Case Snapshot" [level=3] [ref=e46]
+            - paragraph [ref=e47]: This case carries a cached public-record snapshot so reports and chat reuse the same entity pull instead of repeating external fetches.
+          - generic [ref=e48]: Snapshot Ready
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - strong [ref=e51]: "Coverage:"
+            - text: full
+          - generic [ref=e52]:
+            - strong [ref=e53]: "Cache State:"
+            - text: hit
+          - generic [ref=e54]:
+            - strong [ref=e55]: "Rating:"
+            - text: AAA
+          - generic [ref=e56]:
+            - strong [ref=e57]: "Legal Cases:"
+            - text: "50"
+          - generic [ref=e58]:
+            - strong [ref=e59]: "Open Charges:"
+            - text: "0"
+          - generic [ref=e60]:
+            - strong [ref=e61]: "Freshness Modules:"
+            - text: "9"
+      - generic [ref=e28]:
+        - button "📄 CAM Report" [ref=e29] [cursor=pointer]
+        - button "📊 One-Page Memo" [ref=e30] [cursor=pointer]
+        - button "◉ 360° View" [ref=e31] [cursor=pointer]
+        - button "✉ Financial Advisor" [active] [ref=e32] [cursor=pointer]
+      - generic [ref=e444]:
+        - generic [ref=e445]:
+          - generic [ref=e446]:
+            - generic [ref=e447]:
+              - heading "Verified Case Context Available To Chat" [level=3] [ref=e448]
+              - paragraph [ref=e449]: Ask about governance, directors, ratings, legal history, compliance timing, or what still needs to be uploaded for a stronger CAM.
+            - generic [ref=e450]: Information Technology
+          - generic [ref=e451]:
+            - button "Governance summary" [ref=e452] [cursor=pointer]
+            - button "Ratings and legal" [ref=e453] [cursor=pointer]
+            - button "Missing pack" [ref=e454] [cursor=pointer]
+        - generic [ref=e455]:
+          - generic [ref=e456]:
+            - generic [ref=e457]:
+              - heading "Analyst Focus" [level=3] [ref=e458]
+              - generic [ref=e459]:
+                - generic [ref=e460]: Recommendation
+                - generic [ref=e461]: Refer
+              - generic [ref=e462]:
+                - generic [ref=e463]: Risk Grade
+                - generic [ref=e464]: B
+              - generic [ref=e465]:
+                - generic [ref=e466]: Composite Score
+                - generic [ref=e467]: "76.4"
+              - generic [ref=e468]:
+                - generic [ref=e469]: External Rating
+                - generic [ref=e470]: AAA
+              - generic [ref=e471]:
+                - generic [ref=e472]: Legal Matters
+                - generic [ref=e473]: "50"
+              - generic [ref=e474]:
+                - generic [ref=e475]: Cache
+                - generic [ref=e476]: Unknown
+            - generic [ref=e477]:
+              - heading "Suggested Questions" [level=4] [ref=e478]
+              - generic [ref=e479]:
+                - button "Explain the decision" [ref=e480] [cursor=pointer]
+                - button "Credit positives" [ref=e481] [cursor=pointer]
+                - button "Unresolved risks" [ref=e482] [cursor=pointer]
+                - button "Market, ratings, legal" [ref=e483] [cursor=pointer]
+                - button "How to strengthen CAM" [ref=e484] [cursor=pointer]
+          - generic [ref=e485]:
+            - generic [ref=e486]:
+              - generic [ref=e487]:
+                - strong [ref=e488]: Analyst Assistant
+                - generic [ref=e489]: Answers reuse the same verified case snapshot and latest CAM output.
+              - button "Clear chat" [ref=e490] [cursor=pointer]
+            - generic [ref=e491]:
+              - generic [ref=e492]:
+                - generic [ref=e493]: RM
+                - generic [ref=e494]: Explain the credit decision and key factors in detail with market, risk, pricing, exposure, and a short conclusion
+              - generic [ref=e495]:
+                - generic [ref=e496]: AI
+                - generic [ref=e497]:
+                  - heading "Credit Decision Explanation" [level=3] [ref=e498]
+                  - heading "Market Context" [level=4] [ref=e499]
+                  - text: Infosys Limited operates within India's IT-BPM sector, which is robust and growing. The industry revenue stood at approximately $245 billion in FY2024, contributing 8% to the GDP. Digital services now account for about 35% of total revenue, driven by global digital transformation trends. Infosys holds a strong market position with an investment-grade rating from CRISIL (AAA), reflecting its financial health and stability.
+                  - paragraph
+                  - heading "Financial Performance" [level=4] [ref=e500]
+                  - text: "Infosys has demonstrated consistent growth in revenues and profitability over the past few years:"
+                  - list [ref=e501]:
+                    - listitem [ref=e502]:
+                      - strong [ref=e503]: Revenue Growth
+                      - text: ": The company experienced significant year-over-year revenue growth, particularly in FY2024 at 9.5%. However, the projected growth for FY2025 (17615.3%) is exceptionally high and seems unrealistic."
+                    - listitem [ref=e504]:
+                      - strong [ref=e505]: Profitability
+                      - text: ": EBITDA margins have remained steady at 24%, indicating healthy profitability."
+                    - listitem [ref=e506]:
+                      - strong [ref=e507]: Liquidity & Leverage
+                      - text: ": The company maintains a conservative debt-to-equity ratio of 0.99x, with an adequate current ratio of 1.68x, ensuring strong liquidity."
+                  - heading "Risk Factors" [level=4] [ref=e508]
+                  - text: "Several high-severity validation exceptions were identified:"
+                  - list [ref=e509]:
+                    - listitem [ref=e510]:
+                      - strong [ref=e511]: EBITDA and PAT Inconsistencies
+                      - text: ": There are significant discrepancies in EBITDA calculations for multiple years, particularly FY2025 (expected 168257.00 Cr vs found 42375.00 Cr). These inconsistencies need to be resolved."
+                    - listitem [ref=e512]:
+                      - strong [ref=e513]: Revenue Mismatch
+                      - text: ": The company reported substantial differences between its audited financials and exchange filings, with a 63.2% discrepancy in FY2025."
+                  - heading "Pricing & End Use" [level=4] [ref=e514]
+                  - text: The interest rate is set at 9.20% p.a., which includes the base rate (MCLR + 0.80%). Additional fees include processing charges of 0.25%, commitment charges of 0.50% on undrawn amounts, and a penal interest rate of 2% above the applicable rate.
+                  - paragraph
+                  - heading "Exposure" [level=4] [ref=e515]
+                  - text: Infosys has existing exposure across various facilities totaling ₹3625 Cr, with outstanding balances at ₹3225 Cr. The proposed new facility would add to this exposure, necessitating careful risk assessment and additional collateral requirements.
+                  - paragraph
+                  - heading "Key Factors" [level=3] [ref=e516]
+                  - listitem [ref=e517]:
+                    - strong [ref=e518]: Market Position
+                    - text: ": Infosys's strong market position and investment-grade rating from CRISIL are positive factors."
+                  - listitem [ref=e519]:
+                    - strong [ref=e520]: Financial Health
+                    - text: ": Consistent revenue growth and steady profitability support the company’s financial health."
+                  - listitem [ref=e521]:
+                    - strong [ref=e522]: Risk Management
+                    - text: ": High-severity validation exceptions, particularly in EBITDA and revenue reporting, pose significant risks that need to be addressed before disbursement."
+                  - listitem [ref=e523]:
+                    - strong [ref=e524]: Pricing & End Use
+                    - text: ": Competitive interest rates and clear end-use guidelines ensure transparent financing terms."
+                  - heading "Conclusion" [level=3] [ref=e525]
+                  - paragraph [ref=e526]: The credit decision for Infosys Limited is contingent on resolving the high-severity validation exceptions, specifically the inconsistencies in EBITDA and revenue reporting. Given the company's strong market position and financial health, along with the need for additional collateral, a cautious approach is warranted. Once these issues are addressed, disbursement can proceed under stringent conditions to mitigate risks.
+                  - paragraph [ref=e527]:
+                    - strong [ref=e528]: Recommendation
+                    - text: ":"
+                  - list [ref=e529]:
+                    - listitem [ref=e530]: Resolve all high-severity validation exceptions.
+                    - listitem [ref=e531]: Ensure compliance with regulatory requirements.
+                    - listitem [ref=e532]: Require additional collateral as per committee approval before finalizing the loan agreement.
+                  - text: This structured approach will help maintain a balanced risk-reward profile for the proposed credit facility.
+                  - paragraph
+            - generic [ref=e533]:
+              - textbox "Ask about financials, risk, conduct..." [ref=e534]
+              - button "➤" [disabled] [ref=e535]

@@ -1,0 +1,173 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Credit Appraisal Storyline
+          - heading "Reimagining Credit Appraisal with AI" [level=1] [ref=e27]
+          - paragraph [ref=e28]: From verified data ingestion to decision-ready CAMs, the journey now follows one guided flow instead of scattered pages and repeated data pulls.
+          - generic [ref=e29]:
+            - button "+ Create New CAM" [ref=e30] [cursor=pointer]
+            - button "Open Final CAM Workspace" [ref=e31] [cursor=pointer]
+        - generic [ref=e32]:
+          - article [ref=e33]:
+            - heading "AI Data Aggregation" [level=3] [ref=e34]
+            - paragraph [ref=e35]: Unified ingestion from public records, uploaded documents, and internal banking inputs.
+          - article [ref=e36]:
+            - heading "Financial & Risk Analysis" [level=3] [ref=e37]
+            - paragraph [ref=e38]: Ratios, trend scans, validation exceptions, and risk indicators in one credit view.
+          - article [ref=e39]:
+            - heading "CAM Auto-Generation" [level=3] [ref=e40]
+            - paragraph [ref=e41]: Structured CAM drafts generated section-wise with policy aligned formatting.
+          - article [ref=e42]:
+            - heading "Decision Support" [level=3] [ref=e43]
+            - paragraph [ref=e44]: Scorecards, conditions, and recommendation logic ready for analyst review.
+          - article [ref=e45]:
+            - heading "Workflow & Compliance" [level=3] [ref=e46]
+            - paragraph [ref=e47]: RM gaps, upload tracking, comments, and traceable case progression.
+      - generic [ref=e48]:
+        - article [ref=e49]:
+          - generic [ref=e50]: CAMs in Progress
+          - strong [ref=e51]: "2"
+        - article [ref=e52]:
+          - generic [ref=e53]: Completed
+          - strong [ref=e54]: "3"
+        - article [ref=e55]:
+          - generic [ref=e56]: Average Score
+          - strong [ref=e57]: "67.1"
+        - article [ref=e58]:
+          - generic [ref=e59]: Approval Rate
+          - strong [ref=e60]: 0%
+        - article [ref=e61]:
+          - generic [ref=e62]: High Risk Cases
+          - strong [ref=e63]: "1"
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: Live Portfolio
+              - heading "Active CAM Pipeline" [level=3] [ref=e69]
+            - button "Open Pipeline" [ref=e70] [cursor=pointer]
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Data Ingestion" [level=4] [ref=e73]
+              - article [ref=e74]:
+                - strong [ref=e75]: Madras Fertilizers Limited
+                - paragraph [ref=e76]: Working Capital • Rs. 120 Cr
+                - text: Pending execution • Updated 11:05
+              - article [ref=e77]:
+                - strong [ref=e78]: MRF Limited
+                - paragraph [ref=e79]: Working Capital • Rs. 300 Cr
+                - text: Pending execution • Updated 10:40
+              - paragraph [ref=e80]: No cases in this stage.
+            - generic [ref=e81]:
+              - heading "Financial Analysis" [level=4] [ref=e82]
+              - article [ref=e83]:
+                - strong [ref=e84]: Apollo Hospitals Enterprise Limited
+                - paragraph [ref=e85]: Working Capital • Rs. 600 Cr
+                - text: B Risk • Updated 10:15
+              - article [ref=e86]:
+                - strong [ref=e87]: Infosys Limited
+                - paragraph [ref=e88]: Working Capital • Rs. 500 Cr
+                - text: B Risk • Updated 09:50
+              - paragraph [ref=e89]: No cases in this stage.
+            - generic [ref=e90]:
+              - heading "CAM Drafting" [level=4] [ref=e91]
+              - article [ref=e92]:
+                - strong [ref=e93]: THE Indian Hotels Company Limited
+                - paragraph [ref=e94]: Working Capital • Rs. 350 Cr
+                - text: C Risk • Updated 09:15
+              - paragraph [ref=e95]: No cases in this stage.
+            - generic [ref=e96]:
+              - heading "Review / Approval" [level=4] [ref=e97]
+              - paragraph [ref=e98]: No cases in this stage.
+        - complementary [ref=e99]:
+          - generic [ref=e100]:
+            - heading "Risk Alerts" [level=4] [ref=e101]
+            - list [ref=e102]:
+              - listitem [ref=e103]: THE Indian Hotels Company Limited • Credit risk requires closer review
+          - generic [ref=e104]:
+            - heading "AI Insights" [level=4] [ref=e105]
+            - list [ref=e106]:
+              - listitem [ref=e107]: 3 CAMs now have reusable case intelligence and verified public context
+              - listitem [ref=e108]: Document gaps are isolated to RM uploads rather than repeat public-data pulls
+              - listitem [ref=e109]: Cache TTL is set to 24 days
+      - generic [ref=e110]:
+        - article [ref=e111]:
+          - generic [ref=e113]:
+            - generic [ref=e114]: Audit Trail
+            - heading "Recent CAM Activity" [level=3] [ref=e115]
+          - table [ref=e116]:
+            - rowgroup [ref=e117]:
+              - row "Company Stage Updated Status" [ref=e118]:
+                - columnheader "Company" [ref=e119]
+                - columnheader "Stage" [ref=e120]
+                - columnheader "Updated" [ref=e121]
+                - columnheader "Status" [ref=e122]
+            - rowgroup [ref=e123]:
+              - row "Apollo Hospitals Enterprise Limited Final Review 30 Mar, 11:26 pm Refer" [ref=e124]:
+                - cell "Apollo Hospitals Enterprise Limited" [ref=e125]
+                - cell "Final Review" [ref=e126]
+                - cell "30 Mar, 11:26 pm" [ref=e127]
+                - cell "Refer" [ref=e128]:
+                  - generic [ref=e129]: Refer
+              - row "THE Indian Hotels Company Limited Final Review 30 Mar, 11:22 pm Refer" [ref=e130]:
+                - cell "THE Indian Hotels Company Limited" [ref=e131]
+                - cell "Final Review" [ref=e132]
+                - cell "30 Mar, 11:22 pm" [ref=e133]
+                - cell "Refer" [ref=e134]:
+                  - generic [ref=e135]: Refer
+              - row "Infosys Limited Final Review 30 Mar, 11:22 pm Refer" [ref=e136]:
+                - cell "Infosys Limited" [ref=e137]
+                - cell "Final Review" [ref=e138]
+                - cell "30 Mar, 11:22 pm" [ref=e139]
+                - cell "Refer" [ref=e140]:
+                  - generic [ref=e141]: Refer
+          - paragraph [ref=e142]: No CAM activity yet. Start a new case to seed the journey.
+        - article [ref=e143]:
+          - generic [ref=e145]:
+            - generic [ref=e146]: Work Queue
+            - heading "My Assigned CAMs" [level=3] [ref=e147]
+          - table [ref=e148]:
+            - rowgroup [ref=e149]:
+              - row "Company Priority Stage Due" [ref=e150]:
+                - columnheader "Company" [ref=e151]
+                - columnheader "Priority" [ref=e152]
+                - columnheader "Stage" [ref=e153]
+                - columnheader "Due" [ref=e154]
+            - rowgroup [ref=e155]:
+              - row "Apollo Hospitals Enterprise Limited High Final Review Today" [ref=e156]:
+                - cell "Apollo Hospitals Enterprise Limited" [ref=e157]
+                - cell "High" [ref=e158]
+                - cell "Final Review" [ref=e159]
+                - cell "Today" [ref=e160]
+              - row "Infosys Limited Medium Final Review Tomorrow" [ref=e161]:
+                - cell "Infosys Limited" [ref=e162]
+                - cell "Medium" [ref=e163]
+                - cell "Final Review" [ref=e164]
+                - cell "Tomorrow" [ref=e165]
+              - row "THE Indian Hotels Company Limited Medium Final Review +2 days" [ref=e166]:
+                - cell "THE Indian Hotels Company Limited" [ref=e167]
+                - cell "Medium" [ref=e168]
+                - cell "Final Review" [ref=e169]
+                - cell "+2 days" [ref=e170]
+          - paragraph [ref=e171]: Executed cases will appear here for analyst follow-up.

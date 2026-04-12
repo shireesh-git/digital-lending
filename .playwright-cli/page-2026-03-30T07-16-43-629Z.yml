@@ -1,0 +1,57 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6] [cursor=pointer]:
+      - img "probe42-app-logo" [ref=e7]
+      - paragraph [ref=e8]: "|"
+      - paragraph [ref=e9]:
+        - text: API
+        - superscript [ref=e10]: Beta
+    - navigation [ref=e13]:
+      - link "Home" [ref=e14] [cursor=pointer]:
+        - /url: "#/portal/home"
+      - link "Explore API" [active] [ref=e15] [cursor=pointer]:
+        - /url: "#/portal/explore-api/Search"
+      - link "Login" [ref=e16] [cursor=pointer]:
+        - /url: "#/user/login"
+      - link "Contact Sales" [ref=e17] [cursor=pointer]:
+        - /url: "#/portal/support"
+  - generic [ref=e253]:
+    - generic [ref=e254]:
+      - text: 
+      - list [ref=e256]:
+        - listitem
+        - listitem [ref=e257]:
+          - button "Search" [ref=e258] [cursor=pointer]
+        - listitem [ref=e259]:
+          - button "Base" [ref=e260] [cursor=pointer]
+        - listitem [ref=e261]:
+          - button "Comprehensive" [ref=e262] [cursor=pointer]
+        - listitem [ref=e263]:
+          - button "Update" [ref=e264] [cursor=pointer]
+        - listitem [ref=e265]:
+          - button "Status" [ref=e266] [cursor=pointer]
+        - listitem [ref=e267]:
+          - button "Incorporation Document" [ref=e268] [cursor=pointer]
+        - listitem [ref=e269]:
+          - button "Reference Document By ID" [ref=e270] [cursor=pointer]
+    - text: 
+    - list [ref=e276]:
+      - listitem [ref=e277]:
+        - generic [ref=e279]:
+          - paragraph [ref=e280]: Search
+          - separator [ref=e281]
+          - paragraph [ref=e282]: Search within the database of all Indian corporates by name. The response includes legal name, identifier and status of matching entities of matching entities.
+          - button "Explore" [ref=e284] [cursor=pointer]
+  - generic [ref=e217]:
+    - img "footer-logo" [ref=e218]
+    - generic [ref=e219]:
+      - link "Terms Of Use" [ref=e220] [cursor=pointer]:
+        - /url: "#/terms-of-use"
+        - heading "Terms Of Use" [level=4] [ref=e221]
+      - link "Privacy Policy" [ref=e222] [cursor=pointer]:
+        - /url: "#/privacy-policy"
+        - heading "Privacy Policy" [level=4] [ref=e223]
+      - link "Contact Us" [ref=e224] [cursor=pointer]:
+        - /url: "#/portal/support"
+        - heading "Contact Us" [level=4] [ref=e225]
+    - paragraph [ref=e226]: Copyright © 2026 Probe Information Services. All rights reserved.

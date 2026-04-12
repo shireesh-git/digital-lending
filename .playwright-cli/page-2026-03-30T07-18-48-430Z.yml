@@ -1,0 +1,130 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6] [cursor=pointer]:
+      - img "probe42-app-logo" [ref=e7]
+      - paragraph [ref=e8]: "|"
+      - paragraph [ref=e9]:
+        - text: API
+        - superscript [ref=e10]: Beta
+    - navigation [ref=e13]:
+      - link "Home" [ref=e14] [cursor=pointer]:
+        - /url: "#/portal/home"
+      - link "Explore API" [ref=e15] [cursor=pointer]:
+        - /url: "#/portal/explore-api"
+      - link "Contact us" [ref=e16] [cursor=pointer]:
+        - /url: "#/portal/support"
+      - link "Pricing" [ref=e17] [cursor=pointer]:
+        - /url: "#/portal/pricing"
+      - link "Login" [ref=e18] [cursor=pointer]:
+        - /url: "#/user/login"
+      - link "Signup" [ref=e19] [cursor=pointer]:
+        - /url: "#/user/signup"
+  - generic [ref=e528]:
+    - text: 
+    - list [ref=e529]:
+      - listitem [ref=e530]:
+        - button "Data APIs" [ref=e531] [cursor=pointer]
+    - list [ref=e532]:
+      - listitem [ref=e533]:
+        - generic [ref=e535]:
+          - heading "Search API MCP" [level=3] [ref=e536]:
+            - text: Search
+            - generic [ref=e537]: API MCP
+          - separator [ref=e538]
+          - paragraph [ref=e539]: Search within the database of all Indian corporates by name. The response includes legal name and identifier of matching entities.
+          - button "Explore" [ref=e541] [cursor=pointer]
+      - listitem [ref=e542]:
+        - generic [ref=e544]:
+          - heading "Base API MCP" [level=3] [ref=e545]:
+            - text: Base
+            - generic [ref=e546]: API MCP
+          - separator [ref=e547]
+          - paragraph [ref=e548]: Provides essential data points about a corporate, allowing verification of its legitimacy and active status as per regulatory sources.
+          - button "Explore" [ref=e550] [cursor=pointer]
+      - listitem [ref=e551]:
+        - generic [ref=e553]:
+          - heading "KYC API MCP" [level=3] [ref=e554]:
+            - text: KYC
+            - generic [ref=e555]: API MCP
+          - separator [ref=e556]
+          - paragraph [ref=e557]: Fast-track corporate KYC with regulatory data sources covering its vitals, industry segments, directors, and key financial indicators.
+          - button "Explore" [ref=e559] [cursor=pointer]
+      - listitem [ref=e560]:
+        - generic [ref=e562]:
+          - heading "EPFO API MCP" [level=3] [ref=e563]:
+            - text: EPFO
+            - generic [ref=e564]: API MCP
+          - separator [ref=e565]
+          - paragraph [ref=e566]: Returns EPFO establishment details, filing history and payment delay flags of all the establishments for the last 12 months.
+          - button "Explore" [ref=e568] [cursor=pointer]
+      - listitem [ref=e569]:
+        - generic [ref=e571]:
+          - heading "GST Details API MCP" [level=3] [ref=e572]:
+            - text: GST Details
+            - generic [ref=e573]: API MCP
+          - separator [ref=e574]
+          - paragraph [ref=e575]: Returns all the GST registration details, filing history and filing delay flags of all the establishments for the last 12 months.
+          - button "Explore" [ref=e577] [cursor=pointer]
+      - listitem [ref=e578]:
+        - generic [ref=e580]:
+          - heading "Suit Filed Cases API MCP" [level=3] [ref=e581]:
+            - text: Suit Filed Cases
+            - generic [ref=e582]: API MCP
+          - separator [ref=e583]
+          - paragraph [ref=e584]: Returns the details of Suit Filed Accounts - Defaulters and Wilful Defaulters as per Credit Bureaus.
+          - button "Explore" [ref=e586] [cursor=pointer]
+      - listitem [ref=e587]:
+        - generic [ref=e589]:
+          - heading "Credit Ratings API MCP" [level=3] [ref=e590]:
+            - text: Credit Ratings
+            - generic [ref=e591]: API MCP
+          - separator [ref=e592]
+          - paragraph [ref=e593]: Returns the last available credit ratings of the corporate.
+          - button "Explore" [ref=e595] [cursor=pointer]
+      - listitem [ref=e596]:
+        - generic [ref=e598]:
+          - heading "Legal History API MCP" [level=3] [ref=e599]:
+            - text: Legal History
+            - generic [ref=e600]: API MCP
+          - separator [ref=e601]
+          - paragraph [ref=e602]: Provides essential data points about a corporate, allowing verification of its legitimacy and active status as per regulatory sources.
+          - button "Explore" [ref=e604] [cursor=pointer]
+      - listitem [ref=e605]:
+        - generic [ref=e607]:
+          - heading "Open Charges API MCP" [level=3] [ref=e608]:
+            - text: Open Charges
+            - generic [ref=e609]: API MCP
+          - separator [ref=e610]
+          - paragraph [ref=e611]: Returns the open charge details with latest event of the corporate.
+          - button "Explore" [ref=e613] [cursor=pointer]
+      - listitem [ref=e614]:
+        - generic [ref=e616]:
+          - heading "Director Network API MCP" [level=3] [ref=e617]:
+            - text: Director Network
+            - generic [ref=e618]: API MCP
+          - separator [ref=e619]
+          - paragraph [ref=e620]: Returns the details of the director, DIN status and list of Corporates in which the directorship is or was held.
+          - button "Explore" [ref=e622] [cursor=pointer]
+      - listitem [ref=e623]:
+        - generic [ref=e625]:
+          - heading "Data Status API MCP" [level=3] [ref=e626]:
+            - text: Data Status
+            - generic [ref=e627]: API MCP
+          - separator [ref=e628]
+          - paragraph [ref=e629]: Returns the date stamps associated with the last data syc from the sources to Probe's DB for each APIs.
+          - button "Explore" [ref=e631] [cursor=pointer]
+      - listitem [ref=e632]
+      - listitem [ref=e633]
+  - generic [ref=e185]:
+    - img "footer-logo" [ref=e186]
+    - generic [ref=e187]:
+      - link "Terms Of Use" [ref=e188] [cursor=pointer]:
+        - /url: "#/portal/terms-of-use"
+        - heading "Terms Of Use" [level=4] [ref=e189]
+      - link "Privacy Policy" [ref=e190] [cursor=pointer]:
+        - /url: "#/portal/privacy-policy"
+        - heading "Privacy Policy" [level=4] [ref=e191]
+      - link "Contact Us" [ref=e192] [cursor=pointer]:
+        - /url: "#/portal/support"
+        - heading "Contact Us" [level=4] [ref=e193]
+    - paragraph [ref=e194]: Copyright © 2026 Probe Information Services. All rights reserved.

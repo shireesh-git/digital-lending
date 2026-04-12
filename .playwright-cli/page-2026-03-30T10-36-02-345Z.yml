@@ -1,0 +1,100 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Probe42 cache · 24 days
+        - generic [ref=e12]: LLM narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e286]: INFOSYS LIMITED auto-onboarded. Run pipeline to analyse.
+    - generic [ref=e196]:
+      - generic [ref=e198]:
+        - generic [ref=e199]: Guided Case Creation
+        - heading "CAM Journey" [level=1] [ref=e200]
+        - paragraph [ref=e201]: Choose the borrower path, validate the entity, pull one cached Probe42 bundle, strengthen the draft with additional inputs, then move into the final CAM workspace.
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - generic [ref=e206]: Journey
+          - generic [ref=e209]: Entity
+          - generic [ref=e212]: Verified Data
+          - generic [ref=e215]: Inputs
+          - generic [ref=e218]: Final CAM
+        - generic [ref=e287]:
+          - generic [ref=e288]:
+            - generic [ref=e289]:
+              - generic [ref=e290]: Step 3
+              - heading "Company Data & Documents Retrieved" [level=2] [ref=e291]
+              - paragraph [ref=e292]: Public data has been validated and cached. The case now shows what was sourced automatically and what still depends on RM uploads.
+            - generic [ref=e293]:
+              - generic [ref=e294]: MCA Verified
+              - generic [ref=e295]: PAN Validated
+              - generic [ref=e296]: GSTN Authenticated
+              - generic [ref=e297]: Probe42 MCP Live
+          - generic [ref=e298]:
+            - article [ref=e299]:
+              - heading "Corporate Information" [level=4] [ref=e300]
+              - list [ref=e301]:
+                - listitem [ref=e302]: "Legal Name: INFOSYS LIMITED"
+                - listitem [ref=e303]: "CIN: L85110KA1981PLC013115"
+                - listitem [ref=e304]: "PAN: AAACI4798L"
+                - listitem [ref=e305]: "Listing Status: Listed"
+            - article [ref=e306]:
+              - heading "Compliance & Registration" [level=4] [ref=e307]
+              - list [ref=e308]:
+                - listitem [ref=e309]: "GSTIN: 37AAACI4798L3ZV"
+                - listitem [ref=e310]: "Status: Active"
+                - listitem [ref=e311]: "ROC / MCA health: Validated"
+                - listitem [ref=e312]: "Data freshness: hit"
+            - article [ref=e313]:
+              - heading "Directors & Management" [level=4] [ref=e314]
+              - list [ref=e315]:
+                - listitem [ref=e316]: "Directors captured: 12"
+                - listitem [ref=e317]: "KYC status: Validated from Probe42"
+                - listitem [ref=e318]: "Open charges: 0"
+                - listitem [ref=e319]: "Legal cases: 50"
+            - article [ref=e320]:
+              - heading "Financial Filings Available" [level=4] [ref=e321]
+              - list [ref=e322]:
+                - listitem [ref=e323]: "Ratings snapshot: AAA"
+                - listitem [ref=e324]: "Requested facility: Working Capital"
+                - listitem [ref=e325]: "Requested amount: 0 Cr"
+                - listitem [ref=e326]: "Profile: lean"
+          - generic [ref=e327]:
+            - generic [ref=e328]:
+              - generic [ref=e329]:
+                - generic [ref=e330]: Documents Retrieved
+                - heading "Initial borrower and source documents" [level=3] [ref=e331]
+              - button "Open Documents" [ref=e332] [cursor=pointer]
+            - generic [ref=e333]:
+              - generic [ref=e334]:
+                - strong [ref=e335]: board_resolution_borrowing.pdf
+                - text: Local File
+              - generic [ref=e336]:
+                - strong [ref=e337]: certificate_of_incorporation.pdf
+                - text: Local File
+              - generic [ref=e338]:
+                - strong [ref=e339]: pan_card.pdf
+                - text: Local File
+              - generic [ref=e340]:
+                - strong [ref=e341]: probe42_kyc_details.json
+                - text: Probe42 v2
+              - generic [ref=e342]:
+                - strong [ref=e343]: annual_report_fy2024.pdf
+                - text: Local File
+              - generic [ref=e344]:
+                - strong [ref=e345]: audited_financial_statements.pdf
+                - text: Local File
+          - button "Generate CAM" [ref=e347] [cursor=pointer]

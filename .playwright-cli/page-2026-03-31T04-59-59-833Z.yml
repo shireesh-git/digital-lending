@@ -1,0 +1,225 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: Standard narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e183]:
+      - generic [ref=e185]:
+        - generic [ref=e186]: Execution Console
+        - heading "Pipeline" [level=1] [ref=e187]
+        - paragraph [ref=e188]: Run case analysis, monitor live agent progress, and review executed outcomes from one production workflow.
+      - generic [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]: Target Selection
+          - heading "Run the selected borrower" [level=3] [ref=e192]
+          - paragraph [ref=e193]: Single-case execution streams agent progress in real time. Full queue execution runs the available portfolio batch.
+        - generic [ref=e194]:
+          - generic [ref=e195]:
+            - generic [ref=e196]: Selected company
+            - combobox [ref=e197]:
+              - option "Apollo Hospitals Enterprise Limited (APOL001)" [selected]
+              - option "Infosys Limited (INFY001)"
+              - option "THE Indian Hotels Company Limited (IHCL001)"
+              - option "Madras Fertilizers Limited (MFL001)"
+              - option "MRF Limited (MRF001)"
+          - generic [ref=e198]:
+            - button "▶ Execute Pipeline" [ref=e199] [cursor=pointer]:
+              - generic [ref=e200]: ▶ Execute Pipeline
+            - button "Run All" [ref=e201] [cursor=pointer]
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - generic [ref=e204]: Executed Cases
+          - generic [ref=e205]: "3"
+          - generic [ref=e206]: Portfolio runs ready for review
+        - generic [ref=e207]:
+          - generic [ref=e208]: Average Score
+          - generic [ref=e209]: "67.1"
+          - generic [ref=e210]: Composite average across executed cases
+        - generic [ref=e211]:
+          - generic [ref=e212]: Approvals
+          - generic [ref=e213]: "0"
+          - generic [ref=e214]: Approve + conditional approve decisions
+        - generic [ref=e215]:
+          - generic [ref=e216]: LLM Narratives
+          - generic [ref=e217]: "0"
+          - generic [ref=e218]: Cases completed in LLM narrative mode
+      - generic [ref=e219]:
+        - generic [ref=e220]:
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - generic [ref=e223]: Selected Borrower
+              - heading "Apollo Hospitals Enterprise Limited" [level=3] [ref=e224]
+              - paragraph [ref=e225]: Use this view to confirm the selected case before execution.
+            - generic [ref=e226]: AH
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - generic [ref=e229]: Entity ID
+              - strong [ref=e230]: APOL001
+            - generic [ref=e231]:
+              - generic [ref=e232]: Sector
+              - strong [ref=e233]: Healthcare
+            - generic [ref=e234]:
+              - generic [ref=e235]: Case Type
+              - strong [ref=e236]: NTB
+            - generic [ref=e237]:
+              - generic [ref=e238]: Amount
+              - strong [ref=e239]: Rs. 600 Cr
+          - generic [ref=e240]:
+            - generic [ref=e241]: Refer
+            - generic [ref=e242]:
+              - strong [ref=e243]: "66.7"
+              - generic [ref=e244]: composite score
+            - generic [ref=e245]: B
+        - generic [ref=e246]:
+          - generic [ref=e248]:
+            - generic [ref=e249]: Execution State
+            - heading "Ready to execute" [level=3] [ref=e250]
+            - paragraph [ref=e251]: Select a company and run the pipeline when ready.
+          - generic [ref=e252]:
+            - generic [ref=e253]:
+              - generic [ref=e254]: Agents Registered
+              - generic [ref=e255]: "7"
+            - generic [ref=e256]:
+              - generic [ref=e257]: Conditional Approvals
+              - generic [ref=e258]: "0"
+            - generic [ref=e259]:
+              - generic [ref=e260]: Declines
+              - generic [ref=e261]: "0"
+            - generic [ref=e262]:
+              - generic [ref=e263]: Live Progress
+              - generic [ref=e264]: Idle
+      - generic [ref=e265]:
+        - generic [ref=e266]:
+          - generic [ref=e267]:
+            - generic [ref=e268]: Portfolio Results
+            - heading "Execution Results" [level=3] [ref=e269]
+          - generic [ref=e270]: 3 analysed cases
+        - generic [ref=e271]:
+          - generic [ref=e272]: 0 approval-ready
+          - generic [ref=e273]: 3 referred
+          - generic [ref=e274]: 0 declined
+          - generic [ref=e275]: 0 LLM narratives
+        - generic [ref=e276]:
+          - article [ref=e277] [cursor=pointer]:
+            - generic [ref=e278]:
+              - generic [ref=e279]: AH
+              - generic [ref=e280]:
+                - generic [ref=e281]:
+                  - generic [ref=e282]:
+                    - heading "Apollo Hospitals Enterprise Limited" [level=4] [ref=e283]
+                    - generic [ref=e284]:
+                      - generic [ref=e285]: APOL001
+                      - generic [ref=e286]: •
+                      - generic [ref=e287]: Verified data
+                      - generic [ref=e288]: •
+                      - generic [ref=e289]: NTB
+                  - generic [ref=e290]: Selected
+                - generic [ref=e291]:
+                  - generic [ref=e292]: Healthcare
+                  - generic [ref=e293]: Working Capital
+                  - generic [ref=e294]: Rs. 600 Cr
+                  - generic [ref=e295]: Updated 30 Mar, 11:26 pm
+            - generic [ref=e296]:
+              - generic [ref=e297]:
+                - generic [ref=e298]: Grade
+                - strong [ref=e299]:
+                  - generic [ref=e300]: B
+                - generic [ref=e301]: Healthcare
+              - generic [ref=e302]:
+                - generic [ref=e303]: Score
+                - strong [ref=e304]: "66.7"
+                - generic [ref=e305]: Composite
+              - generic [ref=e306]:
+                - generic [ref=e307]: Recommendation
+                - strong [ref=e308]:
+                  - generic [ref=e309]: Refer
+                - generic [ref=e310]: Template
+            - generic [ref=e311]:
+              - button "Re-run" [ref=e312]
+              - button "View" [ref=e313]
+          - article [ref=e314] [cursor=pointer]:
+            - generic [ref=e315]:
+              - generic [ref=e316]: IL
+              - generic [ref=e317]:
+                - generic [ref=e319]:
+                  - heading "Infosys Limited" [level=4] [ref=e320]
+                  - generic [ref=e321]:
+                    - generic [ref=e322]: INFY001
+                    - generic [ref=e323]: •
+                    - generic [ref=e324]: Verified data
+                    - generic [ref=e325]: •
+                    - generic [ref=e326]: NTB
+                - generic [ref=e327]:
+                  - generic [ref=e328]: IT Services
+                  - generic [ref=e329]: Working Capital
+                  - generic [ref=e330]: Rs. 500 Cr
+                  - generic [ref=e331]: Updated 31 Mar, 02:15 am
+            - generic [ref=e332]:
+              - generic [ref=e333]:
+                - generic [ref=e334]: Grade
+                - strong [ref=e335]:
+                  - generic [ref=e336]: B
+                - generic [ref=e337]: IT Services
+              - generic [ref=e338]:
+                - generic [ref=e339]: Score
+                - strong [ref=e340]: "72.1"
+                - generic [ref=e341]: Composite
+              - generic [ref=e342]:
+                - generic [ref=e343]: Recommendation
+                - strong [ref=e344]:
+                  - generic [ref=e345]: Refer
+                - generic [ref=e346]: Template
+            - generic [ref=e347]:
+              - button "Re-run" [ref=e348]
+              - button "View" [ref=e349]
+          - article [ref=e350] [cursor=pointer]:
+            - generic [ref=e351]:
+              - generic [ref=e352]: TI
+              - generic [ref=e353]:
+                - generic [ref=e355]:
+                  - heading "THE Indian Hotels Company Limited" [level=4] [ref=e356]
+                  - generic [ref=e357]:
+                    - generic [ref=e358]: IHCL001
+                    - generic [ref=e359]: •
+                    - generic [ref=e360]: Verified data
+                    - generic [ref=e361]: •
+                    - generic [ref=e362]: ETB
+                - generic [ref=e363]:
+                  - generic [ref=e364]: Hospitality
+                  - generic [ref=e365]: Working Capital
+                  - generic [ref=e366]: Rs. 350 Cr
+                  - generic [ref=e367]: Updated 31 Mar, 02:15 am
+            - generic [ref=e368]:
+              - generic [ref=e369]:
+                - generic [ref=e370]: Grade
+                - strong [ref=e371]:
+                  - generic [ref=e372]: C
+                - generic [ref=e373]: Hospitality
+              - generic [ref=e374]:
+                - generic [ref=e375]: Score
+                - strong [ref=e376]: "62.5"
+                - generic [ref=e377]: Composite
+              - generic [ref=e378]:
+                - generic [ref=e379]: Recommendation
+                - strong [ref=e380]:
+                  - generic [ref=e381]: Refer
+                - generic [ref=e382]: Template
+            - generic [ref=e383]:
+              - button "Re-run" [ref=e384]
+              - button "View" [ref=e385]

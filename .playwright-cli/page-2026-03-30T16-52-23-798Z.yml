@@ -1,0 +1,148 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: ◆
+      - generic [ref=e6]:
+        - generic [ref=e7]: Indian Bank
+        - heading "Credit Appraisal Dashboard" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Case cache · 24 days
+        - generic [ref=e12]: AI narrative
+      - button "+ Create New CAM" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: CO
+  - navigation [ref=e15]:
+    - button "Dashboard" [ref=e16] [cursor=pointer]
+    - button "CAM Journey" [ref=e17] [cursor=pointer]
+    - button "Documents" [ref=e18] [cursor=pointer]
+    - button "Pipeline" [ref=e19] [cursor=pointer]
+    - button "Final CAM" [ref=e20] [cursor=pointer]
+    - button "Settings" [ref=e21] [cursor=pointer]
+  - main [ref=e22]:
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - heading "Final CAM Workspace" [level=1] [ref=e170]
+        - combobox [ref=e172]:
+          - option "Select company"
+          - option "Apollo Hospitals Enterprise Limited (APOL001)"
+          - option "Infosys Limited (INFY001)" [selected]
+      - generic [ref=e173]:
+        - button "📄 CAM Report" [ref=e174] [cursor=pointer]
+        - button "📊 One-Page Memo" [ref=e175] [cursor=pointer]
+        - button "◉ 360° View" [ref=e176] [cursor=pointer]
+        - button "✉ Financial Advisor" [ref=e177] [cursor=pointer]
+      - generic [ref=e178]:
+        - generic [ref=e179]:
+          - button "📄 Load Report" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: 📄 Load Report
+          - button "⬇ Download PDF" [ref=e182] [cursor=pointer]
+          - button "⇗ Open Full Page" [ref=e183] [cursor=pointer]
+          - generic [ref=e188]: 18 sections
+        - generic [ref=e189]:
+          - navigation [ref=e190]:
+            - generic [ref=e191]: Sections
+            - generic [ref=e193] [cursor=pointer]: 1. EXECUTIVE SUMMARY
+            - generic [ref=e195] [cursor=pointer]: 2. BORROWER PROFILE
+            - generic [ref=e197] [cursor=pointer]: 3. INDUSTRY & BUSINESS ANALYSIS
+            - generic [ref=e199] [cursor=pointer]: 4. FINANCIAL ANALYSIS
+            - generic [ref=e201] [cursor=pointer]: 5. CREDIT FACILITY DETAILS
+            - generic [ref=e203] [cursor=pointer]: 6. SECURITY & COLLATERAL
+            - generic [ref=e205] [cursor=pointer]: 7. RISK ASSESSMENT & INTERNAL CREDIT RATING
+            - generic [ref=e207] [cursor=pointer]: 8B. SOCIAL MEDIA & DIGITAL INTELLIGENCE
+            - generic [ref=e209] [cursor=pointer]: 8. COMPLIANCE & REGULATORY CHECKS
+            - generic [ref=e211] [cursor=pointer]: 9. TERMS, CONDITIONS & COVENANTS
+            - generic [ref=e213] [cursor=pointer]: 10. ACCOUNT CONDUCT & RELATIONSHIP REVIEW
+            - generic [ref=e215] [cursor=pointer]: 11. PEER COMPARISON & BENCHMARKING
+            - generic [ref=e217] [cursor=pointer]: 12. RECOMMENDATION & APPROVING AUTHORITY
+            - generic [ref=e219] [cursor=pointer]: ANNEXURE A — DOCUMENT CHECKLIST
+            - generic [ref=e221] [cursor=pointer]: ANNEXURE B — QUARTERLY PERFORMANCE TREND
+            - generic [ref=e223] [cursor=pointer]: ANNEXURE C — GLOSSARY OF TERMS
+            - generic [ref=e225] [cursor=pointer]: APPENDIX — DATA SOURCES & AUDIT TRAIL
+            - generic [ref=e227] [cursor=pointer]: DISCLAIMER
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - heading "1. EXECUTIVE SUMMARY" [level=2] [ref=e230]
+              - paragraph [ref=e231]:
+                - text: This Credit Approval Memorandum pertains to
+                - strong [ref=e232]: INFOSYS LIMITED
+                - text: "(CIN: L85110KA1981PLC013115), a"
+                - strong [ref=e233]: listed
+                - text: company incorporated on 1981-07-02 in
+                - strong [ref=e234]: Karnataka
+                - text: . The Company operates in the
+                - strong [ref=e235]: It Services — Information Technology
+                - text: sector and is listed on
+                - strong [ref=e236]: Listed
+                - text: . The Company carries a credit rating of
+                - strong [ref=e237]: AAA
+                - text: from
+                - strong [ref=e238]: crisil
+                - text: .
+              - paragraph [ref=e239]:
+                - text: The proposal is for a
+                - strong [ref=e240]: Working Capital
+                - text: facility of
+                - strong [ref=e241]: ₹ 500.00 Cr
+                - text: for the purpose of
+                - emphasis [ref=e242]: Working capital
+                - text: . For the latest audited period (FY2025), the Company reported revenue of ₹ 162,981.00 Cr, EBITDA of ₹ 42,375.00 Cr (26.0% margin), and PAT of ₹ 27,234.00 Cr. Net worth stands at ₹ 3,243.74 Cr against total debt of ₹ 3,225.00 Cr.
+              - table [ref=e243]:
+                - rowgroup [ref=e244]:
+                  - row "Parameter Value" [ref=e245]:
+                    - columnheader "Parameter" [ref=e246]
+                    - columnheader "Value" [ref=e247]
+                  - row "Company Name INFOSYS LIMITED" [ref=e248]:
+                    - cell "Company Name" [ref=e249]
+                    - cell "INFOSYS LIMITED" [ref=e250]
+                  - row "Facility Requested Working Capital — ₹ 500.00 Cr" [ref=e251]:
+                    - cell "Facility Requested" [ref=e252]
+                    - cell "Working Capital — ₹ 500.00 Cr" [ref=e253]
+                  - row "Credit Rating AAA (crisil)" [ref=e254]:
+                    - cell "Credit Rating" [ref=e255]
+                    - cell "AAA (crisil)" [ref=e256]
+                  - row "Revenue (Latest) ₹ 162,981.00 Cr" [ref=e257]:
+                    - cell "Revenue (Latest)" [ref=e258]
+                    - cell "₹ 162,981.00 Cr" [ref=e259]
+                  - row "EBITDA (Latest) ₹ 42,375.00 Cr (26.0%)" [ref=e260]:
+                    - cell "EBITDA (Latest)" [ref=e261]
+                    - cell "₹ 42,375.00 Cr (26.0%)" [ref=e262]
+                  - row "Net Worth ₹ 3,243.74 Cr" [ref=e263]:
+                    - cell "Net Worth" [ref=e264]
+                    - cell "₹ 3,243.74 Cr" [ref=e265]
+                  - row "Total Debt ₹ 3,225.00 Cr" [ref=e266]:
+                    - cell "Total Debt" [ref=e267]
+                    - cell "₹ 3,225.00 Cr" [ref=e268]
+                  - 'row "Risk Grade B (Score: 72.1)" [ref=e269]':
+                    - cell "Risk Grade" [ref=e270]
+                    - 'cell "B (Score: 72.1)" [ref=e271]':
+                      - strong [ref=e272]: B
+                      - text: "(Score: 72.1)"
+                  - row "Recommendation REFER" [ref=e273]:
+                    - cell "Recommendation" [ref=e274]
+                    - cell "REFER" [ref=e275]:
+                      - strong [ref=e276]: REFER
+              - strong [ref=e277]: "Risk Assessment:"
+              - text: Composite Score of
+              - strong [ref=e278]: "72.1"
+              - text: "(Grade:"
+              - strong [ref=e279]: B
+              - text: "). Break-up — Financial: 71.0 | Conduct: 70.0 | Governance: 80.0 | Market: 68.0."
+              - paragraph
+              - paragraph [ref=e280]:
+                - strong [ref=e281]: "Validation Alerts:"
+                - text: 0 Critical, 5 High severity exception(s) detected.
+              - paragraph [ref=e282]:
+                - strong [ref=e283]: "Recommendation Rationale:"
+                - text: Risk grade B (composite 72.1). 5 high-severity exceptions require committee review.
+              - separator [ref=e284]
+              - paragraph
+              - paragraph
+            - generic [ref=e285]:
+              - generic [ref=e287]:
+                - generic [ref=e288]: Reviewer Comment
+                - generic [ref=e289]: Saved comments are included in the downloaded CAM PDF.
+              - textbox "Add your note for this section." [ref=e290]
+              - generic [ref=e291]:
+                - button "Save Comment" [ref=e292] [cursor=pointer]:
+                  - generic [ref=e293]: Save Comment
+                - button "Reset" [ref=e294] [cursor=pointer]

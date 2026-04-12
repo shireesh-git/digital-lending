@@ -1,0 +1,43 @@
+{
+  "source": "probe42",
+  "tool": "get_suit_filed_cases_by_identifier",
+  "entity_key": "PNCR001",
+  "as_of_date": "2026-04-06T08:54:00",
+  "payload": {
+    "cin": "L45201DL1999PLC195937",
+    "total_cases": 3,
+    "as_petitioner": 2,
+    "as_respondent": 1,
+    "cases": [
+      {
+        "court": "NCLAT Delhi",
+        "type": "Arbitration",
+        "amount_cr": 45,
+        "status": "Pending",
+        "party": "Sub-contractor dispute",
+        "filed_date": "2024-03-15",
+        "role": "Petitioner"
+      },
+      {
+        "court": "High Court Allahabad",
+        "type": "Civil",
+        "amount_cr": 12,
+        "status": "Pending",
+        "party": "Land acquisition dispute",
+        "filed_date": "2023-08-20",
+        "role": "Petitioner"
+      },
+      {
+        "court": "Consumer Forum UP",
+        "type": "Consumer",
+        "amount_cr": 0.8,
+        "status": "Disposed",
+        "party": "Employment matter",
+        "filed_date": "2022-11-10",
+        "role": "Respondent"
+      }
+    ],
+    "total_disputed_amount_cr": 57.8,
+    "material_impact": "Not material relative to company size"
+  }
+}
