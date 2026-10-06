@@ -221,8 +221,6 @@
   "24 GET /api/cases/MFL001": {
     "status": 200,
     "keys": [
-      "_etb_analytics",
-      "_extraction",
       "cam_text",
       "case_type",
       "company_name",
@@ -231,6 +229,7 @@
       "conduct_score",
       "covenants_proposed",
       "data_provider",
+      "documents_changed",
       "entity_id",
       "exceptions",
       "facility_type",

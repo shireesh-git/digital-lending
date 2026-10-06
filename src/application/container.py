@@ -57,13 +57,15 @@ def build_container(pipeline_factory=default_pipeline_factory) -> ServiceContain
     from src.services.document_store import doc_store
     from src.services.persistence import persistence
     from src.services.probe_service import clear_probe_cache
+    from src.application.serialization import repair_mojibake
 
     cases = persistence.load_latest_cases()
     companies = seed_company_store()
     companies.update(persistence.load_companies())
     state = AppState(
         companies=companies,
-        cases={eid: case for eid, case in cases.items() if eid in companies},
+        # Repaired once here; CaseService.get no longer repairs on every read.
+        cases={eid: repair_mojibake(case) for eid, case in cases.items() if eid in companies},
     )
     bootstrap_reference_documents()
 

@@ -144,6 +144,11 @@ _ENTITY_TO_IDS = {
 _PAN_TO_GSTIN = {ids["pan"]: ids["gstin"] for ids in _ENTITY_TO_IDS.values()}
 
 
+def reference_identifiers(entity_id: str) -> dict:
+    """CIN / PAN / GSTIN from the reference table for an entity ID ({} if unknown)."""
+    return dict(_ENTITY_TO_IDS.get((entity_id or "").upper(), {}))
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Company Resolution
 # ══════════════════════════════════════════════════════════════════════════════

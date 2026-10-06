@@ -3,6 +3,7 @@ Borrower documents: listing and completeness, upload/download/delete,
 reference documents, extraction, DMS, document packs, CRILC files and OCR.
 """
 
+import asyncio
 import logging
 import traceback
 from pathlib import Path
@@ -79,7 +80,7 @@ async def check_data_gaps(entity_id: str, svc: ServiceContainer = Depends(get_co
         name = b.company_name if b else entity_id
         sector = b.sector.value if b and hasattr(b.sector, "value") else "general"
         try:
-            web_crawl_count = len(crawl_company_news(name, sector).get("articles", []))
+            web_crawl_count = len((await asyncio.to_thread(crawl_company_news, name, sector)).get("articles", []))
         except Exception:
             pass
 
@@ -193,7 +194,7 @@ async def run_extraction(entity_id: str, svc: ServiceContainer = Depends(get_con
     if not (DOCUMENTS_ROOT / entity_id).exists():
         raise HTTPException(404, f"No documents found for {entity_id}")
     try:
-        result = extract_all_documents(entity_id, DOCUMENTS_ROOT)
+        result = await asyncio.to_thread(extract_all_documents, entity_id, DOCUMENTS_ROOT)
     except Exception as e:
         log.error("Extraction failed for %s: %s\n%s", entity_id, e, traceback.format_exc())
         raise HTTPException(500, f"Extraction failed: {str(e)}")
@@ -226,7 +227,8 @@ async def dms_fetch(entity_id: str, svc: ServiceContainer = Depends(get_containe
     """Fetch all documents from the DMS for a company."""
     from src.services.dms_service import dms_service
     company = svc.companies.require(entity_id)
-    return {"entity_id": entity_id, **dms_service.fetch_documents(entity_id, company_data=company)}
+    result = await asyncio.to_thread(dms_service.fetch_documents, entity_id, company_data=company)
+    return {"entity_id": entity_id, **result}
 
 
 @router.get("/companies/{entity_id}/dms-status")
@@ -240,18 +242,20 @@ async def dms_status(entity_id: str, svc: ServiceContainer = Depends(get_contain
 async def fetch_documents_bulk(force_refresh: bool = False):
     """Backfill document packs for all supported listed companies."""
     from src.engines.document_downloader import populate_supported_company_documents
-    return populate_supported_company_documents(force_refresh=force_refresh)
+    return await asyncio.to_thread(populate_supported_company_documents, force_refresh=force_refresh)
 
 
 @router.post("/companies/{entity_id}/fetch-documents")
-async def fetch_documents(entity_id: str):
+async def fetch_documents(entity_id: str, svc: ServiceContainer = Depends(get_container)):
     """Download/generate financial documents for a supported listed company."""
     from src.engines.document_downloader import download_company_documents, get_supported_companies
     supported_ids = [c["entity_id"] for c in get_supported_companies()]
     if entity_id not in supported_ids:
         raise HTTPException(400, f"Document download not supported for {entity_id}. "
                                  f"Supported: {supported_ids}")
-    return {"entity_id": entity_id, **download_company_documents(entity_id)}
+    result = await asyncio.to_thread(download_company_documents, entity_id)
+    svc.state.invalidate_derived(entity_id)
+    return {"entity_id": entity_id, **result}
 
 
 @router.get("/companies/supported-downloads")
@@ -265,7 +269,7 @@ async def supported_downloads():
 @router.post("/companies/{entity_id}/crilc-pdf")
 async def generate_crilc_pdf(entity_id: str):
     from src.engines.crilc_report_generator import generate_crilc_report
-    result = generate_crilc_report(entity_id)
+    result = await asyncio.to_thread(generate_crilc_report, entity_id)
     if result["status"] == "error":
         raise HTTPException(400, result["message"])
     return result
@@ -288,7 +292,7 @@ async def run_ocr(entity_id: str, category: str, filename: str):
     filepath = _stored_file(entity_id, category, filename)
     if filepath.suffix.lower() != ".pdf":
         raise HTTPException(400, "OCR is only supported for PDF files")
-    result = ocr_extract(filepath)
+    result = await asyncio.to_thread(ocr_extract, filepath)
     if result.get("error"):
         raise HTTPException(500, result["error"])
     return {"entity_id": entity_id, "category": category, "filename": filename, **result}
@@ -298,7 +302,7 @@ async def run_ocr(entity_id: str, category: str, filename: str):
 async def run_ocr_metadata(entity_id: str, category: str, filename: str):
     """Analyse document metadata for fraud indicators."""
     filepath = _stored_file(entity_id, category, filename)
-    result = analyze_document_metadata(filepath)
+    result = await asyncio.to_thread(analyze_document_metadata, filepath)
     if result.get("error"):
         raise HTTPException(500, result["error"])
     return {"entity_id": entity_id, "category": category, "filename": filename, **result}

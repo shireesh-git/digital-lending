@@ -10,14 +10,18 @@ fallback for scanned pages.  Produces RAG-ready data.
 """
 
 import csv
+import hashlib
 import json
 import logging
+import os
 import re
+import shutil
+import threading
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import openpyxl
-from src.core.runtime_paths import DOCUMENTS_ROOT
+from src.core.runtime_paths import CACHE_ROOT, DOCUMENTS_ROOT
 from src.services.document_classifier import find_best_document
 
 _log = logging.getLogger(__name__)
@@ -39,6 +43,69 @@ except Exception:
         import pdfplumber
     except ImportError:
         pdfplumber = None
+
+
+# ─── Per-file extraction cache ───────────────────────────────────────────────
+#
+# Reading a PDF (especially OCR of scanned pages) is the slow part of
+# extraction, and the same files are re-read after every upload and after a
+# restart. Each extractor's result depends only on its file, so it is cached
+# on disk under the file's content hash: unchanged files are not read again.
+# Bump _EXTRACTION_CACHE_VERSION whenever an extractor's output changes.
+
+_EXTRACTION_CACHE_VERSION = "1"
+_EXTRACTION_CACHE_DIR = CACHE_ROOT / "extractions"
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _ocr_signature() -> str:
+    """Whether a Tesseract binary is available: results differ with and without OCR."""
+    configured = os.environ.get("TESSERACT_CMD") or os.environ.get("TESSERACT_PATH")
+    candidates = [configured, r"C:\Program Files\Tesseract-OCR\tesseract.exe"]
+    found = any(c and Path(c).exists() for c in candidates) or shutil.which("tesseract")
+    return "ocr" if found else "no-ocr"
+
+
+def _cached_extract(extractor: Callable[[Path], dict], filepath: Path) -> dict[str, Any]:
+    """Run ``extractor(filepath)``, reusing a cached result for identical file contents."""
+    filepath = Path(filepath)
+    try:
+        content_hash = _file_sha256(filepath)
+    except OSError:
+        return extractor(filepath)
+
+    engine = "pymupdf" if _USE_PYMUPDF else "pdfplumber"
+    # The path is part of the key because some results embed the file name.
+    key_material = "|".join([_EXTRACTION_CACHE_VERSION, extractor.__name__, engine, _ocr_signature(),
+                             str(filepath.resolve()), content_hash])
+    cache_file = _EXTRACTION_CACHE_DIR / (hashlib.sha256(key_material.encode("utf-8")).hexdigest() + ".json")
+    if cache_file.exists():
+        try:
+            return json.loads(cache_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            pass  # unreadable cache entry: extract again and overwrite it
+
+    result = extractor(filepath)
+    if isinstance(result, dict) and "error" not in result:  # failures may be transient; retry next time
+        try:
+            text = json.dumps(result)
+            # Only cache results that survive a JSON round trip unchanged (no tuples,
+            # non-string keys, NaN or other types JSON would silently alter).
+            if json.loads(text) == result:
+                _EXTRACTION_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+                tmp = cache_file.with_suffix(f".{os.getpid()}.{threading.get_ident()}.tmp")
+                tmp.write_text(text, encoding="utf-8")
+                tmp.replace(cache_file)
+        except (TypeError, ValueError, OSError) as e:
+            _log.debug("Extraction cache skipped for %s: %s", filepath.name, e)
+    return result
 
 
 # ─── PDF Extraction ──────────────────────────────────────────────────────────
@@ -733,7 +800,7 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     # 1. Audited Financials / Annual Report
     fpath = find_best_document(entity_dir / "financials", "financials", "audited_financial_statements")
     if fpath and fpath.exists():
-        ext = extract_financials_from_pdf(fpath)
+        ext = _cached_extract(extract_financials_from_pdf, fpath)
         if "data" in ext:
             extraction["financials"]["audited"] = ext["data"]
             extraction["selected_documents"]["audited_financials"] = fpath.name
@@ -742,34 +809,34 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     # 2. Rating Report
     fpath = entity_dir / "ratings" / "credit_rating_report.pdf"
     if fpath.exists():
-        extraction["rating"] = extract_rating_from_pdf(fpath).get("data", {})
+        extraction["rating"] = _cached_extract(extract_rating_from_pdf, fpath).get("data", {})
         extraction["document_count"] += 1
 
     # 3. GST
     fpath = find_best_document(entity_dir / "gst", "gst", "gst_registration")
     if fpath and fpath.exists():
-        extraction["gst"] = extract_gst_from_pdf(fpath).get("data", {})
+        extraction["gst"] = _cached_extract(extract_gst_from_pdf, fpath).get("data", {})
         extraction["selected_documents"]["gst"] = fpath.name
         extraction["document_count"] += 1
 
     # 4. Exchange Filing
     fpath = find_best_document(entity_dir / "exchange", "exchange", "exchange_filing")
     if fpath and fpath.exists():
-        extraction["exchange"] = extract_exchange_filing_from_pdf(fpath).get("data", {})
+        extraction["exchange"] = _cached_extract(extract_exchange_filing_from_pdf, fpath).get("data", {})
         extraction["selected_documents"]["exchange"] = fpath.name
         extraction["document_count"] += 1
 
     # 5. Provisional Financials
     fpath = find_best_document(entity_dir / "financials", "financials", "provisional_financials")
     if fpath and fpath.exists():
-        extraction["provisional"] = extract_provisional_financials(fpath).get("data", {})
+        extraction["provisional"] = _cached_extract(extract_provisional_financials, fpath).get("data", {})
         extraction["selected_documents"]["provisional"] = fpath.name
         extraction["document_count"] += 1
 
     # 6. Debt Schedule
     fpath = find_best_document(entity_dir / "financials", "financials", "debt_schedule")
     if fpath and fpath.exists():
-        extraction["debt_schedule"] = extract_debt_schedule(fpath).get("data", {})
+        extraction["debt_schedule"] = _cached_extract(extract_debt_schedule, fpath).get("data", {})
         extraction["selected_documents"]["debt_schedule"] = fpath.name
         extraction["document_count"] += 1
 
@@ -784,7 +851,7 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     if not fpath:
         fpath = entity_dir / "banking" / "bank_statement_fy2025.pdf"
     if fpath and fpath.exists():
-        bs_ext = extract_bank_statement_structured(fpath)
+        bs_ext = _cached_extract(extract_bank_statement_structured, fpath)
         extraction["bank_statement"] = bs_ext.get("data", {"text_preview": "", "pages": 0})
         extraction["selected_documents"]["bank_statement"] = fpath.name
         extraction["document_count"] += 1
@@ -793,7 +860,7 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     for fname in ["pan_card.pdf", "certificate_of_incorporation.pdf", "board_resolution_borrowing.pdf"]:
         fpath = entity_dir / "kyc" / fname
         if fpath.exists():
-            raw = extract_pdf(fpath)
+            raw = _cached_extract(extract_pdf, fpath)
             extraction["kyc"][fname.replace(".pdf", "")] = raw["text"][:300]
             extraction["document_count"] += 1
 
@@ -802,7 +869,7 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     if not fpath:
         fpath = entity_dir / "collateral" / "valuation_report.pdf"
     if fpath and fpath.exists():
-        val_ext = extract_valuation_report(fpath)
+        val_ext = _cached_extract(extract_valuation_report, fpath)
         extraction["valuation"] = val_ext.get("data", {})
         extraction["collateral"] = {"text_preview": extraction["valuation"].get("full_text", "")[:500]}
         extraction["selected_documents"]["valuation_report"] = fpath.name
@@ -811,32 +878,40 @@ def extract_all_documents(entity_id: str, storage_root: Path | None = None) -> d
     # 11. Request Note
     fpath = entity_dir / "request" / "request_note.pdf"
     if fpath.exists():
-        raw = extract_pdf(fpath)
+        raw = _cached_extract(extract_pdf, fpath)
         extraction["request_note"] = {"text_preview": raw["text"][:500]}
         extraction["document_count"] += 1
 
     # 11b. Site Visit Report (structured extraction)
     fpath = find_best_document(entity_dir / "request", "request", "site_visit_report")
     if fpath and fpath.exists():
-        sv_ext = extract_site_visit_report(fpath)
+        sv_ext = _cached_extract(extract_site_visit_report, fpath)
         extraction["site_visit"] = sv_ext.get("data", {})
         extraction["selected_documents"]["site_visit_report"] = fpath.name
         extraction["document_count"] += 1
 
-    # 12. Document verification (fingerprint every PDF found)
+    # 12. Document verification (fingerprint every PDF found; cached per file contents)
     if _USE_PYMUPDF:
         all_pdfs = list(entity_dir.rglob("*.pdf"))
         for pdf_path in all_pdfs:
-            fp = compute_document_fingerprint(pdf_path)
-            extraction["document_verification"][pdf_path.name] = {
-                "sha256": fp.get("sha256", ""),
-                "file_size_kb": fp.get("file_size_kb", 0),
-                "page_count": fp.get("pdf_metadata", {}).get("page_count", 0),
-                "producer": fp.get("pdf_metadata", {}).get("producer", ""),
-                "is_verified": fp.get("is_verified", False),
-            }
+            extraction["document_verification"][pdf_path.name] = _cached_extract(_fingerprint_summary, pdf_path)
 
     return extraction
+
+
+def _fingerprint_summary(pdf_path: Path) -> dict[str, Any]:
+    """The stable parts of a document fingerprint (no timestamp), so they can be cached."""
+    fp = compute_document_fingerprint(pdf_path)
+    if fp.get("error"):
+        return {"error": fp["error"]}
+    return {
+        "sha256": fp.get("sha256", ""),
+        "file_size_kb": fp.get("file_size_kb", 0),
+        "file_size_bytes": fp.get("file_size_bytes", 0),
+        "page_count": fp.get("pdf_metadata", {}).get("page_count", 0),
+        "producer": fp.get("pdf_metadata", {}).get("producer", ""),
+        "is_verified": fp.get("is_verified", False),
+    }
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────

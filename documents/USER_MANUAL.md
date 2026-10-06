@@ -66,9 +66,16 @@ If no cases exist:
 - it does not show fake in-progress cases
 - it gives a clear prompt to start the first CAM journey
 
+Once cases exist it also shows the risk-grade distribution, the latest case's score breakdown,
+and `Decision Status` — how many cases are draft, submitted, returned, approved or rejected.
+
 ### CAM Journey
 
 Use this page to begin a new case from verified public data and then move into uploads, extraction, and CAM generation.
+
+Fields marked with a red `*` are mandatory: borrower, facility type and amount. Borrower,
+amount and purpose are dropdowns filled from the borrowers on record. A borrower that is not on
+record can be added with `Borrower not on record? Add it manually`.
 
 ### Documents
 
@@ -78,6 +85,9 @@ Use this page to:
 - see verified public-data coverage
 - upload newer borrower files
 - run extraction
+- `Generate Document Pack` (shown only for companies that support it)
+- `Remove Verified Data` — deletes the retained public-record snapshot; it is fetched again on the
+  next onboarding or pipeline run
 
 ### Pipeline
 
@@ -125,17 +135,18 @@ Or open:
 
 ### Step 3: Select the Borrower
 
-Enter one of the supported borrowers, for example:
+Pick `New to Bank`, then choose the borrower from the `Borrower *` dropdown, for example
+`Infosys Limited (INFY001)`. Borrowers of the chosen journey type are listed first. The line
+under the dropdown shows the borrower's CIN, PAN and GSTIN on record.
 
-- `Infosys Limited`
-- `INFY001`
+Choosing a borrower fills the rest from its record; change any of them if needed:
 
-Set:
+- facility type `*` (e.g. `working_capital`)
+- amount requested `*` — the borrower's own amount is marked `test data`
+- purpose (optional)
 
-- case type: `NTB`
-- facility type: `working_capital`
-- requested amount
-- purpose
+For a borrower not in the list, pick `Other — enter CIN / PAN / GSTIN / name` and type the
+identifier. `Proceed with CAM Preparation` stays disabled until every `*` field is filled.
 
 ### Step 4: Review Verified Data
 
@@ -234,6 +245,9 @@ After execution, review:
 - policy decisions
 - supporting facts
 
+On the case detail page, `Risk Checks` runs the fraud scan and shows PEP/sanctions screening,
+and `Pipeline Log` lists every run attempt, including failed ones with their error.
+
 ### Step 10: Open Final CAM
 
 Go to `Final CAM`.
@@ -248,6 +262,23 @@ Important:
 
 - reviewer comments are stored per `run_id`
 - a fresh run starts with a clean comment set
+- if documents change after the CAM was generated, a banner asks for a re-run
+
+### Step 11: Approval
+
+On `Final CAM`, open the `Approval` tab. Choose your `Acting Role *` and enter your
+`User ID *`; only the actions allowed for the case's current status are shown.
+
+- a maker (relationship manager, credit analyst) submits the case, and can recall it
+- the case is routed to the authority required by amount and risk grade
+  (`config/approval.yaml`); a system `DECLINE` routes higher
+- that authority (or a higher one) approves, rejects or returns it — reject and return need
+  comments, and so does approving against a system decline
+- the person who submitted a case cannot decide it
+- choosing an authority role lists the cases waiting for it
+
+Until single sign-on is in place, the role and user ID are entered by hand: keep the
+application on a trusted network.
 
 ## 6. Step-By-Step ETB Flow
 
@@ -270,9 +301,10 @@ The ETB overlay can contribute:
 
 Flow:
 
-1. Open `CAM Journey`
-2. Select or enter `IHCL001` / `The Indian Hotels Company Limited`
-3. Keep case type as `ETB`
+1. Open `CAM Journey` and pick `Existing to Bank`
+2. Choose `The Indian Hotels Company Limited (IHCL001)` from the `Borrower *` dropdown
+3. `Fetch ETB Data` checks CRILC exposure; where CRILC data is not available it says so
+   (and whether internal records list the borrower as ETB) instead of reporting an exposure
 4. Review verified public data
 5. Review ETB-specific internal context
 6. Upload any newer borrower files if needed

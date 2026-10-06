@@ -98,7 +98,7 @@ graph TB
 
     subgraph ORCHESTRATION["🧠 Agentic Orchestration Layer"]
         direction TB
-        SA["<b>SuperAgent Orchestrator</b><br/>Sequential Pipeline · Context Chain<br/>SSE Streaming · Fault Tolerance"]
+        SA["<b>SuperAgent Orchestrator</b><br/>Dependency-ordered parallel agents · Context Chain<br/>SSE Streaming · Fault Tolerance"]
         
         subgraph AGENT_POOL["Autonomous Agent Pool"]
             direction LR
@@ -269,7 +269,7 @@ graph TB
     end
 
     subgraph ORCHESTRATOR["🧠 SuperAgent — Pipeline Orchestrator"]
-        SA["SuperAgent<br/>Sequential Pipeline<br/>Context Passing · Error Handling<br/>SSE Progress Events"]
+        SA["SuperAgent<br/>Dependency-ordered, parallel agents<br/>Context Passing · Error Handling<br/>SSE Progress Events"]
     end
 
     subgraph AGENTS["🤖 7 Specialized Sub-Agents"]
@@ -377,9 +377,9 @@ The CAM Intelligence Platform follows a **layered architecture** with clear sepa
                            │
 ┌──────────────────────────▼──────────────────────────────────────┐
 │                   ORCHESTRATION LAYER                            │
-│    SuperAgent → 7 Sub-Agents (sequential pipeline)              │
-│    DataGatherAgent → ExtractionAgent → AnalysisAgent →          │
-│    ValidationAgent → PolicyAgent → NarrativeAgent → FinalAgent  │
+│    SuperAgent → 7 Sub-Agents, started as dependencies finish:   │
+│    DataIngestion ∥ PEPScreening → FinancialAnalysis ∥ Validation│
+│    → Benchmark → Policy → Narrative (sections ∥ on hosted LLMs) │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────────┐

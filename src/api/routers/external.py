@@ -1,5 +1,7 @@
 """Pass-through endpoints for external data sources (MCA, GST, bureau, CRILC, ...)."""
 
+import asyncio
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 
@@ -105,4 +107,4 @@ async def ext_web_crawl(entity_id: str, svc: ServiceContainer = Depends(get_cont
     name = b.company_name if b else entity_id
     sector = b.sector.value if b and hasattr(b.sector, "value") else "general"
     is_ntb = company.get("facility") and company["facility"].case_type.value == "NTB"
-    return crawl_company_news(name, sector, is_ntb=bool(is_ntb))
+    return await asyncio.to_thread(crawl_company_news, name, sector, is_ntb=bool(is_ntb))

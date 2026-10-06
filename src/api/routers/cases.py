@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import queue
 import threading
 import traceback
 
@@ -16,6 +15,8 @@ from src.application.errors import ApplicationError
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["cases"])
+
+_KEEPALIVE_SECONDS = 15
 
 
 def _run_summary(case: dict) -> dict:
@@ -34,7 +35,11 @@ async def list_cases(svc: ServiceContainer = Depends(get_container)):
 
 @router.get("/cases/{entity_id}")
 async def get_case(entity_id: str, svc: ServiceContainer = Depends(get_container)):
-    return svc.cases.require(entity_id, "Case not found — run the pipeline first.")
+    """The case record. In-memory bookkeeping keys (``_``-prefixed) are not sent."""
+    case = svc.cases.require(entity_id, "Case not found — run the pipeline first.")
+    public = {key: value for key, value in case.items() if not key.startswith("_")}
+    public["documents_changed"] = bool(case.get("_documents_changed"))
+    return public
 
 
 @router.get("/cases/{entity_id}/runs")
@@ -62,24 +67,32 @@ async def run_case(entity_id: str, svc: ServiceContainer = Depends(get_container
 async def run_case_stream(entity_id: str, svc: ServiceContainer = Depends(get_container)):
     """Server-sent events: run the pipeline and stream agent/section progress."""
     svc.companies.require(entity_id)
-    events: queue.Queue = queue.Queue()
+    # The pipeline runs in a worker thread and hands events to the event loop, so
+    # the stream wakes only when there is something to send (no polling).
+    loop = asyncio.get_running_loop()
+    events: asyncio.Queue = asyncio.Queue()
+
+    def _publish(event: dict) -> None:
+        try:
+            loop.call_soon_threadsafe(events.put_nowait, event)
+        except RuntimeError:  # event loop closed (server shutting down)
+            pass
 
     def _pipeline_thread():
         try:
-            case, _ = svc.cases.run(entity_id, on_progress=events.put)
-            events.put({"type": "done", "entity_id": entity_id, **_run_summary(case)})
+            case, _ = svc.cases.run(entity_id, on_progress=_publish)
+            _publish({"type": "done", "entity_id": entity_id, **_run_summary(case)})
         except Exception as e:
-            events.put({"type": "error", "message": str(e)})
+            _publish({"type": "error", "message": str(e)})
 
     threading.Thread(target=_pipeline_thread, daemon=True).start()
 
     async def _event_generator():
         while True:
             try:
-                event = events.get_nowait()
-            except queue.Empty:
-                yield ": keepalive\n\n"
-                await asyncio.sleep(0.3)
+                event = await asyncio.wait_for(events.get(), timeout=_KEEPALIVE_SECONDS)
+            except asyncio.TimeoutError:
+                yield ": keepalive\n\n"  # keeps proxies from closing a quiet stream
                 continue
             yield f"data: {json.dumps(event)}\n\n"
             if event.get("type") in ("done", "error"):
@@ -91,12 +104,25 @@ async def run_case_stream(entity_id: str, svc: ServiceContainer = Depends(get_co
 
 @router.post("/pipeline/run-all")
 async def run_all(svc: ServiceContainer = Depends(get_container)):
-    results = []
-    for entity_id in list(svc.state.companies):
-        if svc.approvals.is_locked_for_rerun(entity_id):
-            results.append({"entity_id": entity_id, "skipped": "with approving authority"})
-            continue
-        case, _ = svc.cases.run(entity_id)
-        results.append({"entity_id": entity_id, "recommendation": case["recommendation"],
-                        "risk_grade": case["risk_grade"]})
-    return {"status": "completed", "results": results}
+    """Run every company in turn; one failure is reported and does not stop the batch."""
+
+    def _run_all() -> list[dict]:
+        results = []
+        for entity_id in list(svc.state.companies):
+            if svc.approvals.is_locked_for_rerun(entity_id):
+                results.append({"entity_id": entity_id, "skipped": "with approving authority"})
+                continue
+            try:
+                case, _ = svc.cases.run(entity_id)
+            except Exception as e:
+                log.error("Pipeline failed for %s during run-all: %s", entity_id, e)
+                results.append({"entity_id": entity_id, "error": str(e)})
+                continue
+            results.append({"entity_id": entity_id, "recommendation": case["recommendation"],
+                            "risk_grade": case["risk_grade"]})
+        return results
+
+    results = await asyncio.to_thread(_run_all)
+    failed = sum(1 for r in results if "error" in r)
+    return {"status": "completed_with_errors" if failed else "completed",
+            "failed": failed, "results": results}

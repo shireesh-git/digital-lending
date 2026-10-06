@@ -1,5 +1,6 @@
 """Standalone analytics: ETB conduct, PEP screening, core banking, social media, fraud."""
 
+import asyncio
 from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -43,7 +44,8 @@ async def pep_screening(entity_id: str, svc: ServiceContainer = Depends(get_cont
         return {"entity_id": entity_id, "company_name": b.company_name if b else entity_id,
                 "pep_hits": [], "sanctions_hits": [], "adverse_media": [],
                 "summary": "No directors on record for screening"}
-    return {"entity_id": entity_id, **asdict(screen_directors(entity_id=entity_id, directors=directors))}
+    screening = await asyncio.to_thread(screen_directors, entity_id=entity_id, directors=directors)
+    return {"entity_id": entity_id, **asdict(screening)}
 
 
 @router.get("/core-banking")
@@ -64,14 +66,15 @@ async def social_media_analysis(entity_id: str, svc: ServiceContainer = Depends(
     b = company.get("borrower")
     name = b.company_name if b else entity_id
     sector = b.sector.value if b and hasattr(b.sector, "value") else "general"
-    return {"entity_id": entity_id, **analyze_social_media(entity_id, name, sector)}
+    return {"entity_id": entity_id, **(await asyncio.to_thread(analyze_social_media, entity_id, name, sector))}
 
 
 @router.post("/fraud-analysis")
 async def run_fraud_analysis(entity_id: str, svc: ServiceContainer = Depends(get_container)):
     """Multi-signal fraud detection (Beneish, Altman, Benford, governance, documents)."""
     company = svc.companies.require(entity_id, f"Company {entity_id} not found. Onboard first.")
-    report = run_fraud_scan(company, extraction_data=svc.state.extractions.get(entity_id))
+    report = await asyncio.to_thread(run_fraud_scan, company,
+                                     extraction_data=svc.state.extractions.get(entity_id))
     result = {
         "entity_id": report.entity_id,
         "company_name": report.company_name,

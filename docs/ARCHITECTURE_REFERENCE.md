@@ -646,59 +646,51 @@ Some components use **statistical formulas** that look like ML but aren't:
 
 **Files:** `src/agents/pipeline.py` (orchestrator) and one module per agent in `src/agents/`
 
-The `SuperAgent.execute_pipeline(company_data)` orchestrates 7 sub-agents sequentially:
+`SuperAgent.execute_pipeline(company_data)` runs 7 sub-agents. Each agent declares
+`requires` (agents that must succeed first — their results, or their changes to
+`company_data`, are needed) and `waits_for` (agents whose result it uses if present).
+With `pipeline.parallel_agents: true` (default, `config/settings.yaml`) an agent starts
+as soon as those have finished, so independent agents run side by side; with `false` they
+run one at a time in list order. The pipeline log is kept in list order either way.
 
 ```
-┌─────────────────────────────────────────────────┐
-│  1. DataIngestionAgent (critical=True)          │
-│     → Fetches Mock External APIs                │
-│     → MCA, Bureau, Market, GST, Rating data     │
-│     → Web crawl (11 sector corpora)             │
-│     → Social media & digital intelligence       │
-├─────────────────────────────────────────────────┤
-│  2. PEPScreeningAgent (critical=True)           │
-│     → PEP/sanctions/adverse media screening     │
-│     → Checks all directors against PEP database │
-│     → Real Indian PEP entries + sanctions list  │
-├─────────────────────────────────────────────────┤
-│  3. FinancialAnalysisAgent (critical=True)      │
-│     → Runs ratio_engine on all periods          │
-│     → 27 ratios × 3 years                       │
-├─────────────────────────────────────────────────┤
-│  4. ValidationAgent (critical=True)             │
-│     → Runs validation_engine                    │
-│     → 30+ rules → exceptions by severity        │
-├─────────────────────────────────────────────────┤
-│  5. BenchmarkAgent (critical=True)              │
-│     → Runs benchmark_engine                     │
-│     → Peer comparison across sectors             │
-├─────────────────────────────────────────────────┤
-│  6. PolicyAgent (critical=True)                 │
-│     → Tier 1: Hard rules (9 pass/fail gates)    │
-│     → Tier 2: Risk scoring (4 components)       │
-│     → Tier 3: Recommendation + conditions        │
-├─────────────────────────────────────────────────┤
-│  7. NarrativeAgent (critical=False)             │
-│     → Builds fact-pack (cam_fact_builder)        │
-│     → Renders CAM (cam_llm_renderer or template) │
-│     → 19 sections, ~30,000 chars of narrative    │
-│     → Core banking + social media + PEP sections │
-└─────────────────────────────────────────────────┘
+data_ingestion ─┬─ financial_analysis ── benchmark ─┐
+                └─ validation ──────────────────────┴─ policy ─┐
+pep_screening ─────────────────────────────────────────────────┴─ narrative
 ```
 
-**Critical flag:** If a critical agent fails, the pipeline halts. NarrativeAgent is non-critical — if it fails, the case still gets risk scores and recommendation, just no narrative text.
+| # | Agent | Critical | requires / waits_for | Does |
+|---|-------|----------|----------------------|------|
+| 1 | DataIngestionAgent | yes | — | DMS fetch, document extraction (cached per file), uploaded-financials overrides on `company_data`, authenticity fingerprints, ETB analytics, cached verified public records (Probe42) |
+| 2 | PEPScreeningAgent | no | — | Directors against PEP/sanctions lists |
+| 3 | FinancialAnalysisAgent | yes | requires ingestion | `ratio_engine` over all periods (ingestion may first replace financials from uploads) |
+| 4 | ValidationAgent | yes | requires ingestion | Structural, cross-source and policy validations → exceptions |
+| 5 | BenchmarkAgent | yes | requires financial analysis | Sector peer percentiles |
+| 6 | PolicyAgent | yes | requires 3, 4, 5 | Tier 1 hard rules, tier 2 risk score, tier 3 recommendation |
+| 7 | NarrativeAgent | yes | requires 3–6; waits_for PEP | Fact pack (reusing the PEP result) and CAM text: templates, or the LLM via `cam_llm_renderer` with prompts from `cam_sections.py` |
+
+**Critical flag:** if a critical agent fails, the pipeline stops and the run is recorded as
+failed (`GET /api/cases/{id}/runs`). PEP screening is the only non-critical agent; if it
+fails, the narrative screens the directors itself.
+
+**Narrative execution path** depends on the active LLM provider: on hosted providers up to
+`narrative.max_parallel_sections` sections are written at once; Ollama writes one at a time
+with one context size for the run. LLM-written sections are checkpointed as they finish, so a
+failed run resumes. See the README section *Pipeline execution & performance*.
 
 ---
 
 ## 7. API Layer
 
-**File:** `src/api/main.py` (~1200 lines)
+**Files:** `src/api/main.py` (ASGI entry), `src/api/app.py` (app factory) and one router per
+area in `src/api/routers/`; business logic is in `src/application/` services. Full list:
+the README endpoint summary or `/docs` (OpenAPI) on a running server.
 
 ### 7.1 Key Endpoints
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/api/companies` | GET | List all 19 companies |
+| `/api/companies` | GET | List companies (with identifiers, facility type, purpose) |
 | `/api/companies` | POST | Add new company (JSON → canonical model) |
 | `/api/cases/{eid}/run` | POST | Execute full pipeline for company |
 | `/api/cases` | GET | List all analyzed cases |

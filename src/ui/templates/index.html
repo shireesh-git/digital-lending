@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<div x-data="camApp()" x-init="init()" class="app-shell">
+<div x-data="camApp()" class="app-shell">
   <header class="app-topbar">
     <div class="topbar-brand">
       <div class="brand-icon">&#9670;</div>
@@ -171,24 +171,44 @@
         <article class="card">
           <div class="surface-heading">
             <div>
-              <div class="section-kicker">Work Queue</div>
-              <h3>My Assigned CAMs</h3>
+              <div class="section-kicker">Approval Workflow</div>
+              <h3>Decision Status</h3>
             </div>
+            <button class="btn btn-sm btn-outline" @click="reportTab='approval'; navigate('reports')">Open Approvals</button>
           </div>
           <table class="data-table">
-            <thead><tr><th>Company</th><th>Priority</th><th>Stage</th><th>Due</th></tr></thead>
+            <thead><tr><th>Status</th><th>Cases</th></tr></thead>
             <tbody>
-              <template x-for="task in assignedCases()" :key="task.company_name">
+              <template x-for="row in workflowStatusRows()" :key="row.status">
                 <tr>
-                  <td x-text="displayCompanyName(task.company_name)"></td>
-                  <td x-text="task.priority"></td>
-                  <td x-text="task.stage"></td>
-                  <td x-text="task.due"></td>
+                  <td><span class="badge" :class="workflowStatusClass(row.status)" x-text="titleCase(row.status)"></span></td>
+                  <td x-text="row.count"></td>
                 </tr>
               </template>
             </tbody>
           </table>
-          <p class="empty-state" x-show="!assignedCases().length">No analyst follow-up queue yet. Executed cases will appear here after the first run.</p>
+          <p class="empty-state" x-show="!workflowStatusRows().length">No cases in the approval workflow yet. Executed cases start as drafts.</p>
+        </article>
+      </div>
+
+      <div class="grid-2" x-show="hasExecutedCases()">
+        <article class="card">
+          <div class="surface-heading">
+            <div>
+              <div class="section-kicker">Portfolio</div>
+              <h3>Risk Grade Distribution</h3>
+            </div>
+          </div>
+          <div style="position:relative; height:240px"><canvas id="gradeChart"></canvas></div>
+        </article>
+        <article class="card">
+          <div class="surface-heading">
+            <div>
+              <div class="section-kicker">Latest Case</div>
+              <h3 x-text="latestCaseLabel()"></h3>
+            </div>
+          </div>
+          <div style="position:relative; height:240px"><canvas id="scoreChart"></canvas></div>
         </article>
       </div>
     </section>
@@ -279,7 +299,8 @@
         <button :class="{'tab-active':dtab==='documents'}" @click="dtab='documents'">Documents</button>
         <button :class="{'tab-active':dtab==='extraction'}" @click="dtab='extraction'">Extraction</button>
         <button :class="{'tab-active':dtab==='etbdetail'}" @click="dtab='etbdetail'">ETB</button>
-        <button :class="{'tab-active':dtab==='pipeline'}" @click="dtab='pipeline'">Pipeline Log</button>
+        <button :class="{'tab-active':dtab==='risk'}" @click="dtab='risk'; loadRiskChecks()">Risk Checks</button>
+        <button :class="{'tab-active':dtab==='pipeline'}" @click="dtab='pipeline'; loadRunHistory()">Pipeline Log</button>
         <button :class="{'tab-active':dtab==='factpack'}" @click="dtab='factpack'">Fact Pack</button>
       </div>
 
@@ -361,6 +382,8 @@
           <h3 style="margin:0">Document Repository</h3>
           <div style="display:flex; gap:0.75rem; flex-wrap:wrap">
             <button class="btn btn-sm btn-outline" @click="docEntity=detail.entity_id; navigate('documents')">Open Documents Workspace</button>
+            <button class="btn btn-sm btn-outline" x-show="supportsDocumentPack(detail?.entity_id)"
+                    @click="generateDocumentsForDetail()" :disabled="loading">Generate Document Pack</button>
             <button class="btn btn-sm btn-primary" @click="runExtractionForDetail()" :disabled="loading">
               <span x-show="!loading">&#9654; Run Extraction</span>
               <span x-show="loading">Extracting&hellip;</span>
@@ -514,8 +537,90 @@
         <p class="empty-state" x-show="!detailETB">No ETB data. Only available for ETB case types with conduct history.</p>
       </div>
 
+      <!-- Tab: Risk Checks (fraud scan + PEP screening) -->
+      <div class="card" x-show="detail && dtab==='risk'">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem">
+          <h3 style="margin:0">Fraud Detection</h3>
+          <button class="btn btn-sm btn-primary" @click="runFraudForDetail()" :disabled="loading">
+            <span x-show="!loading" x-text="detailFraud ? '&#8635; Re-run Fraud Scan' : '&#9654; Run Fraud Scan'"></span>
+            <span x-show="loading">Scanning&hellip;</span>
+          </button>
+        </div>
+        <div x-show="detailFraud">
+          <div class="metric-cards five">
+            <div class="metric-card mini">
+              <div class="metric-label">Fraud Risk</div>
+              <div class="metric-value" x-text="detailFraud?.risk_grade || '--'"></div>
+              <div class="metric-sub" x-text="'Score ' + (detailFraud?.composite_score ?? '--')"></div>
+            </div>
+            <div class="metric-card mini">
+              <div class="metric-label">Beneish M</div>
+              <div class="metric-value" x-text="detailFraud?.beneish_m_score ?? '--'"></div>
+              <div class="metric-sub" x-text="detailFraud?.beneish_probability || ''"></div>
+            </div>
+            <div class="metric-card mini">
+              <div class="metric-label">Altman Z</div>
+              <div class="metric-value" x-text="detailFraud?.altman_z_score ?? '--'"></div>
+              <div class="metric-sub" x-text="detailFraud?.altman_zone || ''"></div>
+            </div>
+            <div class="metric-card mini">
+              <div class="metric-label">Benford</div>
+              <div class="metric-value" x-text="detailFraud?.benford_chi_sq ?? '--'"></div>
+              <div class="metric-sub" x-text="detailFraud?.benford_verdict || ''"></div>
+            </div>
+            <div class="metric-card mini">
+              <div class="metric-label">Governance</div>
+              <div class="metric-value" x-text="detailFraud?.governance_score ?? '--'"></div>
+            </div>
+          </div>
+          <p style="line-height:1.6; margin-top:1rem" x-text="detailFraud?.summary"></p>
+          <table class="data-table" x-show="detailFraud?.flags?.length">
+            <thead><tr><th>Category</th><th>Indicator</th><th>Severity</th><th>Details</th></tr></thead>
+            <tbody>
+              <template x-for="(f, i) in detailFraud?.flags || []" :key="i">
+                <tr>
+                  <td x-text="titleCase(f.category)"></td>
+                  <td x-text="f.indicator"></td>
+                  <td><span class="badge" :class="sevCls(f.severity)" x-text="f.severity"></span></td>
+                  <td class="text-muted" x-text="f.details"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-state" x-show="!detailFraud">No fraud scan for this case yet. Run the scan to check financial manipulation, distress and document signals.</p>
+
+        <h3 style="margin:1.5rem 0 1rem">PEP &amp; Sanctions Screening</h3>
+        <div x-show="detailPep">
+          <div class="detail-grid">
+            <div><strong>Status</strong><br><span x-text="titleCase(detailPep?.status || 'not screened')"></span></div>
+            <div><strong>Overall Risk</strong><br><span x-text="titleCase(detailPep?.overall_risk || '--')"></span></div>
+            <div><strong>Persons Screened</strong><br><span x-text="detailPep?.total_persons_screened ?? 0"></span></div>
+            <div><strong>PEP Hits</strong><br><span x-text="(detailPep?.pep_hits || []).length"></span></div>
+            <div><strong>Sanctions Hits</strong><br><span x-text="Array.isArray(detailPep?.sanctions_hits) ? detailPep.sanctions_hits.length : (detailPep?.sanctions_hits ?? 0)"></span></div>
+            <div><strong>Adverse Media</strong><br><span x-text="Array.isArray(detailPep?.adverse_media) ? detailPep.adverse_media.length : (detailPep?.adverse_media_hits ?? 0)"></span></div>
+          </div>
+          <p class="text-muted" x-text="detailPep?.remarks || detailPep?.summary || ''"></p>
+          <table class="data-table" x-show="detailPep?.pep_hits?.length">
+            <thead><tr><th>Person</th><th>Category</th><th>Designation</th><th>Risk</th></tr></thead>
+            <tbody>
+              <template x-for="(h, i) in detailPep?.pep_hits || []" :key="i">
+                <tr>
+                  <td x-text="h.person_name"></td>
+                  <td x-text="titleCase(h.pep_category)"></td>
+                  <td x-text="h.pep_designation"></td>
+                  <td><span class="badge" :class="sevCls(h.risk_level)" x-text="h.risk_level"></span></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <p class="empty-state" x-show="!detailPep">Screening loads when this tab opens.</p>
+      </div>
+
       <!-- Tab: Pipeline Log -->
       <div class="card" x-show="detail && dtab==='pipeline'">
+        <h4>Latest run &mdash; agent log</h4>
         <table class="data-table">
           <thead><tr><th>Agent</th><th>Status</th><th>Duration</th><th>Error</th></tr></thead>
           <tbody>
@@ -529,6 +634,22 @@
             </template>
           </tbody>
         </table>
+        <h4 style="margin-top:1.5rem">Run history</h4>
+        <table class="data-table" x-show="detailRuns.length">
+          <thead><tr><th>Started</th><th>Finished</th><th>Status</th><th>LLM</th><th>Error</th></tr></thead>
+          <tbody>
+            <template x-for="run in detailRuns" :key="run.run_id">
+              <tr>
+                <td x-text="formatRunTime(run.started_at)"></td>
+                <td x-text="run.finished_at ? formatRunTime(run.finished_at) : '--'"></td>
+                <td><span class="badge" :class="run.status==='completed' ? 'badge-green' : (run.status==='failed' ? 'badge-red' : 'badge-amber')" x-text="run.status"></span></td>
+                <td x-text="run.llm_provider || '--'"></td>
+                <td class="text-muted" x-text="run.error || '--'"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <p class="empty-state" x-show="!detailRuns.length">No recorded pipeline attempts for this company.</p>
       </div>
 
       <!-- Tab: Fact Pack JSON -->
@@ -550,7 +671,7 @@
         </div>
       </div>
 
-      <div class="journey-shell">
+      <div class="journey-shell" x-show="onboardMode !== 'manual'">
         <div class="journey-stepper">
           <template x-for="step in journeySteps()" :key="step.key">
             <div class="journey-step-pill" :class="'is-' + journeyStepState(step.key)">
@@ -593,29 +714,62 @@
 
           <div class="journey-entity-grid">
             <div class="form-group form-group-span">
-              <label>Company / CIN / GSTIN / PAN</label>
-              <input class="input input-lg" x-model="onboardId" placeholder="Reliance Industries Limited or L17110MH1973PLC019786 or 27AAACR5055K1Z6">
+              <label class="required">Borrower</label>
+              <select class="input input-lg" x-model="onboardPick" @change="onJourneyBorrowerPicked()">
+                <option value="">Select a borrower</option>
+                <optgroup :label="(onboardCaseType === 'ETB' ? 'Existing to Bank' : 'New to Bank') + ' borrowers'">
+                  <template x-for="c in journeyBorrowerOptions(true)" :key="c.entity_id">
+                    <option :value="c.entity_id" x-text="journeyBorrowerLabel(c)"></option>
+                  </template>
+                </optgroup>
+                <optgroup label="Other borrowers in the catalog" x-show="journeyBorrowerOptions(false).length">
+                  <template x-for="c in journeyBorrowerOptions(false)" :key="c.entity_id">
+                    <option :value="c.entity_id" x-text="journeyBorrowerLabel(c) + ' — ' + c.case_type"></option>
+                  </template>
+                </optgroup>
+                <option value="__other__">Other — enter CIN / PAN / GSTIN / name</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" style="margin-top:0.35rem; padding-left:0" @click="onboardMode='manual'">Borrower not on record? Add it manually</button>
+              <p class="text-muted" style="margin:0.35rem 0 0; font-size:0.8rem" x-show="journeyPickedCompany()"
+                 x-text="journeyIdentifierLine(journeyPickedCompany())"></p>
+              <p class="text-muted" style="margin:0.35rem 0 0; font-size:0.8rem"
+                 x-show="onboardCaseType === 'ETB' && !journeyBorrowerOptions(true).length">No ETB borrowers in the test data; pick from the other borrowers or enter an identifier.</p>
+            </div>
+            <div class="form-group form-group-span" x-show="onboardPick === '__other__'">
+              <label class="required">Company / CIN / GSTIN / PAN</label>
+              <input class="input" x-model="onboardId" placeholder="e.g. L85110KA1981PLC013115 or AAACI3456C or Infosys Limited">
             </div>
             <div class="form-group">
-              <label>Facility Type</label>
+              <label class="required">Facility Type</label>
               <select class="input" x-model="onboardFacility">
-                <template x-for="f in enumVals.facility_types||[]"><option :value="f" x-text="titleCase(f)"></option></template>
+                <template x-for="f in enumVals.facility_types||[]"><option :value="f" :selected="f === onboardFacility" x-text="titleCase(f)"></option></template>
               </select>
             </div>
             <div class="form-group">
-              <label>Amount Requested (Cr)</label>
-              <input class="input" type="number" step="0.01" x-model.number="onboardAmount" placeholder="250">
+              <label class="required">Amount Requested (Cr)</label>
+              <select class="input" x-model.number="onboardAmount">
+                <option value="">Select amount</option>
+                <template x-for="opt in journeyAmountOptions()" :key="opt.value">
+                  <option :value="opt.value" :selected="opt.value === onboardAmount" x-text="opt.label"></option>
+                </template>
+              </select>
             </div>
             <div class="form-group form-group-span">
               <label>Purpose</label>
-              <input class="input" x-model="onboardPurpose" placeholder="Working capital / capex / refinancing / renewal">
+              <select class="input" x-model="onboardPurpose">
+                <option value="">Not specified</option>
+                <template x-for="p in journeyPurposeOptions()" :key="p">
+                  <option :value="p" :selected="p === onboardPurpose" x-text="p"></option>
+                </template>
+              </select>
             </div>
           </div>
 
           <div class="action-row" style="margin-top:1rem">
             <button class="btn btn-outline" @click="previewResolve()" :disabled="loading || !onboardId.trim()">Preview Entity</button>
-            <button class="btn btn-primary" @click="launchJourneyPreparation()" :disabled="loading || !onboardId.trim()">Proceed with CAM Preparation</button>
+            <button class="btn btn-primary" @click="launchJourneyPreparation()" :disabled="loading || !journeyFormComplete()">Proceed with CAM Preparation</button>
           </div>
+          <p class="text-muted" style="margin:0.5rem 0 0; font-size:0.8rem" x-show="!journeyFormComplete()">Fill the fields marked <span style="color:var(--red)">*</span> to continue.</p>
 
           <template x-if="onboardCaseType==='ETB'">
             <div class="status-panel status-panel-blue" style="margin-top:1rem">
@@ -965,336 +1119,25 @@
         </div>
       </div>
 
-      <div x-show="false">
-      <div class="page-header page-header-stack">
-        <div>
-          <div class="page-kicker">Intake + Enrichment</div>
-          <h1>Smart Company Onboarding</h1>
-          <p class="page-subtitle">Resolve one identifier, reuse a cached verified record set, and prepare the case for CAM, document review, and analyst chat without redundant calls.</p>
-        </div>
-      </div>
-
-      <div class="hero-panel hero-panel-onboard">
-        <div class="hero-panel-copy">
-          <div class="section-kicker">Live Integration</div>
-          <h2>Verified Data Workflow</h2>
-          <p>Low-call resolve, single-entity cached enrichment, RM gap capture, and downstream pipeline reuse are all handled in one guided flow built for credit operations.</p>
-          <div class="hero-sequence">
-            <span>Resolve</span>
-            <span>Data pull</span>
-            <span>Gap capture</span>
-            <span>CAM</span>
-            <span>Chat</span>
-          </div>
-        </div>
-        <div class="hero-panel-side">
-          <div class="hero-status-row">
-            <span class="badge lg" :class="probeStatus?.configured ? 'badge-green' : 'badge-amber'" x-text="probeStatus?.configured ? 'Integration Ready' : 'Setup Required'"></span>
-          </div>
-          <div class="hero-metric-grid">
-            <div class="hero-metric">
-              <span>Transport</span>
-              <strong x-text="probeStatus?.transport || 'mcp'"></strong>
-            </div>
-            <div class="hero-metric">
-              <span>Coverage</span>
-              <strong>Verified public records</strong>
-            </div>
-            <div class="hero-metric">
-              <span>Default Profile</span>
-              <strong x-text="titleCase(probeStatus?.bundle_profile || 'full')"></strong>
-            </div>
-            <div class="hero-metric">
-              <span>Cache TTL</span>
-              <strong x-text="cacheTtlLabel(probeStatus?.cache_ttl_hours || 576)"></strong>
-            </div>
-            <div class="hero-metric">
-              <span>Discovered Tools</span>
-              <strong x-text="probeStatus?.tool_names?.length || 0"></strong>
-            </div>
-            <div class="hero-metric">
-              <span>Call Pattern</span>
-              <strong>1 entity, 1 full cached bundle</strong>
-            </div>
-          </div>
-          <p x-show="probeStatus && !probeStatus.configured" class="hero-note">Live data retrieval requires the server env var <code>PROBE42_API_KEY</code>.</p>
-        </div>
-      </div>
-
-      <div class="tabs tabs-elevated" style="margin-bottom:1.5rem">
-        <button :class="{'tab-active':onboardMode==='smart'}" @click="onboardMode='smart'">&#9889; Smart Onboard</button>
-        <button :class="{'tab-active':onboardMode==='manual'}" @click="onboardMode='manual'">&#9997; Manual Entry</button>
-      </div>
-
-      <div x-show="onboardMode==='smart'" class="onboard-workspace">
-        <div class="onboard-main">
-          <div class="card form-surface">
-            <div class="surface-heading">
-              <div>
-                <div class="section-kicker">Primary Intake</div>
-                <h3>Enter One Identifier</h3>
-                <p class="section-subtitle">Provide PAN, GSTIN, CIN, Entity ID, or company name. Preview stays cheap; onboarding reuses the cached verified record set for CAM.</p>
-              </div>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group form-group-span">
-                <label>Company Identifier *</label>
-                <input class="input input-lg" x-model="onboardId" placeholder="e.g. AABCB1234F or 27AABCB1234F1Z5 or Bharat Manufacturing">
-                <p class="field-hint">The system will resolve the entity first, then attach verified public records and document gaps to the same borrower record.</p>
-              </div>
-            </div>
-
-            <div class="workflow-steps">
-              <div class="workflow-step">
-                <span class="workflow-step-num">1</span>
-                <div>
-                  <div class="workflow-step-title">Resolve identity</div>
-                  <div class="workflow-step-copy">Low-call preview to validate the borrower match.</div>
-                </div>
-              </div>
-              <div class="workflow-step">
-                <span class="workflow-step-num">2</span>
-                <div>
-                  <div class="workflow-step-title">Pull verified public records</div>
-                  <div class="workflow-step-copy">KYC, GST, EPFO, charges, ratings, suits, director network, and freshness in one cached fetch.</div>
-                </div>
-              </div>
-              <div class="workflow-step">
-                <span class="workflow-step-num">3</span>
-                <div>
-                  <div class="workflow-step-title">Create draft financial context</div>
-                  <div class="workflow-step-copy">Seed the case so CAM generation can start as soon as uploads land.</div>
-                </div>
-              </div>
-              <div class="workflow-step">
-                <span class="workflow-step-num">4</span>
-                <div>
-                  <div class="workflow-step-title">Capture RM gaps</div>
-                  <div class="workflow-step-copy">Surface only the missing borrower documents the RM still needs to provide.</div>
-                </div>
-              </div>
-              <div class="workflow-step">
-                <span class="workflow-step-num">5</span>
-                <div>
-                  <div class="workflow-step-title">Run CAM and chat</div>
-                  <div class="workflow-step-copy">The same onboarded case flows into pipeline execution and analyst review.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Case Type *</label>
-                <select class="input" x-model="onboardCaseType" @change="etbLookupResult=null; etbLookupError=''">
-                  <option value="NTB">NTB - New to Bank</option>
-                  <option value="ETB">ETB - Existing to Bank</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Facility Type</label>
-                <select class="input" x-model="onboardFacility">
-                  <template x-for="f in enumVals.facility_types||[]"><option :value="f" x-text="titleCase(f)"></option></template>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Amount Requested (Cr)</label>
-                <input class="input" type="number" step="0.01" x-model.number="onboardAmount" placeholder="100">
-              </div>
-              <div class="form-group">
-                <label>Purpose</label>
-                <input class="input" x-model="onboardPurpose" placeholder="e.g. Working capital augmentation">
-              </div>
-            </div>
-
-            <template x-if="onboardCaseType==='ETB'">
-              <div class="status-panel status-panel-blue" style="margin-top:1rem">
-                <div class="status-panel-head">
-                  <div>
-                    <div class="section-kicker">Existing Relationship Check</div>
-                    <h4>ETB lookup via CRILC</h4>
-                    <p class="section-subtitle">Verify current banking exposure before onboarding the case as existing-to-bank.</p>
-                  </div>
-                  <button class="btn btn-primary" @click="etbLookup()" :disabled="loading || !onboardId.trim()">
-                    <span x-show="!loading">&#128269; Fetch ETB Data</span>
-                    <span x-show="loading">Looking up&hellip;</span>
-                  </button>
-                </div>
-                <div x-show="etbLookupError" class="status-inline status-inline-error">
-                  <strong>&#9888;</strong>
-                  <span x-text="etbLookupError"></span>
-                </div>
-                <div x-show="etbLookupResult" class="status-inline status-inline-success">
-                  <div class="info-cluster">
-                    <div><span>Entity</span><strong x-text="etbLookupResult?.entity_name"></strong></div>
-                    <div><span>Total Exposure</span><strong x-text="(etbLookupResult?.aggregate_exposure_cr||0)+' Cr'"></strong></div>
-                    <div><span>Fund Based</span><strong x-text="(etbLookupResult?.fund_based_cr||0)+' Cr'"></strong></div>
-                    <div><span>Non-Fund Based</span><strong x-text="(etbLookupResult?.non_fund_based_cr||0)+' Cr'"></strong></div>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <div class="status-panel status-panel-muted" style="margin-top:1rem">
-              <div class="inline-toggle-row">
-                <div>
-                  <div class="section-kicker">Supplementary Input</div>
-                  <h4>CRILC report availability</h4>
-                  <p class="section-subtitle">Mark whether internal CRILC is already available so the downstream case reflects the correct ETB coverage.</p>
-                </div>
-                <label class="inline-toggle">
-                  <input type="checkbox" x-model="onboardCrilcAvailable">
-                  <span class="inline-toggle-indicator"></span>
-                  <span class="inline-toggle-label" x-text="onboardCrilcAvailable ? 'Available' : 'Not available'"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="action-bar">
-              <div class="action-row">
-                <button class="btn btn-primary btn-lg" @click="smartOnboard()" :disabled="loading || !onboardId.trim()">
-                  <span x-show="!loading">&#9889; Auto-Fetch &amp; Onboard</span>
-                  <span x-show="loading">Fetching&hellip;</span>
-                </button>
-                <button class="btn btn-outline" @click="previewResolve()" :disabled="loading || !onboardId.trim()">Preview Resolve</button>
-              </div>
-              <p class="field-hint">Preview resolve validates the entity match without starting full onboarding or pipeline execution.</p>
-            </div>
-          </div>
-
-          <div x-show="onboardResult" class="card result-panel result-panel-success">
-            <div class="surface-heading">
-              <div>
-                <div class="section-kicker">Case Created</div>
-                <h3>Onboarding complete</h3>
-                <p class="section-subtitle" x-text="onboardResult?.message"></p>
-              </div>
-              <span class="badge lg badge-green">Ready for pipeline</span>
-            </div>
-            <div class="summary-grid compact">
-              <div class="summary-card">
-                <div class="summary-label">Data Status</div>
-                <div class="summary-value">Verified</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Coverage</div>
-                <div class="summary-value">Full public record set</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Snapshot</div>
-                <div class="summary-value" x-text="onboardResult?.cache?.retained_until_deleted ? 'Retained' : humanizeText(onboardResult?.cache?.status || 'ready')"></div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Risk Snapshot</div>
-                <div class="summary-value" x-text="onboardResult?.probe_summary?.rating || 'Unrated'"></div>
-              </div>
-            </div>
-            <div class="summary-grid compact" style="margin-top:0.85rem">
-              <div class="summary-card">
-                <div class="summary-label">Legal Cases</div>
-                <div class="summary-value" x-text="onboardResult?.probe_summary?.legal_case_count ?? '-'"></div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Directors</div>
-                <div class="summary-value" x-text="onboardResult?.probe_summary?.directors_count ?? '-'"></div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Open Charges</div>
-                <div class="summary-value" x-text="onboardResult?.probe_summary?.open_charge_count ?? '-'"></div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Case ID</div>
-                <div class="summary-value" x-text="onboardResult?.entity_id || '-'"></div>
-              </div>
-            </div>
-            <div class="result-block">
-              <div class="section-kicker">Sources Fetched</div>
-              <div class="source-pill-grid">
-                <template x-for="[src, status] in Object.entries(onboardResult?.source_summary || {})">
-                  <div class="source-pill">
-                    <span class="badge badge-sm" :class="status==='success' ? 'badge-green' : 'badge-amber'" x-text="status"></span>
-                    <span x-text="src.replace(/_/g, ' ')"></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-            <div class="result-block" x-show="onboardResult?.missing_documents?.length">
-              <div class="section-kicker">Remaining RM Uploads</div>
-              <div class="tag-list">
-                <template x-for="doc in onboardResult?.missing_documents || []" :key="doc.type">
-                  <span class="badge badge-amber" x-text="doc.description"></span>
-                </template>
-              </div>
-            </div>
-            <div class="action-row" style="margin-top:1rem">
-              <button class="btn btn-primary" @click="navigate('pipeline')">Run Pipeline</button>
-              <button class="btn btn-outline" @click="pipelineTarget=onboardResult?.entity_id; navigate('pipeline')">Open in Pipeline</button>
-              <button class="btn btn-secondary" @click="docEntity=onboardResult?.entity_id; navigate('documents')">Open Documents</button>
-              <button class="btn btn-secondary" @click="reportEntity=onboardResult?.entity_id; reportTab='chat'; navigate('reports'); loadChatHistory()">Open Analyst Chat</button>
-            </div>
-          </div>
-        </div>
-
-        <aside class="onboard-side">
-          <div class="card side-panel">
-            <div class="section-kicker">Automation Scope</div>
-            <h3>What gets populated automatically</h3>
-            <ul class="compact-list">
-              <li>KYC and company master profile</li>
-              <li>Legal history, open charges, and ratings snapshot</li>
-              <li>Case shell for CAM, reports, and analyst chat</li>
-              <li>Document gap tracking for RM follow-up</li>
-            </ul>
-          </div>
-
-          <div class="card side-panel">
-            <div class="section-kicker">Required RM Inputs</div>
-            <h3>What still needs borrower documents</h3>
-            <ul class="compact-list">
-              <li>Audited financial statements and latest provisional numbers</li>
-              <li>Debt schedule and lender-wise exposure</li>
-              <li>Board resolution or borrowing approval</li>
-              <li>CMA, projections, and repayment assumptions</li>
-            </ul>
-          </div>
-
-          <div x-show="resolvePreview" class="card result-panel result-panel-info">
-            <div class="section-kicker">Resolve Preview</div>
-            <h3 x-text="displayCompanyName(resolvePreview?.company_name) || 'Resolved identity'"></h3>
-            <div class="info-cluster info-cluster-vertical">
-              <div><span>CIN</span><strong x-text="resolvePreview?.cin || '-'"></strong></div>
-              <div><span>PAN</span><strong x-text="resolvePreview?.pan || '-'"></strong></div>
-              <div><span>GSTIN</span><strong x-text="resolvePreview?.gstin || '-'"></strong></div>
-              <div><span>Source</span><strong x-text="resolvePreview?.source || 'local_registry'"></strong></div>
-              <div><span>Records</span><strong>Verified public records</strong></div>
-              <div><span>Status</span><strong x-text="resolvePreview?.probe_summary?.status || '-'"></strong></div>
-              <div><span>Industry</span><strong x-text="resolvePreview?.probe_summary?.industry || '-'"></strong></div>
-              <div><span>Directors</span><strong x-text="resolvePreview?.probe_summary?.directors_count ?? '-'"></strong></div>
-              <div><span>Match Score</span><strong x-text="resolvePreview?.probe_summary?.probe_score ?? '-'"></strong></div>
-            </div>
-          </div>
-
-          <div x-show="!resolvePreview" class="card side-panel side-panel-empty">
-            <div class="section-kicker">Resolve Preview</div>
-            <h3>Validate the borrower before onboarding</h3>
-            <p class="text-muted">Use preview resolve to confirm the company match and inspect the verified identity snapshot before you commit the full onboarding flow.</p>
-          </div>
-        </aside>
-      </div>
-
-      <!-- â”€â”€ MANUAL MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- Manual entry: create a borrower that is not in the catalog (POST /api/companies) -->
       <div x-show="onboardMode==='manual'">
+        <div class="surface-heading" style="margin-bottom:1rem">
+          <div>
+            <div class="section-kicker">New Borrower</div>
+            <h2>Add a Borrower Manually</h2>
+            <p class="section-subtitle">For a borrower that is not in the catalog. After it is added, run it from Pipeline.</p>
+          </div>
+          <button class="btn btn-outline" @click="onboardMode='smart'">&larr; Back to CAM Journey</button>
+        </div>
         <div class="card">
           <h3>Company Details</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>Entity ID *</label>
+              <label class="required">Entity ID</label>
               <input class="input" x-model="newCo.entity_id" placeholder="e.g. ACME001">
             </div>
             <div class="form-group">
-              <label>Company Name *</label>
+              <label class="required">Company Name</label>
               <input class="input" x-model="newCo.company_name" placeholder="e.g. Acme Corp Pvt Ltd">
             </div>
             <div class="form-group">
@@ -1306,7 +1149,7 @@
               <input class="input" x-model="newCo.pan" placeholder="Optional">
             </div>
             <div class="form-group">
-              <label>Sector *</label>
+              <label class="required">Sector</label>
               <select class="input" x-model="newCo.sector">
                 <option value="">Select</option>
                 <template x-for="s in enumVals.sectors||[]"><option :value="s" x-text="s"></option></template>
@@ -1324,19 +1167,19 @@
           <h3>Facility Request</h3>
           <div class="form-grid">
             <div class="form-group">
-              <label>Case Type *</label>
+              <label class="required">Case Type</label>
               <select class="input" x-model="newCo.case_type">
                 <template x-for="c in enumVals.case_types||[]"><option :value="c" x-text="c"></option></template>
               </select>
             </div>
             <div class="form-group">
-              <label>Facility Type *</label>
+              <label class="required">Facility Type</label>
               <select class="input" x-model="newCo.facility_type">
                 <template x-for="f in enumVals.facility_types||[]"><option :value="f" x-text="titleCase(f)"></option></template>
               </select>
             </div>
             <div class="form-group">
-              <label>Amount Requested (Cr) *</label>
+              <label class="required">Amount Requested (Cr)</label>
               <input class="input" type="number" step="0.01" x-model.number="newCo.amount_requested_cr">
             </div>
             <div class="form-group">
@@ -1352,7 +1195,6 @@
           </button>
           <button class="btn btn-secondary" @click="resetCompanyForm()">Reset</button>
         </div>
-      </div>
       </div>
     </section>
 
@@ -1386,6 +1228,10 @@
             <span x-show="!docExtracting">Run Extraction</span>
             <span x-show="docExtracting">Extracting&hellip;</span>
           </button>
+          <button class="btn btn-outline btn-sm" x-show="supportsDocumentPack(docEntity)"
+                  @click="generateDocumentsForWorkspace()" :disabled="docLoading || loading || !docEntity">Generate Document Pack</button>
+          <button class="btn btn-ghost btn-sm" x-show="docProbe?.available"
+                  @click="clearVerifiedPublicData()" :disabled="docLoading || loading || !docEntity">Remove Verified Data</button>
         </div>
       </div>
 
@@ -1893,6 +1739,113 @@
         <button :class="{'tab-active':reportTab==='memo'}" @click="reportTab='memo'">&#128202; One-Page Memo</button>
             <button :class="{'tab-active':reportTab==='view360'}" @click="reportTab='view360'; if (!view360Data || view360Data.entity_id !== reportEntity) load360()">&#9673; 360&deg; View</button>
         <button :class="{'tab-active':reportTab==='chat'}" @click="reportTab='chat'; loadChatHistory(); loadReportProbe()">&#9993; Financial Advisor</button>
+        <button :class="{'tab-active':reportTab==='approval'}" @click="reportTab='approval'; loadApproval()">&#9878; Approval</button>
+      </div>
+
+      <div x-show="reportEntity && caseMap[reportEntity]?.documents_changed" class="status-inline status-inline-error" style="margin-top:1rem">
+        <span>Documents changed since this CAM was generated. Re-run the pipeline to refresh the analysis.</span>
+      </div>
+
+      <!-- ── Approval Tab ─── -->
+      <div x-show="reportTab==='approval'">
+        <div class="card" style="margin-top:1rem" x-show="!reportEntity">
+          <p class="empty-state">Select a company with an executed case to see its approval workflow.</p>
+        </div>
+        <div class="grid-2" style="margin-top:1rem" x-show="reportEntity">
+          <div class="card">
+            <h3>Workflow Status</h3>
+            <div class="detail-grid" x-show="approvalStatus">
+              <div><strong>Status</strong><br><span class="badge" :class="workflowStatusClass(approvalStatus?.status)" x-text="titleCase(approvalStatus?.status || '')"></span></div>
+              <div><strong>Required Authority</strong><br><span x-text="approvalStatus?.required_authority?.name || '--'"></span></div>
+              <div><strong>System Recommendation</strong><br><span class="badge" :class="recCls(approvalStatus?.system_recommendation)" x-text="fmtRec(approvalStatus?.system_recommendation || '')"></span></div>
+              <div><strong>Risk Grade</strong><br><span x-text="approvalStatus?.risk_grade || '--'"></span></div>
+              <div><strong>Amount</strong><br><span x-text="formatCurrencyCr(approvalStatus?.requested_amount_cr || 0)"></span></div>
+              <div><strong>Submitted By</strong><br><span x-text="approvalStatus?.submitted_by || '--'"></span></div>
+            </div>
+            <p class="status-inline status-inline-error" x-show="approvalStatus?.is_deviation_route">
+              <span>The system recommends DECLINE. Approving is a deviation and needs a justification in the comments.</span>
+            </p>
+            <p class="empty-state" x-show="!approvalStatus">Workflow status loads when this tab opens.</p>
+          </div>
+
+          <div class="card">
+            <h3>Take Action</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="field-label required">Acting Role</label>
+                <select class="input" x-model="approvalRole" @change="loadApprovalQueue()">
+                  <option value="">Select role</option>
+                  <optgroup label="Maker">
+                    <template x-for="role in approvalMakerRoles" :key="role">
+                      <option :value="role" x-text="titleCase(role)"></option>
+                    </template>
+                  </optgroup>
+                  <optgroup label="Approving authority">
+                    <template x-for="level in approvalLevels" :key="level.id">
+                      <option :value="level.id" x-text="level.name"></option>
+                    </template>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="field-label required">User ID</label>
+                <input class="input" x-model="approvalUserId" placeholder="Your staff ID">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="field-label" :class="{'required': approvalCommentsRequired()}">Comments</label>
+              <textarea class="input" rows="3" x-model="approvalComments" placeholder="Required to reject, return, or approve against a system decline"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="field-label">Sanction Conditions (one per line)</label>
+              <textarea class="input" rows="2" x-model="approvalConditions"></textarea>
+            </div>
+            <div class="action-row">
+              <template x-for="action in (approvalStatus?.allowed_actions || [])" :key="action">
+                <button class="btn btn-sm" :class="approvalActionClass(action)" @click="takeApprovalAction(action)"
+                        :disabled="loading || !approvalRole || !approvalUserId.trim()" x-text="titleCase(action)"></button>
+              </template>
+            </div>
+            <p class="text-muted" style="font-size:0.8rem; margin-top:0.75rem">Identity is taken from the role and user ID above until single sign-on is in place.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1rem" x-show="reportEntity">
+          <h3>Decision History</h3>
+          <table class="data-table" x-show="approvalStatus?.history?.length">
+            <thead><tr><th>When</th><th>Action</th><th>From &rarr; To</th><th>By</th><th>Comments</th></tr></thead>
+            <tbody>
+              <template x-for="(h, i) in approvalStatus?.history || []" :key="i">
+                <tr>
+                  <td x-text="formatRunTime(h.created_at)"></td>
+                  <td x-text="titleCase(h.action)"></td>
+                  <td x-text="titleCase(h.from_status) + ' → ' + titleCase(h.to_status)"></td>
+                  <td x-text="(h.actor_id || '--') + ' (' + titleCase(h.actor_role || '') + ')'"></td>
+                  <td class="text-muted" x-text="h.comments || '--'"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+          <p class="empty-state" x-show="!approvalStatus?.history?.length">No decisions recorded for this case run.</p>
+        </div>
+
+        <div class="card" style="margin-top:1rem" x-show="approvalQueue.length">
+          <h3>Awaiting Your Decision</h3>
+          <table class="data-table">
+            <thead><tr><th>Company</th><th>Amount</th><th>Grade</th><th>Recommendation</th><th></th></tr></thead>
+            <tbody>
+              <template x-for="q in approvalQueue" :key="q.entity_id">
+                <tr>
+                  <td x-text="displayCompanyName(q.company_name || q.entity_id)"></td>
+                  <td x-text="formatCurrencyCr(q.requested_amount_cr || 0)"></td>
+                  <td x-text="q.risk_grade || '--'"></td>
+                  <td><span class="badge" :class="recCls(q.system_recommendation)" x-text="fmtRec(q.system_recommendation || '')"></span></td>
+                  <td><button class="btn btn-sm btn-ghost" @click="reportEntity=q.entity_id; onReportEntityChange()">Open</button></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- â”€â”€ CAM Report Tab â”€â”€â”€ -->
@@ -2529,6 +2482,13 @@
               </div>
             </div>
             <div class="chat-input-bar">
+              <select class="input" style="max-width:220px" :disabled="chatLoading || !reportEntity"
+                      @change="if ($event.target.value) { chatInput = $event.target.value; $event.target.value = ''; }">
+                <option value="">Pick a question&hellip;</option>
+                <template x-for="q in chatSuggestions()" :key="q">
+                  <option :value="q" x-text="q"></option>
+                </template>
+              </select>
               <input class="input chat-input" x-model="chatInput" placeholder="Ask about financials, risk, conduct..."
                      @keydown.enter="sendChat()" :disabled="chatLoading || !reportEntity">
               <button class="btn btn-primary" @click="sendChat()" :disabled="chatLoading || !chatInput.trim() || !reportEntity">&#10148;</button>
@@ -2758,6 +2718,16 @@
   </main>
 </div>
 
+<!-- Page modules first: camApp() in app.js merges them into one Alpine component. -->
+<script src="/static/js/modules/formatters.js"></script>
+<script src="/static/js/modules/dashboard.js"></script>
+<script src="/static/js/modules/journey.js"></script>
+<script src="/static/js/modules/pipeline.js"></script>
+<script src="/static/js/modules/case-detail.js"></script>
+<script src="/static/js/modules/documents.js"></script>
+<script src="/static/js/modules/reports.js"></script>
+<script src="/static/js/modules/approvals.js"></script>
+<script src="/static/js/modules/settings.js"></script>
 <script src="/static/js/app.js"></script>
 </body>
 </html>

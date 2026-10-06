@@ -67,23 +67,23 @@ class CamService:
             md = self.regenerate_from_template(entity_id)
         return md
 
-    def html(self, entity_id: str) -> str:
+    def _edited_markdown(self, entity_id: str, case: dict) -> str:
+        """The CAM as the RM last saw it: stored text plus section edits, sanitized."""
         from src.engines.cam_llm_renderer import _sanitize_llm_markdown
 
-        case = self.cases.require(entity_id)
-        md = _sanitize_llm_markdown(self._renderable_markdown(entity_id, case))
-        return markdown_to_html(md, case.get("company_name", entity_id))
-
-    def pdf(self, entity_id: str) -> bytes:
-        from src.engines.cam_llm_renderer import _sanitize_llm_markdown
-
-        case = self.cases.require(entity_id)
         md = self._renderable_markdown(entity_id, case)
         section_edits = self.persistence.load_run_section_edits(case.get("run_id"))
         if section_edits:
             md = apply_section_edits_to_markdown(md, section_edits)
-        md = _sanitize_llm_markdown(md)
-        return generate_cam_pdf(md, case.get("company_name", entity_id),
+        return _sanitize_llm_markdown(md)
+
+    def html(self, entity_id: str) -> str:
+        case = self.cases.require(entity_id)
+        return markdown_to_html(self._edited_markdown(entity_id, case), case.get("company_name", entity_id))
+
+    def pdf(self, entity_id: str) -> bytes:
+        case = self.cases.require(entity_id)
+        return generate_cam_pdf(self._edited_markdown(entity_id, case), case.get("company_name", entity_id),
                                 section_comments=self.load_comments(entity_id))
 
     def one_pager(self, entity_id: str) -> str:

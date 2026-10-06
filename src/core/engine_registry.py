@@ -86,7 +86,9 @@ def register_default_engines():
     from src.engines.benchmark_engine import benchmark_all_periods, get_worst_benchmarks
     from src.engines.policy_engine import tier1_hard_rules, tier2_scoring, tier3_recommendation
     from src.engines.cam_fact_builder import build_cam_fact_pack
-    from src.engines.cam_renderer import render_complete_cam
+    # v2 is the template renderer the CAM path uses (cam_service, cam_llm_renderer);
+    # src/engines/cam_renderer.py is the legacy v1 kept only for older tests.
+    from src.engines.cam_renderer_v2 import render_complete_cam
 
     engines = [
         ("ratio_engine",       compute_all_ratios,         "1.0.0", "Compute 15 financial ratios",         "analysis"),

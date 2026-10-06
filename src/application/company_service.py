@@ -81,6 +81,10 @@ def merge_overlay_company_data(base_company: dict, enriched_company: dict) -> di
     return merged
 
 
+def _enum_value(value) -> str:
+    return getattr(value, "value", value) or ""
+
+
 def _max_revenue(financials: dict) -> float:
     best = 0.0
     for fs in financials.values():
@@ -129,12 +133,29 @@ class CompanyService:
                 "sector": d["borrower"].sector.value,
                 "borrower_type": d["borrower"].borrower_type.value,
                 "case_type": d["facility"].case_type.value,
+                "facility_type": _enum_value(d["facility"].facility_type),
                 "requested_amount_cr": d["facility"].amount_requested_cr,
+                "purpose": d["facility"].purpose,
+                "preferred_identifier": d.get("preferred_identifier") or d["borrower"].company_name,
+                **self._identifiers(eid, d),
                 "data_provider": d.get("data_provider", "internal"),
                 "has_result": eid in self.state.cases,
             }
             for eid, d in items
         ]
+
+    @staticmethod
+    def _identifiers(entity_id: str, company: dict) -> dict:
+        """CIN / PAN / GSTIN for pickers: the borrower record first, then the reference table."""
+        from src.services.external_systems import reference_identifiers
+
+        borrower = company["borrower"]
+        reference = reference_identifiers(entity_id)
+        return {
+            "cin": getattr(borrower, "cin", "") or reference.get("cin") or "",
+            "pan": getattr(borrower, "pan", "") or reference.get("pan") or "",
+            "gstin": company.get("gstin") or reference.get("gstin") or "",
+        }
 
     # ── Commands ─────────────────────────────────────────────────────────
 
@@ -329,12 +350,19 @@ class CompanyService:
         identifier = body.get("identifier", "").strip()
         if not identifier:
             raise InvalidRequestError("Provide 'identifier' — PAN, GSTIN, CIN, Entity ID, or Company Name")
+        # Mandatory: a silent default amount would drive the authority routing and the CAM.
+        try:
+            amount = float(body.get("amount_requested_cr"))
+        except (TypeError, ValueError):
+            amount = 0.0
+        if amount <= 0:
+            raise InvalidRequestError("Provide 'amount_requested_cr' — the requested amount in crore, above 0")
 
         result = self._onboard(
             identifier=identifier,
             case_type=body.get("case_type", "NTB"),
             facility_type=body.get("facility_type", "working_capital"),
-            amount_requested_cr=float(body.get("amount_requested_cr", 100.0)),
+            amount_requested_cr=amount,
             purpose=body.get("purpose", "General corporate purpose"),
             tenor_months=body.get("tenor_months"),
         )

@@ -75,9 +75,12 @@ class CaseService:
     # ── Queries ──────────────────────────────────────────────────────────
 
     def get(self, entity_id: str) -> dict | None:
-        """Latest case from memory, then SQLite, then legacy output files."""
+        """Latest case from memory, then SQLite, then legacy output files.
+
+        Cases are text-repaired once when they enter memory (run, load), so a
+        read does not walk the whole case — fact pack included — again.
+        """
         if entity_id in self.state.cases:
-            self.state.cases[entity_id] = repair_mojibake(self.state.cases[entity_id])
             return self.state.cases[entity_id]
         stored = self.persistence.get_latest_case(entity_id)
         if stored:
@@ -97,10 +100,25 @@ class CaseService:
         return self.persistence.list_pipeline_runs(entity_id, limit)
 
     def summaries(self) -> list[dict]:
-        keys = ("entity_id", "company_name", "sector", "case_type", "requested_amount_cr",
-                "recommendation", "risk_grade", "data_provider", "composite_score",
-                "narrative_mode", "run_at")
-        return [{k: c[k] for k in keys if k in c} for c in self.state.cases.values()]
+        keys = ("entity_id", "company_name", "sector", "case_type", "facility_type",
+                "requested_amount_cr", "recommendation", "risk_grade", "data_provider",
+                "composite_score", "financial_score", "conduct_score", "governance_score",
+                "market_score", "narrative_mode", "run_at")
+        return [{**{k: c[k] for k in keys if k in c}, **self._review_indicators(c)}
+                for c in self.state.cases.values()]
+
+    @staticmethod
+    def _review_indicators(case: dict) -> dict:
+        """Small review indicators so list views need not fetch the full case."""
+        exceptions = case.get("exceptions") or []
+        top = exceptions[0] if exceptions and isinstance(exceptions[0], dict) else {}
+        key_risks = (case.get("fact_pack") or {}).get("key_risks")
+        return {
+            "exception_count": len(exceptions),
+            "top_exception": top.get("message") or top.get("exception_code"),
+            "key_risk_count": len(key_risks) if isinstance(key_risks, list) else 0,
+            "documents_changed": bool(case.get("_documents_changed")),
+        }
 
     def dashboard(self) -> dict:
         cases = list(self.state.cases.values())
@@ -159,7 +177,8 @@ class CaseService:
             pipeline = self._pipeline_factory()
             context = pipeline.execute_pipeline(company, on_progress=on_progress,
                                                 stores=self.state.pipeline_stores())
-            case = build_case_result(entity_id, company, context, pipeline.pipeline_log)
+            # Text repair happens once, here and on load, not on every read.
+            case = repair_mojibake(build_case_result(entity_id, company, context, pipeline.pipeline_log))
             self.state.cases[entity_id] = case
             self.persistence.save_case_run(case)
         except Exception as e:
@@ -167,9 +186,6 @@ class CaseService:
             raise
         self.persistence.finish_pipeline_run(tracking_id, "completed", case_run_id=case["run_id"])
         self.persistence.reset_workflow(entity_id, case["run_id"])
-        # In-memory only: large derived payloads used by chat and the 360 view.
-        case["_extraction"] = self.state.extractions.get(entity_id)
-        case["_etb_analytics"] = self.state.etb_analytics.get(entity_id)
         return case, pipeline.pipeline_log
 
     # ── Legacy output-file cases ─────────────────────────────────────────

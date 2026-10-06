@@ -17,8 +17,8 @@ src/
 │   ├── container.py          # Composition root (wires state + services)
 │   └── errors.py             # Application errors → HTTP status codes
 ├── agents/
-│   ├── base_agent.py         # Agent contract (requires / critical / run)
-│   ├── pipeline.py           # Orchestrator (SuperAgent) running the 7 agents
+│   ├── base_agent.py         # Agent contract (requires / waits_for / critical / run)
+│   ├── pipeline.py           # Orchestrator (SuperAgent): runs the 7 agents, independent ones in parallel
 │   ├── ingestion_agent.py, screening_agent.py, analysis_agents.py, narrative_agent.py
 │   ├── financial_overrides.py # RM-uploaded figures override the public baseline
 │   └── dashboard_360_agent.py # 360° company view aggregator
@@ -33,9 +33,10 @@ src/
 │   ├── fraud_detection_engine.py  # Multi-signal fraud analysis
 │   ├── etb_analytics_engine.py    # ETB behavior analysis
 │   ├── cam_fact_builder.py   # Fact pack assembly (38 keys)
-│   ├── cam_renderer.py       # Template-based CAM rendering
-│   ├── cam_renderer_v2.py    # Enhanced renderer with annexures
-│   ├── cam_llm_renderer.py   # LLM-powered narrative generation
+│   ├── cam_renderer.py       # LEGACY v1 template renderer (tests only)
+│   ├── cam_renderer_v2.py    # Template CAM renderer used by the app (with annexures)
+│   ├── cam_llm_renderer.py   # LLM narrative: sections in parallel on hosted LLMs, checkpointed
+│   ├── cam_sections.py       # CAM prompts: SYSTEM_PROMPT, CAM_SECTIONS, PROMPT_VERSION
 │   ├── cam_one_pager.py      # Executive summary one-pager
 │   ├── core_banking_engine.py # Core banking analytics
 │   ├── social_media_engine.py # Social/digital intelligence
@@ -71,8 +72,10 @@ src/
 └── ui/
     ├── templates/
     │   └── index.html        # Alpine.js SPA (single-page)
-    └── static/
-        └── js/app.js         # Frontend application logic
+    └── static/js/
+        ├── app.js            # camApp(): shared state, start-up, navigation, API helper
+        └── modules/          # One file per page (dashboard, journey, pipeline, case-detail,
+                              #   documents, reports, approvals, settings) + formatters
 ```
 
 ### 1.2 Key Entry Points
@@ -275,8 +278,16 @@ CREATE TABLE app_users (
 The frontend is a single-page application using Alpine.js with no build step:
 
 - **Template:** `src/ui/templates/index.html` — Single HTML file with Alpine.js directives
-- **Logic:** `src/ui/static/js/app.js` — Application state and API calls
-- **Styling:** Tailwind-inspired dark theme with CSS custom properties
+- **Logic:** `src/ui/static/js/app.js` — shared state, start-up, navigation and the API
+  helper. Page code lives in `src/ui/static/js/modules/*.js`; each file defines a function
+  returning methods that `camApp()` merges into the single Alpine component, so `this` in a
+  module is the whole component. The page loads the modules before `app.js`.
+- **Data loading:** the URL hash drives page loads (`navigate()` → `onHash()` → `loadPage()`).
+  Company/case lists fetched in the last 10 s are reused while navigating; actions that
+  change data reload them.
+- **Forms:** mandatory fields use `<label class="required">` (red label and asterisk).
+  Borrower, amount and purpose on the CAM Journey are dropdowns fed by `GET /api/companies`.
+- **Styling:** light theme with CSS custom properties (`dashboard.css`)
 
 ### 5.2 Key Pages
 

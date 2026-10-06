@@ -1,5 +1,7 @@
 """Identifier-based onboarding and company resolution."""
 
+import asyncio
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from src.api.dependencies import get_container
@@ -31,7 +33,7 @@ async def smart_onboard(request: Request, svc: ServiceContainer = Depends(get_co
     Body: { identifier, case_type?, facility_type?, amount_requested_cr?, purpose?,
             tenor_months?, crilc_available?, etb_data? }
     """
-    return svc.companies.onboard(await request.json())
+    return await asyncio.to_thread(svc.companies.onboard, await request.json())
 
 
 @router.post("/resolve")
@@ -41,7 +43,7 @@ async def resolve_identifier(request: Request):
     identifier = body.get("identifier", "").strip()
     if not identifier:
         raise HTTPException(400, "Provide 'identifier'")
-    result = resolve_company_with_probe(identifier)
+    result = await asyncio.to_thread(resolve_company_with_probe, identifier)
     if not result:
         raise HTTPException(404, f"Could not resolve: {identifier}")
     return result
@@ -55,7 +57,7 @@ async def cin_lookup(request: Request):
     if not cin:
         raise HTTPException(400, "Provide 'cin' — Corporate Identification Number")
 
-    resolved = resolve_company(cin) or resolve_company_with_probe(cin)
+    resolved = resolve_company(cin) or await asyncio.to_thread(resolve_company_with_probe, cin)
     if not resolved:
         raise HTTPException(404, f"CIN {cin} not found")
 

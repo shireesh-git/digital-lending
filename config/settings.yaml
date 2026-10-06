@@ -13,6 +13,9 @@ pipeline:
   parser_version: "v1.0"
   rule_pack_version: "sector_v1"
   benchmark_pack_version: "benchmark_v1"
+  # Run independent agents side by side (e.g. PEP screening alongside document
+  # ingestion; ratio analysis alongside validation). false = one at a time.
+  parallel_agents: true
 
 validation:
   balance_sheet_tolerance: 0.20

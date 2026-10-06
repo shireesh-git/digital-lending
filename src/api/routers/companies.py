@@ -1,5 +1,7 @@
 """Borrower records: list, manual add, delete, hierarchy, Probe42 snapshot, 360 view."""
 
+import asyncio
+
 from fastapi import APIRouter, Depends, Request
 
 from src.agents.dashboard_360_agent import generate_360_view
@@ -65,4 +67,5 @@ async def delete_verified_public_data(entity_id: str, svc: ServiceContainer = De
 @router.get("/{entity_id}/360")
 async def get_360_view(entity_id: str, svc: ServiceContainer = Depends(get_container)):
     """360-degree view: overview, financials, credit risk, market intel, sell perspective."""
-    return generate_360_view(entity_id, svc.companies.get(entity_id), svc.cases.get(entity_id))
+    return await asyncio.to_thread(generate_360_view, entity_id, svc.companies.get(entity_id),
+                                   svc.cases.get(entity_id))

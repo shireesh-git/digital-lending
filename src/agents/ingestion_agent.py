@@ -103,6 +103,19 @@ class DataIngestionAgent(BaseAgent):
             if not pdfs:
                 return
             emit(f"Verifying document authenticity ({len(pdfs)} files, SHA-256)...")
+            known = (cd.get("extraction") or {}).get("document_verification") or {}
+            names = [p.name for p in pdfs]
+            if (len(set(names)) == len(names)
+                    and all("file_size_bytes" in (known.get(name) or {}) for name in names)):
+                # Extraction already fingerprinted every PDF (cached by content); reuse it
+                # instead of hashing and opening each file a second time.
+                entries = [known[name] for name in names]
+                cd["document_verification"] = {
+                    "verified_count": sum(1 for e in entries if e.get("is_verified")),
+                    "total_documents": len(entries),
+                    "total_size_mb": round(sum(e["file_size_bytes"] for e in entries) / (1024 * 1024), 2),
+                }
+                return
             verification = verify_batch(pdfs)
             cd["document_verification"] = {
                 "verified_count": verification["verified_count"],

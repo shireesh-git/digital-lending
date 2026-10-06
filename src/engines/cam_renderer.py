@@ -1,5 +1,11 @@
 """
-CAM Narrative Renderer
+CAM Narrative Renderer — LEGACY (v1)
+
+Not used by the application: CAM rendering goes through cam_renderer_v2 (template)
+and cam_llm_renderer (LLM). Kept only because tests/test_pipeline.py asserts on this
+version's headings. To retire it, point those tests at cam_renderer_v2, adjust the
+heading assertions to v2's wording, confirm they pass, then delete this module.
+
 Pass 2: Converts the approved factual JSON into a complete Credit Approval Memorandum.
 This generates deterministic narrative from fixed templates + fact data.
 No hallucination — every sentence traces to the fact pack.

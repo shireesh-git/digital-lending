@@ -141,13 +141,16 @@ def build_conduct_summary(conduct: list[ConductRecord]) -> dict:
     }
 
 
-def build_cam_fact_pack(company_data: dict, assessment: CreditAssessment | None = None) -> dict:
+def build_cam_fact_pack(company_data: dict, assessment: CreditAssessment | None = None,
+                        pep_result=None) -> dict:
     """
     MASTER FUNCTION: Build the complete CAM fact pack from all deterministic sources.
     This is the approved factual dataset — the LLM can only write from this.
 
     ``assessment`` is the pipeline's credit assessment; pass it so the CAM states
-    exactly the recommendation recorded on the case.
+    exactly the recommendation recorded on the case. ``pep_result`` is the PEP
+    agent's screening; when omitted (outside the pipeline, or if that agent
+    failed) the directors are screened here.
     """
     borrower = company_data["borrower"]
     group = company_data["group"]
@@ -165,9 +168,10 @@ def build_cam_fact_pack(company_data: dict, assessment: CreditAssessment | None 
     document_verification = company_data.get("document_verification") or {}
     downloaded_annual_reports = (extraction or {}).get("downloaded_annual_reports") or []
 
-    # ── PEP Screening ──
-    from src.services.pep_service import screen_directors
-    pep_result = screen_directors(borrower.entity_id, directors)
+    # ── PEP Screening ── (reuse the pipeline's screening when given)
+    if pep_result is None:
+        from src.services.pep_service import screen_directors
+        pep_result = screen_directors(borrower.entity_id, directors)
 
     # ── Core Banking Data (ETB) ──
     core_banking_data = company_data.get("core_banking") or {}

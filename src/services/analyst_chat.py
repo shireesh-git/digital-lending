@@ -8,18 +8,19 @@ LLM-powered Q&A for credit analysts. Builds context from:
   - Validation findings
   - Financial ratios & benchmarks
 
-Uses Ollama on the host machine (not Docker).
+Replies come from the active LLM provider (config/llm_providers.yaml) through
+src.core.llm_provider, the same layer CAM generation uses; a rule-based answer
+is the fallback when the provider fails.
 """
 
+import asyncio
+import json
 import re
 import time
 from dataclasses import dataclass, field
 from typing import Any
 
-import httpx
-
 from src.core.config_manager import config
-from src.core.llm_provider import strip_reasoning
 
 
 @dataclass
@@ -438,13 +439,31 @@ async def chat(entity_id: str, user_message: str,
         }
 
 
-async def _call_llm_provider(session: ChatSession) -> str:
-    """Call the active (non-Ollama) LLM provider for chat completion."""
-    import asyncio
+_CHAT_TEMPERATURE = 0.25
+_CHAT_MAX_TOKENS = 1400
+_provider_cache: dict[str, Any] = {}
+
+
+def _chat_provider(cfg: dict):
+    """A provider for chat, reused across messages while its configuration is unchanged.
+
+    Chat goes through the same provider layer as CAM generation, so it gets the same
+    retries, connection reuse, keep-alive and truncation warnings.
+    """
     from src.core.llm_provider import create_llm_provider
 
-    active_cfg = config.get_active_llm_provider()
-    provider = create_llm_provider(active_cfg)
+    key = json.dumps(cfg, sort_keys=True, default=str)
+    provider = _provider_cache.get(key)
+    if provider is None:
+        if len(_provider_cache) >= 8:  # config edited many times: drop stale entries
+            _provider_cache.clear()
+        provider = _provider_cache[key] = create_llm_provider(cfg)
+    return provider
+
+
+async def _call_llm_provider(session: ChatSession) -> str:
+    """Call the active (non-Ollama) LLM provider for chat completion."""
+    provider = _chat_provider(config.get_active_llm_provider())
 
     system_content = ""
     parts = []
@@ -457,18 +476,23 @@ async def _call_llm_provider(session: ChatSession) -> str:
             parts.append(f"Assistant: {m.content}")
     prompt = "\n\n".join(parts)
 
-    loop = asyncio.get_event_loop()
-    response = await loop.run_in_executor(
-        None, lambda: provider.generate(prompt, system_prompt=system_content,
-                                        temperature=0.25, max_tokens=1400)
-    )
+    response = await asyncio.to_thread(provider.generate, prompt, system_prompt=system_content,
+                                       temperature=_CHAT_TEMPERATURE, max_tokens=_CHAT_MAX_TOKENS)
     return str(response).strip()
 
 
+def _ollama_chat_provider():
+    """The Ollama provider configured for chat: the chat model and host, and the
+    chat timeout instead of the (much longer) per-CAM-section timeout."""
+    settings = config.get("llm_providers", "providers", "ollama", default={}) or {}
+    cfg = {**settings, "type": "ollama", "model": _get_chat_model(), "base_url": _get_ollama_host(),
+           "timeout_seconds": settings.get("chat_timeout_seconds", 120)}
+    return _chat_provider(cfg)
+
+
 async def _call_ollama(session: ChatSession) -> str:
-    """Call Ollama API for chat completion using /api/generate."""
-    host = _get_ollama_host()
-    model = _get_chat_model()
+    """Chat completion on Ollama, with one continuation if the reply stops mid-thought."""
+    provider = _ollama_chat_provider()
 
     # Build a single prompt from conversation history
     parts = []
@@ -482,7 +506,7 @@ async def _call_ollama(session: ChatSession) -> str:
     parts.append("Assistant:")
     prompt = "\n\n".join(parts)
 
-    response = await _generate_ollama_text(host, model, prompt)
+    response = await _ollama_generate(provider, prompt)
 
     if _response_looks_incomplete(response):
         continuation_prompt = (
@@ -490,37 +514,20 @@ async def _call_ollama(session: ChatSession) -> str:
             "Assistant: Continue from the last incomplete sentence only. "
             "Do not repeat earlier sections. Finish the remaining analysis and end with a short conclusion."
         )
-        continuation = await _generate_ollama_text(host, model, continuation_prompt)
+        continuation = await _ollama_generate(provider, continuation_prompt)
         if continuation:
             response = f"{response.rstrip()}\n\n{continuation.lstrip()}"
 
     return response
 
 
-def _ollama_chat_settings() -> dict:
-    """Chat uses the same Ollama block as CAM generation (think, timeout)."""
-    return config.get("llm_providers", "providers", "ollama", default={}) or {}
-
-
-async def _generate_ollama_text(host: str, model: str, prompt: str) -> str:
-    settings = _ollama_chat_settings()
-    payload = {
-        "model": model,
-        "prompt": prompt,
-        "stream": False,
-        "options": {
-            "temperature": 0.25,
-            "num_predict": 1400,
-        },
-    }
-    if settings.get("think") is not None:
-        payload["think"] = bool(settings["think"])
-    timeout = float(settings.get("chat_timeout_seconds", 120))
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        resp = await client.post(f"{host}/api/generate", json=payload)
-        resp.raise_for_status()
-        data = resp.json()
-        return strip_reasoning(str(data.get("response", "No response from model.")))
+async def _ollama_generate(provider, prompt: str) -> str:
+    # The prompt already carries the "System:/User:/Assistant:" transcript, so no separate
+    # system prompt. The provider reuses the model's loaded context size (no reload after
+    # a CAM run) and applies keep_alive / think from the Ollama settings.
+    text = await asyncio.to_thread(provider.generate, prompt,
+                                   temperature=_CHAT_TEMPERATURE, max_tokens=_CHAT_MAX_TOKENS)
+    return text or "No response from model."
 
 
 def _response_looks_incomplete(text: str) -> bool:

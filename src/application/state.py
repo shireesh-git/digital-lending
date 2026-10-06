@@ -23,6 +23,14 @@ class AppState:
         return {"extraction": self.extractions, "etb": self.etb_analytics}
 
     def invalidate_derived(self, entity_id: str) -> None:
-        """Drop results derived from a company's documents after they change."""
+        """Drop results derived from a company's documents after they change.
+
+        The latest case stays available (it is also in SQLite, so dropping it
+        here made the case list and the case endpoint disagree); it is flagged
+        so the UI can ask for a re-run. The flag is in-memory only.
+        """
         self.extractions.pop(entity_id, None)
-        self.cases.pop(entity_id, None)
+        self.etb_analytics.pop(entity_id, None)
+        self.fraud_reports.pop(entity_id, None)
+        if entity_id in self.cases:
+            self.cases[entity_id]["_documents_changed"] = True

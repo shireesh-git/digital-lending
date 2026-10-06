@@ -21,8 +21,9 @@ def get_actor(x_user_id: str = Header(default=""), x_user_role: str = Header(def
 
 @router.get("/approvals/authority-matrix")
 async def authority_matrix(svc: ServiceContainer = Depends(get_container)):
-    """Delegation-of-powers levels from config/approval.yaml."""
-    return {"levels": svc.approvals.authority_matrix()}
+    """Delegation-of-powers levels and maker roles from config/approval.yaml."""
+    return {"levels": svc.approvals.authority_matrix(),
+            "maker_roles": list(svc.approvals.matrix.maker_roles)}
 
 
 @router.get("/approvals/queue")

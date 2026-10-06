@@ -6,6 +6,22 @@ narrative:
   # SYSTEM_PROMPT / CAM_SECTIONS in src/engines/cam_llm_renderer.py (bump PROMPT_VERSION on change).
   max_tokens: 16000
   temperature: 0.15
+  # CAM sections written at the same time. A provider can lower this with its own
+  # max_parallel_sections (see ollama). Hosted providers retry rate-limit and
+  # server errors with backoff; set max_retries on a provider to change the
+  # default of 4.
+  max_parallel_sections: 4
+  # Output limits (tokens) for short, table-led sections, overriding
+  # max_tokens_per_section. A limit is a ceiling, not a target: it saves time only
+  # when the model would otherwise run on. Each sits well above what the section's
+  # instructions ask for; raise one if the log shows
+  # "<provider> output hit the N-token limit". Unlisted sections keep their own limit.
+  section_max_tokens:
+    compliance: 1800
+    security_collateral: 1800
+    conduct: 1500
+    benchmarking: 1500
+    social_media: 1500
 providers:
   mock:
     name: Mock (Deterministic)
@@ -56,5 +72,34 @@ providers:
     # qwen3 "thinks" before answering by default; off = much faster on CPU and
     # the whole token budget goes to the CAM text. Leave unset for non-thinking models.
     think: false
-    timeout_seconds: 1800               # per CAM section (CPU inference is slow)
+    # Responses are streamed, so this is the longest *silence* allowed (e.g. while a long
+    # prompt is read), not a cap on the whole section: a slow but working section finishes.
+    timeout_seconds: 1800
+    # One section at a time: a local model queues parallel requests anyway, and
+    # each section's num_ctx can differ, which forces model reloads and extra RAM.
+    max_parallel_sections: 1
+    # Keep the model loaded this long after the last call (CAM sections and chat),
+    # so the next run or chat reply skips a cold load. While loaded it holds about
+    # 5 GB of RAM plus its context; 0 unloads at once, remove for Ollama's 5m default.
+    keep_alive: 15m
     chat_timeout_seconds: 600           # per Financial Advisor chat reply
+    # Route table-led CAM sections to a smaller, faster model; the rest use `model`.
+    # Routed sections run first as one group and that model is then unloaded, so the run
+    # switches model once and both are never in RAM together. verify_figures: a routed
+    # section whose figures are not all in its data is rewritten by `model`.
+    # Install first: ollama pull qwen2.5:3b (~1.9 GB). Compare a few CAMs before enabling.
+    model_routing:
+      enabled: false
+      verify_figures: true
+      routes:
+        qwen2.5:3b:
+          - group_shareholders
+          - directors_kmp
+          - external_rating
+          - compliance
+          - conduct
+          - core_banking
+          - social_media
+          - benchmarking
+          - security_collateral
+          - terms_conditions

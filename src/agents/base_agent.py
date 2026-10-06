@@ -39,18 +39,28 @@ class BaseAgent:
     """All pipeline agents inherit from this.
 
     Contract:
-      * ``requires`` — names of earlier agents whose results this agent reads
-        from ``context["results"]``. Documented dependencies; the orchestrator
-        checks them so a misordered pipeline fails loudly.
+      * ``requires`` — agents that must finish *successfully* first: their results
+        (``context["results"]``) or their changes to ``company_data`` are needed.
+        The orchestrator starts an agent only after these finish, and fails it
+        if one of them produced no result, so a broken order fails loudly.
+      * ``waits_for`` — agents to wait for whose results are optional: the agent
+        starts after them and uses their result when present, but runs anyway if
+        they failed (e.g. reuse a non-critical agent's output instead of
+        recomputing it).
       * ``critical`` — when True, a failure stops the pipeline.
       * ``run(context)`` returns this agent's result payload, stored under
         ``context["results"][name]``.
+
+    Agents without a dependency between them may run at the same time (see
+    ``src/agents/pipeline.py``), so an agent must not write to ``company_data``
+    keys that another independent agent reads.
     """
 
     name: str = "base"
     description: str = ""
     critical: bool = True
     requires: tuple[str, ...] = ()
+    waits_for: tuple[str, ...] = ()
 
     def execute(self, context: dict) -> AgentResult:
         start = datetime.now()
@@ -82,4 +92,5 @@ class BaseAgent:
 
     def describe(self) -> dict:
         return {"name": self.name, "description": self.description,
-                "critical": self.critical, "requires": list(self.requires)}
+                "critical": self.critical, "requires": list(self.requires),
+                "waits_for": list(self.waits_for)}

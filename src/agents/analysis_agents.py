@@ -10,6 +10,9 @@ from src.agents.base_agent import BaseAgent
 class FinancialAnalysisAgent(BaseAgent):
     name = "financial_analysis"
     description = "Compute financial ratios and growth metrics"
+    # Reads no ingestion *result*, but ingestion rewrites company_data["financials"]
+    # from uploaded statements, so it must finish first (matters when agents run in parallel).
+    requires = ("data_ingestion",)
 
     def run(self, context):
         from src.engines.ratio_engine import compute_all_ratios, compute_multi_period_ratios
