@@ -20,3 +20,11 @@ downloaded document/*
 node_modules/
 dist/
 build/
+
+# Local tooling, browser artifacts and secrets
+.claude/
+.continue/
+.playwright-cli/
+.env
+.env.*
+!.env.example

@@ -41,7 +41,6 @@ if (-not $googleKey) {
 
 $envVars = @"
 PROBE42_API_KEY: "$probeKey"
-CAM_ENABLE_OPTIONAL_MOCK_DATA: "false"
 GOOGLE_CLOUD_PROJECT: "$ProjectId"
 GOOGLE_CLOUD_LOCATION: "us-central1"
 "@

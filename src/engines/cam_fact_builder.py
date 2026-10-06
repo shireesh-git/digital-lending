@@ -4,23 +4,13 @@ Assembles the approved factual JSON structure from deterministic engine outputs.
 This is Pass 1 — no LLM involvement.
 """
 
-import json
 from datetime import date
-from src.models.canonical_model import (
-    Borrower, GroupEntity, DirectorPromoter, FacilityRequest,
-    ExistingExposure, Collateral, MarketSignal, ValidationException,
-    BenchmarkResult, ConductRecord, CovenantRecord, CaseType,
-)
-from src.engines.ratio_engine import compute_all_ratios, revenue_growth_rate, RatioResult
-from src.engines.validation_engine import run_all_validations
-from src.engines.benchmark_engine import benchmark_all_periods, get_worst_benchmarks, benchmark_summary_table
-from src.engines.policy_engine import (
-    tier1_hard_rules, tier2_scoring, tier3_recommendation,
-    RiskScore, CreditRecommendation,
-)
-from src.services.corporate_hierarchy import (
-    enrich_group_with_hierarchy, hierarchy_to_dict,
-)
+from src.models.canonical_model import Collateral, ConductRecord
+from src.engines.ratio_engine import compute_all_ratios, revenue_growth_rate
+from src.engines.benchmark_engine import benchmark_summary_table
+from src.engines.credit_assessment import CreditAssessment, assess_credit
+from src.engines.projection_engine import build_projections
+from src.services.corporate_hierarchy import enrich_group_with_hierarchy
 
 
 def _resolve_ocf(fs):
@@ -151,10 +141,13 @@ def build_conduct_summary(conduct: list[ConductRecord]) -> dict:
     }
 
 
-def build_cam_fact_pack(company_data: dict) -> dict:
+def build_cam_fact_pack(company_data: dict, assessment: CreditAssessment | None = None) -> dict:
     """
     MASTER FUNCTION: Build the complete CAM fact pack from all deterministic sources.
     This is the approved factual dataset — the LLM can only write from this.
+
+    ``assessment`` is the pipeline's credit assessment; pass it so the CAM states
+    exactly the recommendation recorded on the case.
     """
     borrower = company_data["borrower"]
     group = company_data["group"]
@@ -167,7 +160,6 @@ def build_cam_fact_pack(company_data: dict) -> dict:
     existing_exposure = company_data.get("existing_exposure", [])
     conduct = company_data.get("conduct", [])
     covenants = company_data.get("covenants", [])
-    exchange_filing = company_data.get("exchange_filing")
     extraction = company_data.get("extraction")
     etb_analysis_data = company_data.get("etb_analysis_data") or company_data.get("etb_analysis")
     document_verification = company_data.get("document_verification") or {}
@@ -228,60 +220,18 @@ def build_cam_fact_pack(company_data: dict) -> dict:
     from src.engines.crilc_report_generator import get_crilc_data
     crilc_detail = get_crilc_data(borrower.entity_id)
 
-    # ── Run Validation Engine ──
-    exceptions = run_all_validations(
-        borrower=borrower,
-        financials=financials,
-        provisional=provisional,
-        exchange_filing=exchange_filing,
-        bureau_payload=bureau_data,
-        gst_payload=gst_data,
-        market_signals=market_signals,
-        conduct_records=conduct,
-        covenants=covenants,
-        case_type=facility.case_type,
-        extraction=extraction,
-        etb_analysis=etb_analysis_data,
-    )
-
-    # ── Run Benchmark Engine ──
-    benchmarks = benchmark_all_periods(borrower.entity_id, borrower.sector, financials, subsector=borrower.subsector or "")
-    latest_period = sorted(financials.keys())[-1]
-    latest_benchmarks = benchmarks.get(latest_period, [])
-    worst_benchmarks = get_worst_benchmarks(benchmarks, latest_period)
-
-    # ── Run Ratio Engine ──
-    latest_fs = financials[latest_period]
-    latest_ratios = compute_all_ratios(latest_fs)
-
-    # ── Run Policy Engine ──
-    tier1 = tier1_hard_rules(borrower, facility, exceptions, bureau_data)
-
-    risk_score = tier2_scoring(
-        borrower=borrower,
-        ratios=latest_ratios,
-        benchmarks=latest_benchmarks,
-        conduct=conduct,
-        covenants=covenants,
-        directors=directors,
-        group_entities=len(group.entities) if group else 0,
-        market_signals=market_signals,
-        infra_metrics=company_data.get("infra_metrics") or None,
-    )
-
-    # Collateral coverage
-    total_fsv = sum(c.forced_sale_value_cr for c in collaterals)
-    facility_amt = facility.amount_requested_cr
-    collateral_coverage = round(total_fsv / facility_amt, 2) if facility_amt > 0 else 0
-
-    recommendation = tier3_recommendation(
-        tier1_decisions=tier1,
-        risk_score=risk_score,
-        exceptions=exceptions,
-        facility=facility,
-        collateral_coverage=collateral_coverage,
-        infra_metrics=company_data.get("infra_metrics") or None,
-    )
+    # ── Credit assessment: computed once by the pipeline agents, or here when ──
+    # ── the fact pack is built outside a pipeline run.                        ──
+    if assessment is None:
+        assessment = assess_credit(company_data)
+    exceptions = assessment.exceptions
+    latest_period = assessment.benchmarks.latest_period
+    latest_benchmarks = assessment.benchmarks.latest
+    worst_benchmarks = assessment.benchmarks.worst
+    latest_ratios = assessment.latest_ratios
+    tier1 = assessment.policy.tier1_decisions
+    risk_score = assessment.policy.risk_score
+    recommendation = assessment.policy.recommendation
 
     # ── Assemble Fact Pack ──
     fact_pack = {
@@ -433,6 +383,7 @@ def build_cam_fact_pack(company_data: dict) -> dict:
             } for e in exceptions
         ],
 
+        "approving_authority": _build_approving_authority(facility, recommendation),
         "policy_decisions": {
             "tier1_hard_rules": [
                 {
@@ -568,7 +519,52 @@ def build_cam_fact_pack(company_data: dict) -> dict:
         "bank_statement_analysis": _build_bank_statement_data(extraction),
     }
 
+    # Policy thresholds and projections are computed here so every CAM section
+    # quotes the same numbers instead of the LLM inventing or extrapolating them.
+    thresholds = _policy_thresholds()
+    fact_pack["policy_thresholds"] = thresholds
+    fact_pack["financial_projections"] = build_projections(
+        fact_pack["financial_summary"], fact_pack["facility_details"], fact_pack["facility_pricing"],
+        fact_pack["sector_kpis"], min_dscr=thresholds["min_dscr"],
+    )
     return fact_pack
+
+
+_DEFAULT_POLICY_THRESHOLDS = {
+    "min_dscr": 1.20, "max_debt_to_equity": 2.5, "min_current_ratio": 1.25,
+    "min_interest_coverage": 2.0, "max_debt_to_ebitda": 4.0, "min_ebitda_margin_pct": 10,
+    "max_tol_tnw": 4.0, "min_roe_pct": 12, "max_debtor_days": 90,
+}
+
+
+def _policy_thresholds() -> dict:
+    """Internal credit-policy thresholds from config/rules.yaml (policy_thresholds)."""
+    from src.core.config_manager import config
+
+    configured = config.get("rules", "policy_thresholds", default={}) or {}
+    return {**_DEFAULT_POLICY_THRESHOLDS, **configured}
+
+
+def _build_approving_authority(facility, recommendation) -> dict:
+    """Sanctioning authority required by the delegation-of-powers matrix."""
+    from src.core.config_manager import config
+    from src.engines.approval_policy import AuthorityMatrix
+
+    cfg = config.get("approval", default=None)
+    if not cfg:
+        return {}
+    matrix = AuthorityMatrix.from_config(cfg)
+    system_rec = recommendation.recommendation.value
+    required = matrix.required_authority(facility.amount_requested_cr, recommendation.risk_grade, system_rec)
+    return {
+        "level_id": required.id,
+        "name": required.name,
+        "amount_cr": facility.amount_requested_cr,
+        "risk_grade": recommendation.risk_grade,
+        "system_recommendation": system_rec,
+        "deviation_route": system_rec == "decline",
+        "basis": "Delegation of powers (config/approval.yaml)",
+    }
 
 
 def _build_hierarchy_section(company_data, borrower, directors, group):

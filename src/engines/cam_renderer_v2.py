@@ -2381,6 +2381,7 @@ def _render_retail_operational_kpis(fp: dict, latest: dict, latest_ra: dict, sk:
 def render_section_13_financial_projections(fp: dict) -> str:
     """Render Financial Projections — P&L, Cash Flow, DSCR, Sensitivity."""
     fs = fp["financial_summary"]
+    min_dscr = (fp.get("policy_thresholds") or {}).get("min_dscr", 1.20)
     ra = fp["ratio_analysis"]
     fd = fp["facility_details"]
     cs = fp["case_summary"]
@@ -2524,23 +2525,23 @@ def render_section_13_financial_projections(fp: dict) -> str:
 
     out += _hdr(["Scenario", "Revenue Impact", "EBITDA Impact", "Projected DSCR", "Assessment", "Source"])
     out += _row(["Base Case", "—", "—", f"{base_dscr:.2f}x",
-                 "Adequate" if base_dscr >= 1.25 else "Tight", "Projected Financials"])
+                 "Adequate" if base_dscr >= min_dscr else "Tight", "Projected Financials"])
     # Revenue -10%
     stress1_ocf = (proj_data[0]["revenue"] * 0.90) * ebitda_margin_avg / 100 * 0.85
     stress1_dscr = stress1_ocf / max(base_ds, 0.01)
     out += _row(["Revenue Stress (-10%)", "-10%", f"-{_pct(10)}", f"{stress1_dscr:.2f}x",
-                 "Adequate" if stress1_dscr >= 1.25 else "Tight" if stress1_dscr >= 1.0 else "Breach", "Stress Scenario"])
+                 "Adequate" if stress1_dscr >= min_dscr else "Tight" if stress1_dscr >= 1.0 else "Breach", "Stress Scenario"])
     # Cost +10%
     stress2_ebitda = proj_data[0]["ebitda"] * 0.85  # 15% EBITDA hit from cost increase on non-EBITDA items
     stress2_ocf = stress2_ebitda * 0.85
     stress2_dscr = stress2_ocf / max(base_ds, 0.01)
     out += _row(["Cost Stress (+10% opex)", "—", "-15%", f"{stress2_dscr:.2f}x",
-                 "Adequate" if stress2_dscr >= 1.25 else "Tight" if stress2_dscr >= 1.0 else "Breach", "Stress Scenario"])
+                 "Adequate" if stress2_dscr >= min_dscr else "Tight" if stress2_dscr >= 1.0 else "Breach", "Stress Scenario"])
     # Combined
     stress3_ocf = (proj_data[0]["revenue"] * 0.90) * (ebitda_margin_avg * 0.85) / 100 * 0.85
     stress3_dscr = stress3_ocf / max(base_ds, 0.01)
     out += _row(["Combined Stress", "-10% rev", "-25% EBITDA", f"{stress3_dscr:.2f}x",
-                 "Adequate" if stress3_dscr >= 1.25 else "Tight" if stress3_dscr >= 1.0 else "⚠️ Breach", "Stress Scenario"])
+                 "Adequate" if stress3_dscr >= min_dscr else "Tight" if stress3_dscr >= 1.0 else "⚠️ Breach", "Stress Scenario"])
     out += "\n"
 
     out += _resolve_section_source(fp, "Financial Analysis", "Cash Flow", fallback="Projected from Audited Financials; Growth assumptions based on historical CAGR; Stress scenarios per RBI guidelines") + "\n\n"
@@ -2881,14 +2882,26 @@ def render_section_15_recommendation(fp: dict) -> str:
             out += f"- ⚠️ {note}\n"
         out += "\n"
 
+    # Approving authority (delegation of powers)
+    authority = fp.get("approving_authority") or {}
+    if authority:
+        out += _h("15.2 Approving Authority", 3)
+        reason = f"Amount {_cr(authority['amount_cr'])}, risk grade {authority['risk_grade']}"
+        if authority.get("deviation_route"):
+            reason += "; approval would deviate from the system DECLINE, so the case escalates"
+        out += f"**Required sanctioning authority:** {authority['name']} ({reason}).\n\n"
+
     # Signature block
     out += "\n---\n\n"
     out += "### SIGNATURES & APPROVALS\n\n"
     out += _hdr(["Role", "Name", "Signature", "Date"])
     out += _row(["Relationship Manager", "_______________", "_______________", "___/___/______"])
-    out += _row(["Branch Credit Head", "_______________", "_______________", "___/___/______"])
-    out += _row(["Zonal Credit Head", "_______________", "_______________", "___/___/______"])
-    out += _row(["Sanctioning Authority", "_______________", "_______________", "___/___/______"])
+    if authority:
+        out += _row([authority["name"], "_______________", "_______________", "___/___/______"])
+    else:
+        out += _row(["Branch Credit Head", "_______________", "_______________", "___/___/______"])
+        out += _row(["Zonal Credit Head", "_______________", "_______________", "___/___/______"])
+        out += _row(["Sanctioning Authority", "_______________", "_______________", "___/___/______"])
     out += "\n"
 
     out += "---\n\n"

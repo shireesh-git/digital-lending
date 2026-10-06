@@ -1,46 +1,9 @@
-active_provider: vertex_ai_gemini
+active_provider: ollama
 narrative:
   mode: llm
   max_tokens_per_section: 2500
-  system_prompt: 'You are a senior credit analyst at a leading Indian commercial bank
-    writing a Credit Approval Memorandum (CAM) for the Credit Committee.
-
-    WRITING STYLE:
-
-    - Write with authority and analytical depth. This is a formal banking document.
-
-    - Every claim must be supported by data. State the number, then interpret it.
-
-    - Use comparative framing: X improved from Y to Z, indicating...
-
-    - Connect data points to credit implications.
-
-    - Use transition phrases between subsections for narrative flow.
-
-    FORMATTING RULES:
-
-    1. Use ONLY the data provided in the JSON. NEVER fabricate facts, numbers, names,
-    or dates.
-
-    2. Use Rs. Cr for currency amounts. Use % for percentages. Use x for multiples.
-
-    3. Present tabular data in clean markdown tables with right-aligned numbers.
-
-    4. Every financial claim must trace directly to the provided data.
-
-    5. If data is missing, state Information not available. NEVER fabricate.
-
-    6. Past tense for historical data, present for current state.
-
-    7. Keep each section focused and within the specified word count.
-
-    8. Do NOT add meta-commentary or disclaimers.
-
-    9. Output clean markdown with proper headings, tables, and paragraphs.
-
-    10. For risk items, state the risk, its severity, and the mitigant.
-
-    '
+  # The CAM system prompt and per-section prompts live in code:
+  # SYSTEM_PROMPT / CAM_SECTIONS in src/engines/cam_llm_renderer.py (bump PROMPT_VERSION on change).
   max_tokens: 16000
   temperature: 0.15
 providers:
@@ -83,8 +46,15 @@ providers:
   ollama:
     name: Ollama (Local)
     type: ollama
-    model: qwen2.5:7b
-    base_url: http://localhost:11434
+    # Install first:  ollama pull qwen3:8b   (~5.2 GB; runs on CPU with 16 GB RAM)
+    model: qwen3:8b
+    base_url: http://localhost:11434    # OLLAMA_HOST env var overrides this
     temperature: 0.15
     max_tokens: 4000
-    num_ctx: 8192
+    num_ctx: 8192                       # starting context window (tokens)
+    max_num_ctx: 32768                  # grown per prompt up to this, so long sections are never truncated
+    # qwen3 "thinks" before answering by default; off = much faster on CPU and
+    # the whole token budget goes to the CAM text. Leave unset for non-thinking models.
+    think: false
+    timeout_seconds: 1800               # per CAM section (CPU inference is slow)
+    chat_timeout_seconds: 600           # per Financial Advisor chat reply

@@ -4,10 +4,20 @@ Supports Mock, OpenAI, Anthropic, Azure OpenAI, and Ollama.
 Switch providers via config/llm_providers.yaml — no code changes.
 """
 
+import logging
 import os
-import json
+import re
 from abc import ABC, abstractmethod
-from typing import Any
+
+
+log = logging.getLogger(__name__)
+
+_REASONING_BLOCK = re.compile(r"<think>.*?</think>", flags=re.DOTALL | re.IGNORECASE)
+
+
+def strip_reasoning(text: str) -> str:
+    """Remove <think>…</think> reasoning that some local models emit inline."""
+    return _REASONING_BLOCK.sub("", text or "").strip()
 
 
 class BaseLLMProvider(ABC):
@@ -185,30 +195,59 @@ class OllamaProvider(BaseLLMProvider):
         self.base_url = os.environ.get("OLLAMA_HOST") or cfg.get("base_url", "http://localhost:11434")
         self._temp = cfg.get("temperature", 0.1)
         self._max = cfg.get("max_tokens", 4000)
-        self._num_ctx = cfg.get("num_ctx", 8192)
+        self._num_ctx = int(cfg.get("num_ctx", 8192))
+        self._max_ctx = int(cfg.get("max_num_ctx", 32768))
+        self._timeout = float(cfg.get("timeout_seconds", 600))
+        # Reasoning models (qwen3, deepseek-r1): False skips the hidden "thinking" pass.
+        self._think = cfg.get("think")
+
+    def context_window(self, prompt: str, num_predict: int) -> int:
+        """Smallest context bucket that holds the prompt plus the answer.
+
+        Ollama silently drops the *start* of a prompt that exceeds ``num_ctx``,
+        which would cut the system prompt and section instructions. Sizes step
+        in doublings so Ollama reloads the model rarely (a reload happens
+        whenever ``num_ctx`` changes).
+        """
+        estimated_tokens = len(prompt) // 3 + num_predict  # JSON-heavy text ≈ 3 chars/token
+        window = self._num_ctx
+        while window < estimated_tokens and window < self._max_ctx:
+            window *= 2
+        window = min(window, self._max_ctx)
+        if estimated_tokens > window:
+            log.warning("Prompt (~%d tokens incl. answer) exceeds max_num_ctx=%d; the start will be truncated",
+                        estimated_tokens, window)
+        return window
 
     def generate(self, prompt: str, system_prompt: str = "",
                  temperature: float = None, max_tokens: int = None) -> str:
         import httpx
         full = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
-        r = httpx.post(
-            f"{self.base_url}/api/generate",
-            json={"model": self.model, "prompt": full, "stream": False,
-                  "options": {"temperature": temperature or self._temp,
-                              "num_predict": max_tokens or self._max,
-                              "num_ctx": self._num_ctx}},
-            timeout=600.0,
-        )
-        return r.json().get("response", "")
+        num_predict = self._max if max_tokens is None else max_tokens
+        payload = {"model": self.model, "prompt": full, "stream": False,
+                   "options": {"temperature": self._temp if temperature is None else temperature,
+                               "num_predict": num_predict,
+                               "num_ctx": self.context_window(full, num_predict)}}
+        if self._think is not None:
+            payload["think"] = bool(self._think)
+        r = httpx.post(f"{self.base_url}/api/generate", json=payload, timeout=self._timeout)
+        if r.status_code == 404:
+            raise RuntimeError(f"Ollama model '{self.model}' is not installed. Run: ollama pull {self.model}")
+        r.raise_for_status()
+        return strip_reasoning(r.json().get("response", ""))
 
     def test_connection(self) -> dict:
+        """Ollama is reachable and the configured model is installed."""
         try:
             import httpx
             r = httpx.get(f"{self.base_url}/api/tags", timeout=5.0)
-            return {"status": "ok", "provider": "ollama",
-                    "models": [m["name"] for m in r.json().get("models", [])]}
+            models = [m["name"] for m in r.json().get("models", [])]
         except Exception as e:
-            return {"status": "error", "provider": "ollama", "message": str(e)}
+            return {"status": "error", "provider": "ollama", "message": f"Ollama not reachable: {e}"}
+        if self.model not in models and f"{self.model}:latest" not in models:
+            return {"status": "error", "provider": "ollama", "models": models,
+                    "message": f"Model '{self.model}' is not installed. Run: ollama pull {self.model}"}
+        return {"status": "ok", "provider": "ollama", "model": self.model, "models": models}
 
 
 # ─── Factory ────────────────────────────────────────────────────────────────

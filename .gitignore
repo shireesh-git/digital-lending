@@ -1,71 +1,63 @@
-# Python
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 *.egg-info/
+*.egg
 dist/
 build/
-*.egg
 
-# Virtual environment
+# ── Virtual environments ─────────────────────────────────────────────────────
 .venv/
 venv/
 ENV/
 
-# Environment variables / secrets
-.env
-.env.local
-.env.production
+# ── Test / lint caches and coverage ──────────────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
 
-# IDE
+# ── Secrets and local environment (see .env.example) ─────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editors, IDEs and AI-assistant workspace config ──────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
+.claude/
+.continue/
+.agents/
+CLAUDE.local.md
 
-# OS files
+# ── OS files ─────────────────────────────────────────────────────────────────
 Thumbs.db
 .DS_Store
+desktop.ini
 
-# Runtime database (generated at runtime)
-runtime-db/*.sqlite3
-
-# Storage cache
+# ── Runtime data (created by the app) ────────────────────────────────────────
+runtime-db/
 storage/cache/
-
-# Downloaded documents (user-specific)
+output/
+synthetic-assets/
 downloaded document/
+refer/
 
-# Output files (generated at runtime)
-output/*.json
-output/*.txt
-output/*.md
-output/pdf_compare/
-output/playwright/
-output/video_assets/
-
-# Test artifacts
+# ── Browser automation / scratch artifacts ───────────────────────────────────
+.playwright-cli/
+playwright-report/
+test-results/
+*.log
 test_output.txt
 test_results.txt
 test_pipeline.txt
-test_cam_result.py
 e2e_log.txt
 
-# Byte-compiled
-*.pyc
-
-# Logs
-*.log
-
-# Postman environment files (may contain secrets)
+# ── Postman environments (may contain secrets) ───────────────────────────────
 postman/*environment*.json
-
-# Synthetic assets (large generated files)
-synthetic-assets/
-
-# Reference docs (local only)
-refer/
-
-# Agent customization (local workspace config)
-.agents/

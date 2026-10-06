@@ -9,9 +9,10 @@ and analyst chat.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
@@ -36,6 +37,8 @@ from src.services.document_store import doc_store
 from src.services.document_classifier import requirement_is_satisfied
 from src.services.external_systems import resolve_company as resolve_local_company, _ENTITY_TO_IDS
 from src.services.probe_mcp_client import ProbeMcpClient, ProbeMcpError
+
+log = logging.getLogger(__name__)
 
 
 _PROBE_PROVIDER = "probe42_mcp_v2"
@@ -146,7 +149,7 @@ _DEFAULT_CACHE_TTL_HOURS = 24 * 24
 
 
 def _now_iso() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None).isoformat() + "Z"
 
 
 def _probe_cfg() -> dict[str, Any]:

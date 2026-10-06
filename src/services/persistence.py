@@ -4,7 +4,7 @@ import json
 import sqlite3
 from contextlib import contextmanager
 from dataclasses import is_dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from enum import Enum
 from pathlib import Path
 from threading import RLock
@@ -28,6 +28,11 @@ from src.models.canonical_model import (
     RiskSeverity,
     Sector,
 )
+
+
+def _utc_now() -> str:
+    """UTC timestamp, second precision, e.g. 2026-10-06T14:03:22Z."""
+    return datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None).isoformat() + "Z"
 
 
 def _plain(value: Any) -> Any:
@@ -337,9 +342,73 @@ class PersistenceService:
                     updated_at TEXT NOT NULL,
                     PRIMARY KEY (entity_id, section_key)
                 );
+
+                CREATE TABLE IF NOT EXISTS pipeline_runs (
+                    run_id TEXT PRIMARY KEY,
+                    entity_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    started_at TEXT NOT NULL,
+                    finished_at TEXT,
+                    error TEXT,
+                    llm_provider TEXT,
+                    case_run_id TEXT
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_pipeline_runs_entity
+                ON pipeline_runs(entity_id, started_at DESC);
+
+                CREATE TABLE IF NOT EXISTS cam_section_checkpoints (
+                    entity_id TEXT NOT NULL,
+                    section_id TEXT NOT NULL,
+                    input_hash TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    model TEXT,
+                    prompt_version TEXT,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (entity_id, section_id, input_hash)
+                );
+
+                CREATE TABLE IF NOT EXISTS case_workflow (
+                    entity_id TEXT PRIMARY KEY,
+                    case_run_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    required_authority TEXT,
+                    submitted_by TEXT,
+                    updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS case_decisions (
+                    decision_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    entity_id TEXT NOT NULL,
+                    case_run_id TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    from_status TEXT NOT NULL,
+                    to_status TEXT NOT NULL,
+                    actor_id TEXT NOT NULL,
+                    actor_role TEXT NOT NULL,
+                    required_authority TEXT,
+                    system_recommendation TEXT,
+                    comments TEXT,
+                    conditions_json TEXT,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_case_decisions_entity
+                ON case_decisions(entity_id, decision_id);
+
+                CREATE TABLE IF NOT EXISTS cam_run_section_edits (
+                    run_id TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    section_key TEXT NOT NULL,
+                    edited_html TEXT NOT NULL,
+                    edited_by TEXT NOT NULL DEFAULT 'RM',
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (run_id, section_key)
+                );
                 """
             )
-            now = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+            self._migrate_section_edits_to_runs(conn)
+            now = _utc_now()
             conn.execute(
                 """
                 INSERT OR IGNORE INTO app_users(user_id, email, display_name, role, status, created_at, updated_at)
@@ -355,7 +424,7 @@ class PersistenceService:
             or company_data.get("company_name")
             or entity_id
         )
-        now = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        now = _utc_now()
         with self._connect() as conn:
             conn.execute(
                 """
@@ -391,10 +460,13 @@ class PersistenceService:
             conn.execute("DELETE FROM case_runs WHERE entity_id = ?", (entity_id,))
             for run_id in run_ids:
                 conn.execute("DELETE FROM case_comments WHERE run_id = ?", (run_id,))
+            for table in ("pipeline_runs", "cam_section_checkpoints", "cam_run_section_edits", "cam_section_edits",
+                          "case_workflow", "case_decisions"):
+                conn.execute(f"DELETE FROM {table} WHERE entity_id = ?", (entity_id,))
 
     def save_case_run(self, case_result: dict[str, Any]) -> None:
         payload = json.dumps(_plain(case_result), ensure_ascii=False)
-        now = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        now = _utc_now()
         run_id = str(case_result.get("run_id") or "")
         if not run_id:
             return
@@ -471,7 +543,7 @@ class PersistenceService:
         if not run_id:
             return {}
         clean = {str(key): str(value or "").strip() for key, value in comments.items() if str(value or "").strip()}
-        now = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        now = _utc_now()
         with self._connect() as conn:
             conn.execute("DELETE FROM case_comments WHERE run_id = ?", (run_id,))
             for section_id, comment_text in clean.items():
@@ -503,7 +575,7 @@ class PersistenceService:
         """Save or update a single RM-edited CAM section."""
         if not entity_id or not section_key:
             return
-        now = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        now = _utc_now()
         with self._connect() as conn:
             if edited_html.strip():
                 conn.execute(
@@ -529,6 +601,188 @@ class PersistenceService:
             return
         with self._connect() as conn:
             conn.execute("DELETE FROM cam_section_edits WHERE entity_id = ?", (entity_id,))
+
+    # ── Migrations ───────────────────────────────────────────────────────
+
+    @staticmethod
+    def _migrate_section_edits_to_runs(conn) -> None:
+        """One-off: attach legacy per-company RM edits to that company's latest run."""
+        conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)")
+        name = "2026_10_cam_edits_per_run"
+        if conn.execute("SELECT 1 FROM schema_migrations WHERE name = ?", (name,)).fetchone():
+            return
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO cam_run_section_edits(run_id, entity_id, section_key, edited_html, edited_by, updated_at)
+            SELECT latest.run_id, e.entity_id, e.section_key, e.edited_html, e.edited_by, e.updated_at
+            FROM cam_section_edits e
+            JOIN (
+                SELECT entity_id, run_id FROM case_runs r1
+                WHERE run_at = (SELECT MAX(run_at) FROM case_runs r2 WHERE r2.entity_id = r1.entity_id)
+            ) latest ON latest.entity_id = e.entity_id
+            """
+        )
+        conn.execute("INSERT INTO schema_migrations(name, applied_at) VALUES (?, ?)", (name, _utc_now()))
+
+    # ── RM section edits, scoped to one pipeline run ─────────────────────
+
+    def load_run_section_edits(self, run_id: str | None) -> dict[str, dict[str, str]]:
+        if not run_id:
+            return {}
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT section_key, edited_html, edited_by, updated_at FROM cam_run_section_edits "
+                "WHERE run_id = ? ORDER BY section_key",
+                (run_id,),
+            ).fetchall()
+        return {
+            row["section_key"]: {"html": row["edited_html"], "edited_by": row["edited_by"],
+                                 "updated_at": row["updated_at"]}
+            for row in rows
+        }
+
+    def save_run_section_edit(self, run_id: str, entity_id: str, section_key: str, edited_html: str,
+                              edited_by: str = "RM") -> None:
+        """Save, or delete when empty, one RM edit for a run's CAM section."""
+        if not run_id or not section_key:
+            return
+        with self._connect() as conn:
+            if edited_html.strip():
+                conn.execute(
+                    """
+                    INSERT INTO cam_run_section_edits(run_id, entity_id, section_key, edited_html, edited_by, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(run_id, section_key) DO UPDATE SET
+                        edited_html=excluded.edited_html,
+                        edited_by=excluded.edited_by,
+                        updated_at=excluded.updated_at
+                    """,
+                    (run_id, entity_id, section_key, edited_html.strip(), edited_by, _utc_now()),
+                )
+            else:
+                conn.execute("DELETE FROM cam_run_section_edits WHERE run_id = ? AND section_key = ?",
+                             (run_id, section_key))
+
+    # ── Pipeline run tracking ────────────────────────────────────────────
+
+    def start_pipeline_run(self, run_id: str, entity_id: str, llm_provider: str | None) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT INTO pipeline_runs(run_id, entity_id, status, started_at, llm_provider) "
+                "VALUES (?, ?, 'running', ?, ?)",
+                (run_id, entity_id, _utc_now(), llm_provider),
+            )
+
+    def finish_pipeline_run(self, run_id: str, status: str, error: str | None = None,
+                            case_run_id: str | None = None) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE pipeline_runs SET status = ?, finished_at = ?, error = ?, case_run_id = ? WHERE run_id = ?",
+                (status, _utc_now(), error, case_run_id, run_id),
+            )
+
+    def list_pipeline_runs(self, entity_id: str, limit: int = 20) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT run_id, entity_id, status, started_at, finished_at, error, llm_provider, case_run_id "
+                "FROM pipeline_runs WHERE entity_id = ? ORDER BY started_at DESC LIMIT ?",
+                (entity_id, limit),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    # ── Approval workflow ────────────────────────────────────────────────
+
+    def get_workflow(self, entity_id: str) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute("SELECT * FROM case_workflow WHERE entity_id = ?", (entity_id,)).fetchone()
+        return dict(row) if row else None
+
+    def record_workflow_transition(self, *, entity_id: str, case_run_id: str, action: str,
+                                   from_status: str, to_status: str, actor_id: str, actor_role: str,
+                                   required_authority: str | None, system_recommendation: str | None,
+                                   submitted_by: str | None, comments: str = "",
+                                   conditions: list[str] | None = None) -> None:
+        """Update the case's state and append the decision to the audit trail atomically."""
+        now = _utc_now()
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO case_workflow(entity_id, case_run_id, status, required_authority, submitted_by, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(entity_id) DO UPDATE SET
+                    case_run_id=excluded.case_run_id, status=excluded.status,
+                    required_authority=excluded.required_authority,
+                    submitted_by=excluded.submitted_by, updated_at=excluded.updated_at
+                """,
+                (entity_id, case_run_id, to_status, required_authority, submitted_by, now),
+            )
+            conn.execute(
+                """
+                INSERT INTO case_decisions(entity_id, case_run_id, action, from_status, to_status, actor_id,
+                    actor_role, required_authority, system_recommendation, comments, conditions_json, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (entity_id, case_run_id, action, from_status, to_status, actor_id, actor_role,
+                 required_authority, system_recommendation, comments,
+                 json.dumps(conditions or [], ensure_ascii=False), now),
+            )
+
+    def reset_workflow(self, entity_id: str, case_run_id: str) -> None:
+        """A new pipeline run starts a fresh draft; earlier decisions stay in the audit trail."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO case_workflow(entity_id, case_run_id, status, required_authority, submitted_by, updated_at)
+                VALUES (?, ?, 'draft', NULL, NULL, ?)
+                ON CONFLICT(entity_id) DO UPDATE SET
+                    case_run_id=excluded.case_run_id, status='draft', required_authority=NULL,
+                    submitted_by=NULL, updated_at=excluded.updated_at
+                """,
+                (entity_id, case_run_id, _utc_now()),
+            )
+
+    def list_case_decisions(self, entity_id: str) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM case_decisions WHERE entity_id = ? ORDER BY decision_id", (entity_id,),
+            ).fetchall()
+        decisions = []
+        for row in rows:
+            item = dict(row)
+            item["conditions"] = json.loads(item.pop("conditions_json") or "[]")
+            decisions.append(item)
+        return decisions
+
+    def list_workflows(self, status: str | None = None) -> list[dict[str, Any]]:
+        query, params = "SELECT * FROM case_workflow", ()
+        if status:
+            query, params = query + " WHERE status = ?", (status,)
+        with self._connect() as conn:
+            rows = conn.execute(query + " ORDER BY updated_at", params).fetchall()
+        return [dict(row) for row in rows]
+
+    # ── CAM section checkpoints (resume after a failed run) ──────────────
+
+    def load_section_checkpoint(self, entity_id: str, section_id: str, input_hash: str) -> str | None:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT content FROM cam_section_checkpoints "
+                "WHERE entity_id = ? AND section_id = ? AND input_hash = ?",
+                (entity_id, section_id, input_hash),
+            ).fetchone()
+        return row["content"] if row else None
+
+    def save_section_checkpoint(self, entity_id: str, section_id: str, input_hash: str, content: str,
+                                model: str | None, prompt_version: str | None) -> None:
+        with self._connect() as conn:
+            # Keep only the newest checkpoint per section: older inputs are stale.
+            conn.execute("DELETE FROM cam_section_checkpoints WHERE entity_id = ? AND section_id = ?",
+                         (entity_id, section_id))
+            conn.execute(
+                "INSERT INTO cam_section_checkpoints(entity_id, section_id, input_hash, content, model, "
+                "prompt_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (entity_id, section_id, input_hash, content, model, prompt_version, _utc_now()),
+            )
 
     def describe(self) -> dict[str, Any]:
         return {

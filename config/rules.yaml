@@ -73,3 +73,17 @@ recommendation:
     - "Monthly stock/receivable statements"
   monitoring_enhanced:
     - "Enhanced media/news monitoring — weekly"
+
+# Internal credit-policy thresholds quoted in the CAM (KPI benchmarking,
+# projections and covenants all read these, so the memo is consistent).
+# PLACEHOLDER VALUES — align with your bank's credit policy.
+policy_thresholds:
+  min_dscr: 1.20
+  max_debt_to_equity: 2.5
+  min_current_ratio: 1.25
+  min_interest_coverage: 2.0
+  max_debt_to_ebitda: 4.0
+  min_ebitda_margin_pct: 10
+  max_tol_tnw: 4.0
+  min_roe_pct: 12
+  max_debtor_days: 90

@@ -57,4 +57,4 @@ Each entity's `optional-inputs/` folder contains:
 
 ## Re-generating
 
-Run `.\scripts\consolidate_test_documents.ps1` to rebuild this folder from source locations.
+These packs are static test inputs for upload demos; edit them directly when needed.

@@ -21,3 +21,11 @@ downloaded document/*
 .mypy_cache/
 node_modules/
 *.log
+
+# Local tooling, browser artifacts and secrets
+.claude/
+.continue/
+.playwright-cli/
+.env
+.env.*
+!.env.example

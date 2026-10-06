@@ -11,16 +11,15 @@ LLM-powered Q&A for credit analysts. Builds context from:
 Uses Ollama on the host machine (not Docker).
 """
 
-import json
 import re
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 import httpx
 
 from src.core.config_manager import config
+from src.core.llm_provider import strip_reasoning
 
 
 @dataclass
@@ -498,23 +497,30 @@ async def _call_ollama(session: ChatSession) -> str:
     return response
 
 
+def _ollama_chat_settings() -> dict:
+    """Chat uses the same Ollama block as CAM generation (think, timeout)."""
+    return config.get("llm_providers", "providers", "ollama", default={}) or {}
+
+
 async def _generate_ollama_text(host: str, model: str, prompt: str) -> str:
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        resp = await client.post(
-            f"{host}/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.25,
-                    "num_predict": 1400,
-                }
-            }
-        )
+    settings = _ollama_chat_settings()
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0.25,
+            "num_predict": 1400,
+        },
+    }
+    if settings.get("think") is not None:
+        payload["think"] = bool(settings["think"])
+    timeout = float(settings.get("chat_timeout_seconds", 120))
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        resp = await client.post(f"{host}/api/generate", json=payload)
         resp.raise_for_status()
         data = resp.json()
-        return str(data.get("response", "No response from model.")).strip()
+        return strip_reasoning(str(data.get("response", "No response from model.")))
 
 
 def _response_looks_incomplete(text: str) -> bool:

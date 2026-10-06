@@ -1,13 +1,18 @@
 """
 LLM-Powered CAM Renderer — Section-by-Section Generation
 Pass 2 per IDEA.MD: LLM converts approved factual JSON into credit narrative.
-Each section is independently generated → template fallback if LLM fails.
+Each section is generated independently and checkpointed as soon as it is
+written; a failed run resumes from the last completed section. An LLM failure
+stops the run (no silent template fallback).
 Golden Rule: LLM only writes from approved fact-pack, never invents facts.
 """
 
+import hashlib
 import json
 import logging
-from typing import Callable
+import re
+import time
+from typing import Callable, Protocol
 
 log = logging.getLogger(__name__)
 
@@ -73,8 +78,7 @@ CAM_SECTIONS = [
             "Include rows: Company Name, CIN, PAN, Date of Incorporation, Registered State, "
             "Registered Address, Authorized Capital (₹ Cr), Paid-up Capital (₹ Cr), "
             "Listed Exchange, NSE/BSE Symbol, Credit Rating, Rating Agency, Employee Count.\n"
-            "Each row MUST have a source (e.g., 'MCA21', 'Certificate of Incorporation', "
-            "'ROC Records', 'Annual Report FY2025', 'CRISIL/CARE website', 'NSE/BSE website').\n\n"
+            "Fill each row's source as per the system rules (data provenance only).\n\n"
             "(2.2) Registered Address & Location — Full registered address, corporate office "
             "address if different, state, PIN code.\n\n"
             "(2.3) Business Overview — Brief company history (1-2 paragraphs), key milestones, "
@@ -104,8 +108,7 @@ CAM_SECTIONS = [
             "Include: Project Name, Location/Stretch, Length (km), Concession Model "
             "(EPC/BOT/HAM), Concession Period, Contract Value (₹ Cr), Appointed Date, "
             "PCOD/COD, Client/Authority (e.g., NHAI).\n"
-            "Source should reference 'NHAI Concession Agreement', 'Company Disclosure', "
-            "'RM Submission' etc.\n\n"
+            "\n"
             "(3.3) Project Components — If infrastructure project, show:\n"
             "| Component | Scope | Status | Source / Remarks |\n"
             "Include: Road Works (km), Structures (bridges, flyovers, ROBs), "
@@ -118,9 +121,9 @@ CAM_SECTIONS = [
             "(3.5) Construction Status / Order Execution:\n"
             "Table: Project | Physical Progress % | Financial Progress % | Appointed Date | "
             "Target COD | Ahead/Behind Schedule | Source / Remarks.\n\n"
-            "If infra_metrics or sector_kpis data is available, use it to populate "
-            "project-specific details. If no specific project data is available, describe "
-            "the general business activity and purpose of the facility in detail.\n\n"
+            "Use infra_metrics / sector_kpis to populate project-specific details. Include "
+            "sub-sections 3.2–3.5 ONLY when the data contains project details; otherwise omit "
+            "them and describe the business activity and the purpose of the facility.\n\n"
             "300-500 words."
         ),
         "max_tokens": 2500,
@@ -139,7 +142,7 @@ CAM_SECTIONS = [
             "(4.1) Shareholding Pattern — Table with Source column:\n"
             "| Category | Holding (%) | Source / Remarks |\n"
             "Promoter & Promoter Group, Institutional (FII/DII), Public/Others, Total.\n"
-            "Source: 'BSE/NSE Shareholding Pattern Q4 FY2025', 'Annual Report'.\n\n"
+            "\n"
             "(4.2) Group Structure — Parent company, subsidiary/associate companies, JV partners.\n"
             "Table: Entity Name | Relationship | CIN | Activity | Stake % | Source / Remarks.\n\n"
             "(4.3) Promoter Background — Key promoter details: name, stake, net worth, background.\n"
@@ -161,8 +164,8 @@ CAM_SECTIONS = [
             "(5.1) Board of Directors — Table with Source column:\n"
             "| S.No | Name | DIN | Designation | Date of Appointment | Promoter (Y/N) | "
             "Net Worth (₹ Cr) | Other Directorships | Source / Remarks |\n"
-            "Source: 'MCA Company Master', 'MCA DIN Search', 'Uploaded KYC'.\n\n"
-            "(5.2) Key Management Profile — Brief profile (2-3 lines each) for:\n"
+            "\n"
+            "(5.2) Key Management Profile — Brief profile (2-3 lines each), only for people in the data:\n"
             "- Managing Director / CEO: background, experience, tenure, previous roles\n"
             "- CFO / Finance Director: qualifications, experience\n"
             "- Other key directors: domain expertise and contribution\n\n"
@@ -189,7 +192,7 @@ CAM_SECTIONS = [
             "(6.1) Industry Overview — Current state of the sector, size, growth rate, "
             "regulatory environment, government policy thrust.\n"
             "Table: Parameter | Value | Source / Remarks.\n\n"
-            "(6.2) Competitive Landscape — Table of key competitors:\n"
+            "(6.2) Competitive Landscape — only if competitor data is provided; table of key competitors:\n"
             "Company | Revenue (₹ Cr) | Market Cap | Rating | Key Differentiator | Source / Remarks.\n\n"
             "(6.3) Revenue Segments & Geography — Revenue breakdown by segment and geography.\n\n"
             "(6.4) SWOT Analysis — Strengths, Weaknesses, Opportunities, Threats.\n\n"
@@ -219,7 +222,7 @@ CAM_SECTIONS = [
             "Write the External Credit Rating section with detailed analysis:\n\n"
             "(7.1) Current Ratings — Table with Source:\n"
             "| Agency | Instrument | Rating | Outlook | Date | Source / Remarks |\n\n"
-            "(7.2) Rating Rationale — Key Strengths cited by rating agency:\n"
+            "(7.2) Rating Rationale — Key Strengths cited by the rating agency, only as stated in the data:\n"
             "Bullet list of strengths (e.g., strong order book, established track record, "
             "comfortable financial metrics). Source reference for each point.\n\n"
             "(7.3) Rating Concerns & Sensitivities:\n"
@@ -366,24 +369,24 @@ CAM_SECTIONS = [
         "instruction": (
             "Write comprehensive Financial Analysis (most data-intensive section):\n\n"
             "(13.1) Profit & Loss Statement — Table with ALL periods + Source column:\n"
-            "| Particulars | FY2023 | FY2024 | FY2025 | YoY Growth | Source / Remarks |\n"
+            "| Particulars | <one column per period in financial_summary> | YoY Growth | Source / Remarks |\n"
             "Revenue, Other Income, Total Income, Raw Material/Sub-contracting Cost, "
             "Employee Cost, Other Expenses, EBITDA, EBITDA Margin %, Depreciation, "
             "EBIT, Interest/Finance Cost, PBT, Tax, PAT, PAT Margin %.\n"
-            "Source: 'Audited Financials FY20XX'.\n"
+            "Source: each period's statement source from the data.\n"
             "Add analytical commentary on revenue drivers, margin trajectory.\n\n"
             "(13.2) Balance Sheet Summary — Table with Source:\n"
-            "| Particulars | FY2023 | FY2024 | FY2025 | Source / Remarks |\n"
+            "| Particulars | <one column per period> | Source / Remarks |\n"
             "Net Worth, Long-Term Debt, Short-Term Debt, Total Debt, Total Assets, "
             "Fixed Assets, Current Assets (Trade Receivables, Inventory, Cash), "
             "Current Liabilities (Trade Payables, Short-term Borrowings).\n"
             "Commentary: leverage assessment, working capital position.\n\n"
             "(13.3) Cash Flow Analysis — Table with Source:\n"
-            "| Particulars | FY2023 | FY2024 | FY2025 | Source / Remarks |\n"
+            "| Particulars | <one column per period> | Source / Remarks |\n"
             "OCF, Capex, FCF, Debt Repayment, Net Cash Flow.\n"
             "Cash quality: OCF/PAT ratio.\n\n"
             "(13.4) Key Financial Ratios — Comprehensive table:\n"
-            "| Ratio | FY2023 | FY2024 | FY2025 | Peer Median | Assessment | Source / Remarks |\n"
+            "| Ratio | <one column per period> | Peer Median (benchmark_summary) | Assessment | Source / Remarks |\n"
             "Current Ratio, D/E, Debt/EBITDA, ICR, DSCR, EBITDA Margin, PAT Margin, "
             "ROE, ROA, Asset Turnover, Debtor Days, Inventory Days, Working Capital Cycle, TOL/TNW.\n\n"
             "(13.5) Decision Impact Analysis — For each key metric: what it means for credit "
@@ -400,10 +403,11 @@ CAM_SECTIONS = [
         "id": "operational_kpis",
         "title": "14. Detailed Operational Analysis & Industry KPI Benchmarking",
         "data_keys": ["infra_metrics", "industry_analysis", "benchmark_summary",
-                       "financial_summary", "ratio_analysis", "case_summary", "sector_kpis"],
+                       "financial_summary", "ratio_analysis", "case_summary", "sector_kpis",
+                       "policy_thresholds"],
         "instruction": (
             "Write the Detailed Operational Analysis section with industry-specific KPIs.\n\n"
-            "(14.1) Industry KPI Benchmarking — This is a CRITICAL table. ALL columns MUST be populated.\n"
+            "(14.1) Industry KPI Benchmarking — CRITICAL table:\n"
             "| KPI Metric | External Benchmark | Internal Benchmark | Company Value | Assessment | Source / Remarks |\n\n"
             "For INFRASTRUCTURE / ROAD CONSTRUCTION sector, use these EXTERNAL BENCHMARKS "
             "(from NHAI/ICRA/CRISIL industry data):\n"
@@ -422,16 +426,9 @@ CAM_SECTIONS = [
             "- Subcontractor Dependency: <40% (good); 40-60% (moderate); >60% (high risk)\n"
             "- Labour Productivity (km/worker/yr): 0.008-0.012 km\n"
             "- Safety (LTIFR): <0.5 (excellent); 0.5-1.0 (good); >1.0 (concern)\n\n"
-            "INTERNAL BENCHMARKS (bank's credit policy thresholds):\n"
-            "- Min DSCR: 1.25x\n"
-            "- Max D/E Ratio: 2.0x\n"
-            "- Min ICR: 2.0x\n"
-            "- Min Current Ratio: 1.2x\n"
-            "- Max Debt/EBITDA: 4.0x\n"
-            "- Min EBITDA Margin: 10%\n"
-            "- Max TOL/TNW: 4.0x\n"
-            "- Min ROE: 12%\n"
-            "- Max Debtor Days: 90 days\n\n"
+            "For OTHER sectors, the External Benchmark is the peer median from benchmark_summary; "
+            "write 'N/A' where none is given. Do not apply the infrastructure ranges to other sectors.\n\n"
+            "INTERNAL BENCHMARKS: use policy_thresholds exactly (the bank's credit-policy limits).\n\n"
             "Use the company's ACTUAL values from infra_metrics, sector_kpis, and financial data. "
             "Do NOT write 'Information not available' if data exists — extract and compute the value.\n\n"
             "(14.2) KPI Assessment — Commentary on each KPI vs benchmarks. "
@@ -465,7 +462,7 @@ CAM_SECTIONS = [
             "Gap | Source / Remarks.\n\n"
             "Summary: X metrics above median, Y in line, Z below peers.\n"
             "Highlight worst performers with specific gap analysis and credit impact.\n\n"
-            "Source: 'Internal Benchmark Engine', 'Peer Database FY2025'."
+            "Source: 'Benchmark engine (sector peer percentiles)'."
         ),
     },
 
@@ -475,26 +472,23 @@ CAM_SECTIONS = [
     {
         "id": "financial_projections",
         "title": "16. Financial Projections",
-        "data_keys": ["financial_summary", "ratio_analysis", "cash_flow_repayment",
-                       "facility_details", "case_summary", "infra_metrics", "sector_kpis"],
+        "data_keys": ["financial_projections", "policy_thresholds", "financial_summary",
+                       "cash_flow_repayment", "facility_details", "case_summary"],
         "instruction": (
-            "Write comprehensive Financial Projections:\n\n"
-            "(16.1) Projected P&L — Table with Source:\n"
-            "| Particulars | FY2025 (Actual) | FY2026P | FY2027P | FY2028P | "
-            "Assumptions | Source / Remarks |\n"
-            "Revenue, EBITDA, PAT. Show growth assumptions clearly.\n"
-            "Source: 'Management Projections', 'RM Assessment', 'Historical Trend Extrapolation'.\n\n"
-            "(16.2) Cash Flow & DSCR Projections — Table:\n"
-            "| Year | OCF (₹ Cr) | Debt Repayment | Interest | Total Debt Service | "
-            "DSCR | Source / Remarks |\n"
-            "DSCR must be > 1.25x for comfortable debt servicing. Flag if marginal.\n\n"
-            "(16.3) DSRA (Debt Service Reserve Account) — Computation table:\n"
-            "Next 6 months' debt service, DSRA balance needed, adequacy assessment.\n\n"
-            "(16.4) Sensitivity Analysis — Impact on DSCR under stress:\n"
-            "| Scenario | Revenue Change | Cost Change | DSCR Impact | Assessment | Source / Remarks |\n"
-            "Base Case, Revenue -10%, Cost +10%, Combined Stress.\n\n"
-            "If projection data is limited, state: 'Detailed projections to be provided by "
-            "RM / Management representation pending.' Do NOT fabricate projection numbers.\n\n"
+            "Write the Financial Projections section using ONLY the computed figures in "
+            "financial_projections. Do not calculate or extrapolate any number yourself.\n\n"
+            "If financial_projections.available is false, state its reason and that projections "
+            "are pending from management / RM, then stop.\n\n"
+            "(16.1) Basis & Assumptions — state the revenue method and each assumption "
+            "(CAGR applied, average margins, OCF conversion, interest rate, tenor, debt basis).\n\n"
+            "(16.2) Projected P&L — table: Particulars | base_period (Actual, from financial_summary) | "
+            "one column per projected year | Source / Remarks ('Projection engine'). "
+            "Rows: Revenue, EBITDA, PAT.\n\n"
+            "(16.3) Debt Service & DSCR — table: Year | OCF | Principal | Interest | DSCR | Assessment. "
+            "Compare DSCR with policy_thresholds.min_dscr and flag any year below it.\n\n"
+            "(16.4) DSRA requirement — quote dsra_requirement_cr (one quarter of annual debt service).\n\n"
+            "(16.5) Stress tests — table: Scenario | DSCR | Assessment, from stress_tests.\n\n"
+            "Close with a short note that these are model projections pending management's CMA data.\n\n"
             "250-400 words."
         ),
         "max_tokens": 2500,
@@ -544,7 +538,7 @@ CAM_SECTIONS = [
             "(18.1) Security Structure — Table with Source:\n"
             "| S.No | Security Type | Description | Market Value (₹ Cr) | FSV (₹ Cr) | "
             "Encumbrance | Source / Remarks |\n"
-            "Source: 'Valuation Report dt. XX', 'RM Assessment', 'CERSAI/ROC'.\n\n"
+            "\n"
             "(18.2) Collateral Coverage:\n"
             "| Item | Value (₹ Cr) | Source / Remarks |\n"
             "Total Market Value, Total FSV, Facility Amount, FSV Coverage Ratio, "
@@ -560,14 +554,15 @@ CAM_SECTIONS = [
     {
         "id": "covenants",
         "title": "19. Terms, Conditions & Financial Covenants",
-        "data_keys": ["policy_decisions", "covenant_history"],
+        "data_keys": ["policy_decisions", "covenant_history", "policy_thresholds", "ratio_analysis"],
         "instruction": (
             "Write the Covenants section:\n\n"
             "(19.1) Conditions Precedent — Numbered table with Source / Remarks column.\n\n"
             "(19.2) Financial Covenants — Table:\n"
             "| Covenant | Threshold | Current Actual | Compliance | Source / Remarks |\n"
-            "Include: Min DSCR, Max D/E, Min Current Ratio, Max TOL/TNW, "
-            "Min EBITDA Margin.\n\n"
+            "Include: Min DSCR, Max D/E, Min Current Ratio, Max TOL/TNW, Min EBITDA Margin. "
+            "Thresholds come from policy_thresholds (and the covenants in policy_decisions); "
+            "Current Actual is the latest-period value from ratio_analysis.\n\n"
             "(19.3) Reporting Requirements — Table:\n"
             "Report | Frequency | Due Date | Source / Remarks.\n\n"
             "(19.4) Monitoring Conditions — Special monitoring requirements if any.\n\n"
@@ -584,7 +579,7 @@ CAM_SECTIONS = [
         "data_keys": ["policy_decisions", "borrower_profile", "case_summary",
                        "collateral_analysis", "core_banking_analysis",
                        "social_media_cam_summary", "pep_screening",
-                       "credit_strengths", "key_risks"],
+                       "credit_strengths", "key_risks", "approving_authority"],
         "instruction": (
             "Write the Recommendation section with comprehensive decision details:\n\n"
             "(20.1) RECOMMENDATION: State clearly — [APPROVE / CONDITIONAL APPROVE / REFER / DECLINE].\n"
@@ -600,9 +595,11 @@ CAM_SECTIONS = [
             "  - Social Media/Reputation: any reputation flags\n\n"
             "(20.3) Conditions & Covenants — collateral requirement, exception notes, "
             "financial covenants, monitoring frequency, reporting requirements.\n\n"
-            "(20.4) Approving Authority — table:\n"
+            "(20.4) Approving Authority — state the required sanctioning authority from "
+            "approving_authority (name, and the reason: amount, risk grade, and whether approval "
+            "would be a deviation from the system recommendation). Then a signature table:\n"
             "| Authority | Name | Designation | Signature | Date |\n"
-            "RM, Branch Credit Head, Zonal Head, Sanctioning Authority.\n\n"
+            "Relationship Manager, then the required sanctioning authority.\n\n"
             "Be analytical and connect data points to the decision."
         ),
     },
@@ -688,15 +685,61 @@ SYSTEM_PROMPT = (
     "9. Output clean markdown with proper headings (##, ###), tables, bold for emphasis, and paragraphs.\n"
     "10. For risk items, always state: the risk, its severity, and the mitigant (if any).\n"
     "11. EVERY table that contains factual data MUST include a 'Source / Remarks' column as the LAST column. "
-    "Populate it with the data provenance — e.g., 'MCA21', 'Annual Report FY2025', 'Audited Financials FY2025', "
-    "'NHAI Concession Agreement', 'CRISIL/CARE Rating Report', 'BSE/NSE Filing', 'CIBIL/Equifax', "
-    "'RBI CRILC', 'GST Portal', 'Probe42', 'Management Representation', 'RM Submission', "
-    "'Company Website', 'ROC Records', 'Certificate of Incorporation'. "
-    "This is MANDATORY — the Credit Committee requires data traceability.\n"
-    "12. For Industry KPI tables, ALL benchmark columns (External Benchmark, Internal Benchmark) "
-    "MUST be populated with actual values from the provided data or standard industry benchmarks. "
-    "Do NOT leave benchmark columns as 'Information not available' when benchmark data is provided in the instructions.\n"
+    "Fill it ONLY with provenance that appears in the data (a 'source' field, data provider, or a document "
+    "named in the data). Otherwise name the data area it came from, e.g. 'Financial summary', "
+    "'Policy engine', 'Bureau data', 'Benchmark engine'. NEVER invent document names, report dates, "
+    "rating agencies or filing references — the Credit Committee relies on this traceability.\n"
+    "12. Benchmark columns may only use values given in the data (benchmark_summary, policy_thresholds) "
+    "or stated in the section instructions. Write 'N/A' where no benchmark is provided.\n"
+    "13. Use the financial periods present in the data as table columns; never add years that are not in the data.\n"
+    "14. When the data contains a computed value (ratios, projections, DSCR, scores), quote it. "
+    "Do not recalculate or extrapolate your own figures.\n"
+    "15. Omit a requested sub-section or table entirely when the data has nothing for it, rather than "
+    "filling it with placeholders.\n"
 )
+
+
+# Bump whenever CAM_SECTIONS instructions or SYSTEM_PROMPT change in a way that
+# should invalidate saved section checkpoints and be traceable in the output.
+PROMPT_VERSION = "cam-2026.10-2"
+
+
+class SectionCheckpoints(Protocol):
+    """Storage for CAM sections already generated, so a failed run can resume."""
+
+    def load(self, section_id: str, input_hash: str) -> str | None: ...
+
+    def save(self, section_id: str, input_hash: str, content: str) -> None: ...
+
+
+def model_identity(llm_provider) -> str:
+    model = getattr(llm_provider, "model", None) or getattr(llm_provider, "model_name", None) or ""
+    return f"{getattr(llm_provider, 'name', 'unknown')}:{model}"
+
+
+def section_input_hash(prompt: str, system_prompt: str, model_id: str,
+                       temperature: float, max_tokens: int) -> str:
+    """Fingerprint of everything that determines a section's LLM output."""
+    material = json.dumps(
+        {"v": PROMPT_VERSION, "prompt": prompt, "system": system_prompt, "model": model_id,
+         "temperature": temperature, "max_tokens": max_tokens},
+        sort_keys=True, ensure_ascii=False,
+    )
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+
+_THINK_BLOCK = re.compile(r"<think>.*?</think>", flags=re.DOTALL | re.IGNORECASE)
+_FENCED = re.compile(r"^```(?:markdown|md)?\s*\n(.*)\n```\s*$", flags=re.DOTALL)
+
+
+def clean_section_output(text: str) -> str:
+    """Strip reasoning blocks (e.g. qwen3 <think>) and a wrapping code fence."""
+    text = _THINK_BLOCK.sub("", text or "")
+    if "</think>" in text.lower():  # reasoning without an opening tag
+        text = text[text.lower().rindex("</think>") + len("</think>"):]
+    text = text.strip()
+    fenced = _FENCED.match(text)
+    return fenced.group(1).strip() if fenced else text
 
 
 def _sanitize_llm_markdown(text: str) -> str:
@@ -853,9 +896,14 @@ def render_cam_with_llm(
     temperature: float = 0.1,
     max_tokens_per_section: int = 1500,
     on_section_progress: Callable = None,
+    checkpoints: SectionCheckpoints | None = None,
 ) -> str:
     """
     Render a complete CAM using LLM for narrative sections.
+
+    Each section is saved to ``checkpoints`` as soon as it is generated, and a
+    section whose inputs are unchanged is reused instead of regenerated, so a
+    re-run after a failure resumes where the last run stopped.
     Raises on LLM failure — no template fallback.
     """
     from src.engines.cam_renderer_v2 import (
@@ -888,6 +936,7 @@ def render_cam_with_llm(
     llm_sections = [s for s in CAM_SECTIONS if not s.get("skip_llm") and _should_render_section(s, fact_pack)]
     llm_total = len(llm_sections)
     llm_idx = 0
+    model_id = model_identity(llm_provider)
 
     for section in CAM_SECTIONS:
         sid = section["id"]
@@ -920,28 +969,37 @@ def render_cam_with_llm(
             f"Start with the heading: ## {section['title']}"
         )
 
-        import time as _time
-        _t0 = _time.time()
         section_max_tokens = section.get("max_tokens", max_tokens_per_section)
-        log.info("LLM generating section %d/%d: %s (prompt ~%d chars)", llm_idx, llm_total, sid, len(prompt))
-        text = llm_provider.generate(
-            prompt=prompt,
-            system_prompt=SYSTEM_PROMPT,
-            temperature=temperature,
-            max_tokens=section_max_tokens,
-        )
-        _dt = _time.time() - _t0
-        log.info("LLM section %s: %d chars in %.1fs", sid, len(text) if text else 0, _dt)
-        if not text or len(text.strip()) < 50:
-            raise RuntimeError(
-                f"LLM produced empty/insufficient output for section '{sid}' "
-                f"({len(text.strip()) if text else 0} chars in {_dt:.1f}s)"
-            )
-        rendered_sections.append(text.strip())
+        input_hash = section_input_hash(prompt, SYSTEM_PROMPT, model_id, temperature, section_max_tokens)
+        text = checkpoints.load(sid, input_hash) if checkpoints else None
+        resumed = text is not None
+
+        if resumed:
+            log.info("LLM section %d/%d: %s resumed from checkpoint", llm_idx, llm_total, sid)
+        else:
+            started = time.time()
+            log.info("LLM generating section %d/%d: %s (prompt ~%d chars)", llm_idx, llm_total, sid, len(prompt))
+            text = clean_section_output(llm_provider.generate(
+                prompt=prompt,
+                system_prompt=SYSTEM_PROMPT,
+                temperature=temperature,
+                max_tokens=section_max_tokens,
+            ))
+            elapsed = time.time() - started
+            log.info("LLM section %s: %d chars in %.1fs", sid, len(text), elapsed)
+            if len(text) < 50:
+                raise RuntimeError(
+                    f"LLM produced empty/insufficient output for section '{sid}' "
+                    f"({len(text)} chars in {elapsed:.1f}s)"
+                )
+            if checkpoints:
+                checkpoints.save(sid, input_hash, text)
+
+        rendered_sections.append(text)
         section_results[sid] = "llm"
         if on_section_progress:
-            on_section_progress({"type": "section_complete", "section": sid,
-                                 "mode": "llm", "step": llm_idx, "total": llm_total})
+            on_section_progress({"type": "section_complete", "section": sid, "mode": "llm",
+                                 "resumed": resumed, "step": llm_idx, "total": llm_total})
 
     # Add generation metadata
     meta = _generation_metadata(section_results)
@@ -966,7 +1024,10 @@ def _get_template_fallback(section_id: str, fact_pack: dict) -> str:
         render_section_9_covenants,
         render_section_10_conduct,
         render_section_11_benchmarking,
-        render_section_12_recommendation,
+        render_section_12_operational_kpis,
+        render_section_13_financial_projections,
+        render_section_15_recommendation,
+        render_section_8a_core_banking,
     )
     _map = {
         "executive_summary": render_section_1_executive_summary,
@@ -981,7 +1042,10 @@ def _get_template_fallback(section_id: str, fact_pack: dict) -> str:
         "covenants": render_section_9_covenants,
         "conduct": render_section_10_conduct,
         "benchmarking": render_section_11_benchmarking,
-        "recommendation": render_section_12_recommendation,
+        "operational_kpis": render_section_12_operational_kpis,
+        "financial_projections": render_section_13_financial_projections,
+        "recommendation": render_section_15_recommendation,
+        "core_banking": render_section_8a_core_banking,
     }
     fn = _map.get(section_id)
     return fn(fact_pack) if fn else ""

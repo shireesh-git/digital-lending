@@ -9,12 +9,23 @@
 ```
 src/
 ├── api/
-│   └── main.py              # FastAPI app, 50+ routes, SSE pipeline endpoint
+│   ├── main.py               # ASGI entry point (src.api.main:app)
+│   ├── app.py                # create_app(): middleware, static files, routers, error mapping
+│   ├── dependencies.py       # FastAPI dependency providers
+│   └── routers/              # 11 routers, one per area (85+ routes incl. SSE run-stream)
+├── application/              # Use-case services: company, case, cam, approval, document workspace
+│   ├── container.py          # Composition root (wires state + services)
+│   └── errors.py             # Application errors → HTTP status codes
 ├── agents/
-│   ├── base_agent.py         # Abstract base agent class
-│   ├── super_agent.py        # Pipeline orchestrator (7 sub-agents)
+│   ├── base_agent.py         # Agent contract (requires / critical / run)
+│   ├── pipeline.py           # Orchestrator (SuperAgent) running the 7 agents
+│   ├── ingestion_agent.py, screening_agent.py, analysis_agents.py, narrative_agent.py
+│   ├── financial_overrides.py # RM-uploaded figures override the public baseline
 │   └── dashboard_360_agent.py # 360° company view aggregator
+├── rendering/                # CAM markdown→HTML, CAM PDF, CRILC PDF
 ├── engines/
+│   ├── credit_assessment.py  # Single definition: validation → benchmarks → policy decision
+│   ├── approval_policy.py    # Delegation-of-powers matrix + workflow state machine
 │   ├── ratio_engine.py       # 20+ financial ratio computations
 │   ├── benchmark_engine.py   # Sector benchmarking with RAG classification
 │   ├── validation_engine.py  # Cross-document data validation
@@ -45,10 +56,10 @@ src/
 │   ├── external_systems.py   # External API integration layer
 │   ├── ocr_service.py        # OCR service abstraction
 │   ├── pep_service.py        # PEP/sanctions/adverse media screening
-│   ├── persistence.py        # SQLite persistence layer
+│   ├── persistence.py        # SQLite persistence (cases, runs, checkpoints, workflow)
+│   ├── cam_checkpoints.py    # Per-section CAM checkpoints (resume after failure)
 │   ├── probe_mcp_client.py   # External data provider client
 │   ├── probe_service.py      # Data provider orchestration
-│   ├── synthetic_optional_inputs.py # Synthetic test data for optional docs
 │   └── web_crawl_service.py  # News/web intelligence
 ├── data/
 │   ├── company_catalog.py    # Company registry and seeding
@@ -69,8 +80,8 @@ src/
 | Entry Point | File | Purpose |
 |-------------|------|---------|
 | Application start | `run.py` | Configures and starts uvicorn server |
-| API router | `src/api/main.py` | All HTTP endpoints |
-| Pipeline trigger | `super_agent.py` → `run_pipeline()` | Full CAM generation |
+| HTTP API | `src/api/routers/` | Endpoints, one router per area |
+| Pipeline trigger | `CaseService.run()` → `SuperAgent.execute_pipeline()` | Full CAM generation |
 | Company seed | `company_catalog.py` → `seed_company_store()` | Loads test companies |
 
 ## 2. Canonical Data Model
@@ -170,7 +181,7 @@ All financial statements use a canonical set of 35+ line items in ₹ Crores:
 
 **Process:**
 1. For each of 14 LLM sections:
-   - Load section-specific system prompt from `prompts/`
+   - Take the section prompt from SYSTEM_PROMPT / CAM_SECTIONS in src/engines/cam_llm_renderer.py
    - Inject relevant fact-pack data as context
    - Call LLM with `max_tokens_per_section=2500`, `temperature=0.15`
    - Stream response via SSE for real-time UI updates
@@ -325,17 +336,20 @@ providers:
 ### 7.1 Test Structure
 
 ```
-tests/
-├── test_pipeline.py          # Full pipeline integration tests
-├── test_e2e_all.py           # End-to-end across all companies
-├── test_document_downloader.py # Document download tests
-└── check_results.py          # Result validation utilities
+tests/                          # pytest, offline (mock LLM, Probe42 off, temp copies of config/storage)
+├── conftest.py                 # Isolates runtime paths before any src import
+├── characterization/           # Golden snapshots: pipeline output per company + API contract
+├── test_pipeline.py            # Engine-level tests on synthetic companies
+├── test_single_assessment.py   # Case record and CAM share one credit decision
+├── test_cam_checkpoints.py     # Section checkpoints / resume after a failed run
+├── test_approval_policy.py     # Delegation matrix and workflow transitions
+├── test_approval_api.py        # Maker-checker flow through the API
+├── test_persistence_runs.py    # Run tracking, checkpoints, run-scoped edits
+├── test_llm_provider.py        # Ollama context sizing, reasoning cleanup
+└── test_document_downloader.py # Document download tests
 
 scripts/
-├── test_e2e.py               # E2E validation script
-├── test_e2e_full.py          # Full E2E with all companies
-├── test_llm_pipeline.py      # LLM integration test
-└── test_ocr_pipeline.py      # OCR quality validation
+└── test_e2e_full.py            # Manual E2E against a running server (all screens)
 ```
 
 ### 7.2 Test Coverage

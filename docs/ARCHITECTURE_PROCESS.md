@@ -576,7 +576,7 @@ Fact Pack JSON
       │
       ├──► LLM Renderer (cam_llm_renderer.py)
       │    └── 14 AI narrative sections
-      │    └── Per-section system prompts from prompts/
+      │    └── Per-section prompts: CAM_SECTIONS (cam_llm_renderer.py)
       │    └── Context injection from fact pack
       │
       └──► Combined Markdown CAM (21 sections total)

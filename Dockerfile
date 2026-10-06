@@ -25,7 +25,6 @@ WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY src/ ./src/
 COPY config/ ./config/
-COPY prompts/ ./prompts/
 COPY scripts/ ./scripts/
 COPY run.py .
 COPY requirements.txt .
@@ -45,8 +44,7 @@ ENV PYTHONUNBUFFERED=1 \
     CAM_OUTPUT_ROOT=/app/output \
     CAM_RUNTIME_DB_ROOT=/app/runtime-db \
     CAM_REFERENCE_ROOT=/app/reference-docs \
-    CAM_SYNTHETIC_ROOT=/app/synthetic-assets \
-    CAM_ENABLE_OPTIONAL_MOCK_DATA=false
+    CAM_SYNTHETIC_ROOT=/app/synthetic-assets
 
 EXPOSE 8000
 

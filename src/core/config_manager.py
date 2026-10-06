@@ -3,10 +3,14 @@ Centralized Configuration Manager
 Loads YAML configs with hot-reload support and typed accessors.
 """
 
+import logging
+import os
 import yaml
 from pathlib import Path
 from typing import Any
 import threading
+
+log = logging.getLogger(__name__)
 
 
 class ConfigManager:
@@ -34,7 +38,8 @@ class ConfigManager:
     def load(self, config_dir: str | Path = None):
         """Load all YAML configs from directory."""
         if config_dir is None:
-            config_dir = Path(__file__).parent.parent.parent / "config"
+            config_dir = (os.getenv("CAM_CONFIG_DIR", "").strip()
+                          or Path(__file__).parent.parent.parent / "config")
         self._config_dir = Path(config_dir)
 
         if not self._config_dir.exists():
@@ -50,7 +55,7 @@ class ConfigManager:
             self._configs[path.stem] = data
             self._file_mtimes[path.stem] = path.stat().st_mtime
         except Exception as e:
-            print(f"[ConfigManager] Error loading {path}: {e}")
+            log.error("Error loading config %s: %s", path, e)
 
     def reload(self):
         """Reload configs that have changed on disk."""
