@@ -130,14 +130,25 @@ class OpenAIProvider(BaseLLMProvider):
     def __init__(self, cfg: dict):
         self.model = cfg.get("model", "gpt-4")
         self.api_key = os.environ.get(cfg.get("api_key_env", "OPENAI_API_KEY"), "")
+        # OpenAI-compatible endpoints (e.g. NVIDIA NIM): base_url_env, when set in the
+        # environment, overrides base_url. None = api.openai.com.
+        self.base_url = os.environ.get(cfg.get("base_url_env", "")) or cfg.get("base_url")
         self._temp = cfg.get("temperature", 0.1)
         self._max = cfg.get("max_tokens", 4000)
         self._max_retries = int(cfg.get("max_retries", _DEFAULT_MAX_RETRIES))
+        self._timeout = cfg.get("timeout_seconds")
+        # Reasoning models (o-series, gpt-oss): "low" | "medium" | "high". Unset = not sent.
+        self._reasoning_effort = cfg.get("reasoning_effort")
         self._client = _CachedClient(self._make_client)
 
     def _make_client(self):
         import openai
-        return openai.OpenAI(api_key=self.api_key, max_retries=self._max_retries)
+        kwargs = {"api_key": self.api_key, "max_retries": self._max_retries}
+        if self.base_url:
+            kwargs["base_url"] = self.base_url
+        if self._timeout:
+            kwargs["timeout"] = float(self._timeout)
+        return openai.OpenAI(**kwargs)
 
     def generate(self, prompt: str, system_prompt: str = "",
                  temperature: float = None, max_tokens: int = None) -> str:
@@ -146,10 +157,12 @@ class OpenAIProvider(BaseLLMProvider):
             msgs.append({"role": "system", "content": system_prompt})
         msgs.append({"role": "user", "content": prompt})
         limit = max_tokens or self._max
+        extra = {"reasoning_effort": self._reasoning_effort} if self._reasoning_effort else {}
         r = self._client.get().chat.completions.create(
             model=self.model, messages=msgs,
-            temperature=temperature or self._temp,
+            temperature=self._temp if temperature is None else temperature,
             max_tokens=limit,
+            **extra,
         )
         choice = r.choices[0]
         _warn_if_truncated(self.name, choice.finish_reason == "length", limit)

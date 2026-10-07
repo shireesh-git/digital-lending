@@ -1,4 +1,4 @@
-active_provider: ollama
+active_provider: nvidia_nim
 narrative:
   mode: llm
   max_tokens_per_section: 2500
@@ -34,6 +34,19 @@ providers:
     api_key_env: OPENAI_API_KEY
     temperature: 0.1
     max_tokens: 8000
+  nvidia_nim:
+    name: NVIDIA NIM
+    type: openai                        # NIM serves an OpenAI-compatible API
+    model: openai/gpt-oss-20b
+    base_url: https://integrate.api.nvidia.com/v1
+    base_url_env: NVIDIA_NIM_BASE_URL   # overrides base_url when set
+    api_key_env: NVIDIA_NIM_API_KEY     # set in .env.local (never committed)
+    temperature: 0.15
+    max_tokens: 4000
+    timeout_seconds: 60                 # per request; timeouts are retried (max_retries)
+    # gpt-oss reasons before answering, and that reasoning counts against each section's
+    # max_tokens. If sections come back cut short or empty, try reasoning_effort: low.
+    # reasoning_effort: low
   anthropic:
     name: Anthropic Claude
     type: anthropic
