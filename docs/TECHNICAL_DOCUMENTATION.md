@@ -74,7 +74,7 @@ src/
     │   └── index.html        # Alpine.js SPA (single-page)
     └── static/js/
         ├── app.js            # camApp(): shared state, start-up, navigation, API helper
-        └── modules/          # One file per page (dashboard, journey, pipeline, case-detail,
+        └── modules/          # One file per page (summary, journey, pipeline, case-detail,
                               #   documents, reports, approvals, settings) + formatters
 ```
 
@@ -277,7 +277,7 @@ CREATE TABLE app_users (
 
 The frontend is a single-page application using Alpine.js with no build step:
 
-- **Template:** `src/ui/templates/index.html` — Single HTML file with Alpine.js directives
+- **Template:** `src/ui/templates/index.html` (shell) plus one file per page in `src/ui/templates/pages/`, inlined by `render_spa()` when the page is served; Alpine.js directives
 - **Logic:** `src/ui/static/js/app.js` — shared state, start-up, navigation and the API
   helper. Page code lives in `src/ui/static/js/modules/*.js`; each file defines a function
   returning methods that `camApp()` merges into the single Alpine component, so `this` in a
@@ -293,13 +293,13 @@ The frontend is a single-page application using Alpine.js with no build step:
 
 | Page | Route (SPA) | Description |
 |------|-------------|-------------|
-| Dashboard | `/` | Company cards, case statistics, recent activity |
-| Company Detail | `/company/{id}` | 360° view with financials, documents, analysis |
-| Document Management | `/documents/{id}` | Upload, classify, extract documents |
-| CAM Viewer | `/cam/{id}` | Full CAM report with section navigation |
-| Pipeline Monitor | `/pipeline/{id}` | Real-time pipeline progress (SSE) |
-| Configuration | `/config` | LLM, benchmark, rule configuration |
-| Chat | `/chat/{id}` | Financial advisor chat interface |
+| Summary | `#summary` | Executive portfolio view: headline numbers, risk / status / sector breakdowns, proposals needing attention; a row opens a side-panel preview |
+| Cases | `#cases` | Every borrower with grade, score, system view, status and last run; search; run / re-run |
+| Borrower workspace | `#case/{id}/{tab}` | Sticky header (amount, grade, score, status, authority, run picker) and tabs: Overview, CAM, One-pager, 360° view, Risk checks, Documents, Ask AI, Decision, Runs |
+| Run CAM | `#pipeline` | Run the pipeline for a borrower and follow each step live (SSE) |
+| Approvals | `#approvals` | Cases waiting for a chosen authority level |
+| CAM Journey | `#onboard` | Guided creation of a new case (opened from *+ Create New CAM*) |
+| Settings | `#settings` | LLM, engines, benchmarks, policy rules |
 
 ### 5.3 Real-time Updates
 

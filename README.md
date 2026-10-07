@@ -24,7 +24,7 @@ The CAM Intelligence Platform automates the end-to-end credit appraisal process 
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python 3.11, FastAPI, Uvicorn |
-| Frontend | Alpine.js 3.14, Chart.js 4.4; one component split into page modules (`src/ui/static/js/modules/`) |
+| Frontend | Alpine.js 3.14; one component split into page modules (`src/ui/static/js/modules/`) |
 | LLM | Pluggable — Google Gemini (Vertex AI), Ollama (local), OpenAI, Anthropic, Azure |
 | Database | SQLite (runtime persistence) |
 | PDF | ReportLab (generation), pdfplumber (extraction) |
@@ -36,9 +36,22 @@ The CAM Intelligence Platform automates the end-to-end credit appraisal process 
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.com) with `qwen2.5:3b` (the configured LLM) — or switch to another
-  provider in `config/llm_providers.yaml`
+- An NVIDIA NIM API key (the configured LLM, `openai/gpt-oss-20b`) — or
+  [Ollama](https://ollama.com) for a fully local setup; the provider is chosen by
+  `active_provider` in `config/llm_providers.yaml`
 - (Optional) Docker for containerized deployment
+
+### Hosted LLM (NVIDIA NIM, default)
+
+Put your key from [build.nvidia.com](https://build.nvidia.com) in `.env.local`:
+
+```
+NVIDIA_NIM_API_KEY=nvapi-...
+```
+
+`config/llm_providers.yaml` sets `active_provider: nvidia_nim`, which calls NIM's
+OpenAI-compatible endpoint (`type: openai` with a `base_url`). CAM sections are written
+`narrative.max_parallel_sections` at a time.
 
 ### Local LLM (Ollama + qwen2.5:3b)
 
@@ -47,7 +60,7 @@ ollama pull qwen2.5:3b      # ~1.9 GB, one-time
 ollama serve                # if Ollama is not already running as a service
 ```
 
-`config/llm_providers.yaml` sets `active_provider: ollama` with `model: qwen2.5:3b`, the
+To run locally, set `active_provider: ollama` in `config/llm_providers.yaml`; it uses `model: qwen2.5:3b`, the
 fastest of the tested local models (qwen2.5:3b, qwen2.5:7b, qwen3:8b, gemma4:e4b) on CPU.
 For richer narrative at the cost of speed, switch to `qwen3:8b` and add `think: false` (qwen3
 otherwise writes a long hidden reasoning pass before answering).
@@ -121,7 +134,7 @@ docker-compose up --build
 │   ├── services/           # Integrations and persistence (SQLite, DMS, OCR, Probe42, chat)
 │   ├── data/               # Company data (synthetic + real Indian corporates)
 │   ├── core/               # Configuration, LLM providers, runtime paths
-│   └── ui/                 # Alpine.js SPA: templates/index.html, static/js/app.js (core
+│   └── ui/                 # Alpine.js SPA: templates/index.html (shell) + templates/pages/ (one file per page), static/js/app.js (core
 │                           #   state + navigation) and static/js/modules/ (one file per page)
 ├── config/                 # YAML configuration (benchmarks, rules, LLM providers, approval matrix)
 ├── scripts/                # Deployment, testing, and data generation scripts
@@ -216,11 +229,12 @@ disabled (`tests/conftest.py`); they never touch your database or call external 
 
 | Category | Endpoints | Description |
 |----------|-----------|-------------|
-| Dashboard | `GET /api/dashboard` | Platform overview metrics |
+| Summary | `GET /api/dashboard` | Executive summary: metrics and one row per proposal (`portfolio`) |
 | Companies | `GET/POST/DELETE /api/companies` | Company CRUD & catalog |
 | Cases | `GET/POST /api/cases/{id}` | CAM case management |
 | Pipeline | `POST /api/cases/{id}/run`, `GET /api/cases/{id}/run-stream` | Run full CAM pipeline (blocking / SSE) |
-| Run history | `GET /api/cases/{id}/runs` | Pipeline attempts with status and errors |
+| Run history | `GET /api/cases/{id}/runs` | Pipeline attempts, newest first: status, error, model, and for completed runs grade, score, recommendation, approval status, `is_current` |
+| Earlier run's CAM | `GET /api/cases/{id}/cam`, `/cam-html`, `/cam-pdf`, `/one-pager`, `/comments`, `/cam-section-edits` with `?run_id=` | That run's CAM with its own comments and edits (read-only; without `run_id` = latest run) |
 | Approvals | `GET /api/cases/{id}/workflow`, `POST /api/cases/{id}/workflow/{action}` | Maker-checker workflow (submit, recall, approve, reject, return) |
 | Approval queue | `GET /api/approvals/queue?authority=…`, `GET /api/approvals/authority-matrix` | Cases awaiting an authority; delegation matrix |
 | Documents | `GET/POST /api/companies/{id}/documents` | Document upload & management |

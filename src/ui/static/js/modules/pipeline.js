@@ -12,16 +12,16 @@ function camPipeline() {
     /* SSE-powered pipeline execution with live agent progress */
     runPipelineSSE() {
       if (!this.pipelineTarget || this.pipelineRunning) return;
+      const entityId = this.pipelineTarget;
       this.pipelineRunning = true;
       this.pipelineError = false;
       this.agentEvents = [];
-      this.agentViewOpen = true;
       this.agentPct = 0;
       this.agentProgress = '';
       this.pipelineDoneResult = null;
       this.camBuildSections = [];
 
-      const es = new EventSource('/api/cases/' + this.pipelineTarget + '/run-stream');
+      const es = new EventSource('/api/cases/' + entityId + '/run-stream');
 
       es.onmessage = (e) => {
         try {
@@ -65,7 +65,7 @@ function camPipeline() {
             this.agentPct = 100;
             this.agentProgress = 'Complete';
             this.pipelineDoneResult = {
-              entity_id: this.pipelineTarget,
+              entity_id: entityId,
               recommendation: evt.recommendation,
               risk_grade: evt.risk_grade,
               composite_score: evt.composite_score,
@@ -74,13 +74,15 @@ function camPipeline() {
             this.pipelineRunning = false;
             es.close();
             this.notify('Pipeline complete — ' + (evt.recommendation || '').replace(/_/g, ' '), 'ok');
+            this.pushNotification('CAM ready for ' + this.companyLabel(entityId) + ' — ' + this.fmtRec(evt.recommendation) + ', grade ' + (evt.risk_grade || '--'), 'ok', entityId, 'cam');
             this.loadCases();
-            this.loadDashboard();
+            this.loadSummary();
           } else if (evt.type === 'error') {
             this.pipelineRunning = false;
             this.pipelineError = true;
             es.close();
             this.notify('Pipeline error: ' + (evt.message || 'unknown'), 'error');
+            this.pushNotification('CAM run failed for ' + this.companyLabel(entityId) + ': ' + (evt.message || 'unknown error'), 'error', entityId, 'runs');
           }
         } catch {}
       };
@@ -103,35 +105,54 @@ function camPipeline() {
         if (r.failed) {
           const names = r.results.filter(x => x.error).map(x => x.entity_id).join(', ');
           this.notify((total - r.failed) + ' of ' + total + ' processed; failed: ' + names, 'error');
+          this.pushNotification('Run all: ' + (total - r.failed) + ' of ' + total + ' borrowers processed; failed: ' + names, 'error');
         } else {
           this.notify('All ' + total + ' companies processed', 'ok');
+          this.pushNotification('Run all: all ' + total + ' borrowers processed', 'ok');
         }
         await this.loadCases();
-        await this.loadDashboard();
+        await this.loadSummary();
       } catch {} finally { this.loading = false; }
-    },
-
-    pipelineRows() {
-      return this.executedCompanies().slice().sort((a, b) => {
-        if (a.entity_id === this.pipelineTarget) return -1;
-        if (b.entity_id === this.pipelineTarget) return 1;
-        const aScore = Number(this.caseMap[a.entity_id]?.composite_score || 0);
-        const bScore = Number(this.caseMap[b.entity_id]?.composite_score || 0);
-        if (bScore !== aScore) return bScore - aScore;
-        return (a.company_name || '').localeCompare(b.company_name || '');
-      });
     },
 
     selectedPipelineCase() {
       return this.caseMap[this.pipelineTarget] || null;
     },
 
-    pipelineEmptyStateMessage() {
-      const company = this.selectedCompany();
-      if (!company) {
-        return 'No borrower selected. Choose a borrower to start the first pipeline execution.';
-      }
-      return 'No pipeline has been executed yet. Run ' + this.displayCompanyName(company.company_name) + ' to create the first case result and CAM draft.';
+    /* One row per pipeline agent, in pipeline order, with its status from the streamed events.
+       Agents may run in parallel, so several can be 'running' at once. */
+    runSteps() {
+      const events = this.agentEvents;
+      const names = this.agents.length
+        ? this.agents.map(a => a.name)
+        : [...new Set(events.filter(e => e.agent).map(e => e.agent))];
+      return names.map(name => {
+        const started = events.some(e => e.type === 'agent_start' && e.agent === name);
+        const done = events.find(e => e.type === 'agent_complete' && e.agent === name);
+        let status = 'pending';
+        if (done) status = done.status === 'completed' ? 'done' : 'failed';
+        else if (started && this.pipelineRunning) status = 'running';
+        else if (started) status = 'failed';  // the run stopped before this agent finished
+        return {
+          name,
+          status,
+          duration_ms: done ? done.duration_ms : null,
+          error: done?.error || '',
+          detail: name === 'narrative' ? this.narrativeProgress(status) : '',
+        };
+      });
+    },
+
+    /* "8 of 21 sections written · writing: Financial Analysis" while the CAM is being written. */
+    narrativeProgress(status) {
+      const sections = this.agentEvents.filter(e => e.type === 'section_start' || e.type === 'section_complete');
+      if (!sections.length) return '';
+      const total = sections[sections.length - 1].total;
+      const finished = new Set(sections.filter(e => e.type === 'section_complete').map(e => e.section));
+      const writing = sections.filter(e => e.type === 'section_start' && !finished.has(e.section)).map(e => e.title || e.section);
+      let text = finished.size + (total ? ' of ' + total : '') + ' sections written';
+      if (status === 'running' && writing.length) text += ' · writing: ' + [...new Set(writing)].join(', ');
+      return text;
     },
   };
 }

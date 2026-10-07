@@ -38,19 +38,73 @@ function camReports() {
       this.chatMessages = [];
       this.reportProbe = null;
       this.approvalStatus = null;
-      await this.loadReportProbe();
-      if (this.reportTab === 'chat') await this.loadChatHistory();
-      if (this.reportTab === 'approval') await this.loadApproval();
+      this.reportRunId = '';
+      this.camEditMode = false;
+      await Promise.all([this.loadReportProbe(), this.loadReportRuns()]);
+    },
+
+    /* ─── Runs: the CAM of an earlier run, read-only ─────────────────── */
+    /* reportRunId '' = the latest run; otherwise a completed earlier run's case_run_id. */
+    async loadReportRuns() {
+      this.reportRuns = [];
+      if (!this.reportEntity) return;
+      try {
+        const runs = (await this.api('cases/' + this.reportEntity + '/runs', undefined, { quiet: true })).runs || [];
+        this.reportRuns = runs.filter(run => run.status === 'completed' && run.case_run_id);
+      } catch {}
+    },
+
+    runQuery() {
+      return this.reportRunId ? '?run_id=' + encodeURIComponent(this.reportRunId) : '';
+    },
+
+    isOldRun() {
+      return !!this.reportRunId;
+    },
+
+    selectedReportRun() {
+      return this.reportRuns.find(run => run.case_run_id === this.reportRunId) || null;
+    },
+
+    /* "Run 3 · 07 Oct, 07:16 · Grade C · latest" — numbered oldest = 1. */
+    reportRunLabel(run) {
+      if (!run.case_run_id) return '';
+      const number = this.reportRuns.length - this.reportRuns.indexOf(run);
+      return 'Run ' + number + ' · ' + this.formatRunTime(run.started_at)
+        + (run.risk_grade ? ' · Grade ' + run.risk_grade : '') + (run.is_current ? ' · latest' : '');
+    },
+
+    async onReportRunChange() {
+      this.camEditMode = false;
+      this.camSections = [];
+      this.camHtml = '';
+      this.memoHtml = '';
+      if (this.wtab === 'cam') await this.loadCAMReport();
+      if (this.wtab === 'memo') await this.loadOnePager();
     },
 
     /* ─── CAM Report Viewer ───────────────────────────────────────── */
+    /* Open a borrower's workspace on its CAM; runId opens an earlier run's CAM ('' = latest). */
+    openCamFor(entityId, runId = '') {
+      return this.openWorkspace(entityId, 'cam', runId);
+    },
+
+    /* Previous / next section in the CAM viewer. */
+    stepCamSection(delta) {
+      const next = this.camActiveSection + delta;
+      if (next >= 0 && next < this.camSections.length) {
+        this.camActiveSection = next;
+        document.querySelector('.cam-content-panel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    },
+
     async loadCAMReport() {
       if (!this.reportEntity) return;
       this.loading = true;
       try {
         await this.loadReportProbe();
         // Fetch raw markdown for sectioned navigation
-        const mdRes = await fetch('/api/cases/' + this.reportEntity + '/cam');
+        const mdRes = await fetch('/api/cases/' + this.reportEntity + '/cam' + this.runQuery());
         if (!mdRes.ok) throw new Error('Failed to load CAM report');
         const mdData = await mdRes.json();
         const rawMd = mdData.cam_text || '';
@@ -74,7 +128,7 @@ function camReports() {
         } else {
           // Fallback: no section headings found, use HTML iframe
           this.camSections = [];
-          const htmlRes = await fetch('/api/cases/' + this.reportEntity + '/cam-html');
+          const htmlRes = await fetch('/api/cases/' + this.reportEntity + '/cam-html' + this.runQuery());
           if (!htmlRes.ok) throw new Error('Failed to load CAM HTML');
           this.camHtml = await htmlRes.text();
         }
@@ -93,7 +147,7 @@ function camReports() {
         this.camCommentDrafts = {};
         return;
       }
-      const r = await this.api('cases/' + this.reportEntity + '/comments');
+      const r = await this.api('cases/' + this.reportEntity + '/comments' + this.runQuery());
       this.camComments = r.comments || {};
       this.camCommentDrafts = { ...this.camComments };
     },
@@ -134,7 +188,7 @@ function camReports() {
     async loadCamSectionEdits() {
       if (!this.reportEntity) return;
       try {
-        const r = await this.api('cases/' + this.reportEntity + '/cam-section-edits');
+        const r = await this.api('cases/' + this.reportEntity + '/cam-section-edits' + this.runQuery());
         this.camSectionEdits = r.edits || {};
         // Apply saved edits to section HTML
         for (const sec of this.camSections) {
@@ -197,12 +251,12 @@ function camReports() {
         const saved = this.camComments[section.key] || '';
         if (draft !== saved) await this.saveCamComment();
       }
-      window.open('/api/cases/' + this.reportEntity + '/cam-pdf', '_blank');
+      window.open('/api/cases/' + this.reportEntity + '/cam-pdf' + this.runQuery(), '_blank');
     },
 
     openCamNewTab() {
       if (!this.reportEntity) return;
-      window.open('/api/cases/' + this.reportEntity + '/cam-html', '_blank');
+      window.open('/api/cases/' + this.reportEntity + '/cam-html' + this.runQuery(), '_blank');
     },
 
     /* ─── One-Page Memo ────────────────────────────────────────────── */
@@ -210,7 +264,7 @@ function camReports() {
       if (!this.reportEntity) return;
       this.loading = true;
       try {
-        const r = await fetch('/api/cases/' + this.reportEntity + '/one-pager');
+        const r = await fetch('/api/cases/' + this.reportEntity + '/one-pager' + this.runQuery());
         if (!r.ok) throw new Error('Failed to load one-page memo');
         this.memoHtml = await r.text();
       } catch(e) {
@@ -220,7 +274,7 @@ function camReports() {
 
     openMemoNewTab() {
       if (!this.reportEntity) return;
-      window.open('/api/cases/' + this.reportEntity + '/one-pager', '_blank');
+      window.open('/api/cases/' + this.reportEntity + '/one-pager' + this.runQuery(), '_blank');
     },
 
     /* ─── Analyst Chat ─────────────────────────────────────────────── */
@@ -256,16 +310,17 @@ function camReports() {
       }
     },
 
+    /* Suggested questions shown beside the chat. */
     chatSuggestions() {
       return [
-        'Explain the credit decision and key factors',
-        'Summarize the strongest credit positives and what supports them',
-        'List the main unresolved risk items and why they matter',
-        'Summarize the governance and compliance findings for this case',
-        'What do the current ratings, legal matters and open charges show?',
-        'Summarize the market signals, ratings and legal matters for this case',
-        'Which documents are still missing before this CAM should be treated as credit-ready?',
-        'What additional documents or analyst actions would strengthen this CAM?',
+        { label: 'Explain the decision', question: 'Explain the credit decision and key factors' },
+        { label: 'Credit positives', question: 'Summarize the strongest credit positives and what supports them' },
+        { label: 'Unresolved risks', question: 'List the main unresolved risk items and why they matter' },
+        { label: 'Governance & compliance', question: 'Summarize the governance and compliance findings for this case' },
+        { label: 'Ratings, legal & charges', question: 'What do the current ratings, legal matters and open charges show?' },
+        { label: 'Market signals', question: 'Summarize the market signals, ratings and legal matters for this case' },
+        { label: 'Missing documents', question: 'Which documents are still missing before this CAM should be treated as credit-ready?' },
+        { label: 'How to strengthen the CAM', question: 'What additional documents or analyst actions would strengthen this CAM?' },
       ];
     },
 

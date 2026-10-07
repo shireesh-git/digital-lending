@@ -17,6 +17,26 @@ def test_pipeline_run_lifecycle(tmp_path):
     assert runs["r2"]["status"] == "completed" and runs["r2"]["case_run_id"] == "case-2"
 
 
+def test_run_history_lookups(tmp_path):
+    db = PersistenceService(tmp_path / "history.sqlite3")
+    db.start_pipeline_run("r1", "ACME001", "nvidia_nim", llm_model="openai/gpt-oss-20b")
+    db.finish_pipeline_run("r1", "completed", case_run_id="case-1")
+    db.save_case_run({"run_id": "case-1", "entity_id": "ACME001", "company_name": "Acme",
+                      "risk_grade": "B", "composite_score": 71.5, "recommendation": "approve",
+                      "run_at": "2026-10-07T10:00:00", "cam_text": "# CAM"})
+    db.record_workflow_transition(entity_id="ACME001", case_run_id="case-1", action="submit",
+                                  from_status="draft", to_status="submitted", actor_id="u1",
+                                  actor_role="credit_analyst", required_authority="zonal_credit_committee",
+                                  system_recommendation="approve", submitted_by="u1")
+
+    assert db.list_pipeline_runs("ACME001")[0]["llm_model"] == "openai/gpt-oss-20b"
+    assert db.latest_pipeline_runs()["ACME001"]["llm_model"] == "openai/gpt-oss-20b"
+    assert db.get_case_run("case-1")["cam_text"] == "# CAM"
+    assert db.get_case_run("missing") is None
+    assert db.list_case_run_summaries("ACME001")["case-1"]["risk_grade"] == "B"
+    assert db.run_decision_statuses("ACME001") == {"case-1": "submitted"}
+
+
 def test_section_checkpoint_keeps_latest_only(tmp_path):
     db = PersistenceService(tmp_path / "cp.sqlite3")
     db.save_section_checkpoint("ACME001", "executive_summary", "h1", "old", "m", "v")

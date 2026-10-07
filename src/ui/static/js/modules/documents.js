@@ -97,21 +97,17 @@ function camDocuments() {
       this.docExtraction = null;
       this.docGaps = null;
       this.docProbe = null;
-      const [docs, gaps, extraction, refs] = await Promise.allSettled([
+      const [docs, gaps, extraction, probe] = await Promise.allSettled([
         this.api('companies/' + this.docEntity + '/documents'),
         this.api('companies/' + this.docEntity + '/data-gaps'),
         this.api('companies/' + this.docEntity + '/extraction'),
-        this.api('reference-documents?entity_id=' + encodeURIComponent(this.docEntity)),
-      ]);
-      const probe = await Promise.allSettled([
         this.api('companies/' + this.docEntity + '/probe'),
       ]);
 
       this.docData = docs.status === 'fulfilled' ? docs.value : null;
       this.docGaps = gaps.status === 'fulfilled' ? gaps.value : null;
       this.docExtraction = extraction.status === 'fulfilled' ? extraction.value : null;
-      this.refDocs = refs.status === 'fulfilled' ? (refs.value.groups || {}) : {};
-      this.docProbe = probe[0].status === 'fulfilled' ? probe[0].value : null;
+      this.docProbe = probe.status === 'fulfilled' ? probe.value : null;
       await this.loadDocumentOperations(this.docEntity);
       this.docLoading = false;
     },

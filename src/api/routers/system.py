@@ -8,7 +8,7 @@ from src.application.container import ServiceContainer
 from src.core.config_manager import config
 from src.core.engine_registry import registry
 from src.core.runtime_paths import DOCUMENTS_ROOT, OUTPUT_ROOT
-from src.core.ui_paths import UI_ROOT
+from src.core.ui_paths import render_spa
 from src.models.canonical_model import BorrowerType, CaseType, FacilityType, Sector
 from src.services.probe_service import get_probe_status
 
@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def serve_spa():
-    return (UI_ROOT / "templates" / "index.html").read_text(encoding="utf-8")
+    return render_spa()
 
 
 @router.get("/favicon.ico", include_in_schema=False)
@@ -27,7 +27,12 @@ async def favicon():
 
 @router.get("/api/dashboard")
 async def get_dashboard(svc: ServiceContainer = Depends(get_container)):
-    return svc.cases.dashboard()
+    summary = svc.cases.dashboard()
+    # Sanctioning authority per case, from the delegation-of-powers matrix.
+    for row in summary["portfolio"]:
+        case = svc.cases.get(row["entity_id"]) if row.get("workflow_status") else None
+        row["required_authority"] = svc.approvals.required_authority(case).name if case else None
+    return summary
 
 
 @router.get("/api/health")

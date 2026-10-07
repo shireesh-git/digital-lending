@@ -16,9 +16,14 @@ class CamService:
         self.cases = cases
         self.companies = companies
 
+    # Reads take an optional ``run_id`` to show an earlier run's CAM exactly as that run
+    # left it (its own comments and edits); writes always go to the latest run.
+
     # ── Comments (per run) ───────────────────────────────────────────────
 
-    def load_comments(self, entity_id: str) -> dict[str, str]:
+    def load_comments(self, entity_id: str, run_id: str | None = None) -> dict[str, str]:
+        if run_id:
+            return self.persistence.load_case_comments(self.cases.get_run(entity_id, run_id).get("run_id"))
         run_id = (self.state.cases.get(entity_id) or {}).get("run_id")
         if not run_id:
             return {}
@@ -38,8 +43,8 @@ class CamService:
 
     # Edits belong to the run whose CAM the RM was editing; a re-run starts clean.
 
-    def load_section_edits(self, entity_id: str) -> dict:
-        case = self.cases.require(entity_id)
+    def load_section_edits(self, entity_id: str, run_id: str | None = None) -> dict:
+        case = self.cases.get_run(entity_id, run_id)
         return self.persistence.load_run_section_edits(case.get("run_id"))
 
     def save_section_edit(self, entity_id: str, section_key: str, edited_html: str) -> dict:
@@ -53,8 +58,8 @@ class CamService:
 
     # ── Renditions ───────────────────────────────────────────────────────
 
-    def cam_text(self, entity_id: str) -> str:
-        return self.cases.require(entity_id).get("cam_text", "")
+    def cam_text(self, entity_id: str, run_id: str | None = None) -> str:
+        return self.cases.get_run(entity_id, run_id).get("cam_text", "")
 
     def _renderable_markdown(self, entity_id: str, case: dict) -> str:
         """Stored CAM text; re-rendered from the fact pack only when none was stored.
@@ -77,19 +82,19 @@ class CamService:
             md = apply_section_edits_to_markdown(md, section_edits)
         return _sanitize_llm_markdown(md)
 
-    def html(self, entity_id: str) -> str:
-        case = self.cases.require(entity_id)
+    def html(self, entity_id: str, run_id: str | None = None) -> str:
+        case = self.cases.get_run(entity_id, run_id)
         return markdown_to_html(self._edited_markdown(entity_id, case), case.get("company_name", entity_id))
 
-    def pdf(self, entity_id: str) -> bytes:
-        case = self.cases.require(entity_id)
+    def pdf(self, entity_id: str, run_id: str | None = None) -> bytes:
+        case = self.cases.get_run(entity_id, run_id)
         return generate_cam_pdf(self._edited_markdown(entity_id, case), case.get("company_name", entity_id),
-                                section_comments=self.load_comments(entity_id))
+                                section_comments=self.persistence.load_case_comments(case.get("run_id")))
 
-    def one_pager(self, entity_id: str) -> str:
+    def one_pager(self, entity_id: str, run_id: str | None = None) -> str:
         from src.engines.cam_one_pager import generate_one_pager_html
 
-        case = self.cases.require(entity_id)
+        case = self.cases.get_run(entity_id, run_id)
         return generate_one_pager_html(case.get("fact_pack", {}), case)
 
     def regenerate_from_template(self, entity_id: str) -> str:

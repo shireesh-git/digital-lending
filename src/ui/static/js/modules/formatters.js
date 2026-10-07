@@ -197,7 +197,7 @@ function camFormatters() {
 
     formatCurrencyCr(value) {
       const num = Number(value || 0);
-      if (!num) return '0 Cr';
+      if (!num) return 'Rs. 0 Cr';
       return 'Rs. ' + num.toLocaleString('en-IN', { maximumFractionDigits: num >= 100 ? 0 : 2 }) + ' Cr';
     },
 
@@ -251,6 +251,28 @@ function camFormatters() {
         hour: '2-digit',
         minute: '2-digit',
       });
+    },
+
+    /* Pipeline agent ids (src/agents) as business-readable step names. */
+    agentLabel(name) {
+      return ({
+        data_ingestion: 'Collect data & documents',
+        pep_screening: 'PEP & sanctions screening',
+        financial_analysis: 'Financial analysis',
+        validation: 'Validation checks',
+        benchmark: 'Peer benchmarking',
+        policy: 'Risk score & recommendation',
+        narrative: 'Write CAM',
+      })[name] || this.humanizeText(name);
+    },
+
+    formatDuration(ms) {
+      const value = Number(ms);
+      if (!value && value !== 0) return '--';
+      if (value < 1000) return value + ' ms';
+      const seconds = Math.round(value / 1000);
+      if (seconds < 60) return seconds + 's';
+      return Math.floor(seconds / 60) + 'm ' + String(seconds % 60).padStart(2, '0') + 's';
     },
 
     /* ─── Formatters ───────────────────────────────────────────────── */

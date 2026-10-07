@@ -528,6 +528,7 @@ function camJourney() {
           es.close();
           this.journeyStage = errorStage;
           this.notify('Pipeline error: ' + (message || 'unknown'), 'error');
+          this.pushNotification('CAM run failed for ' + this.companyLabel(entityId) + ': ' + (message || 'unknown error'), 'error', entityId, 'runs');
           reject(new Error(message || 'Pipeline error'));
         };
 
@@ -578,12 +579,13 @@ function camJourney() {
               es.close();
               try {
                 await this.loadCases();
-                await this.loadDashboard();
+                await this.loadSummary();
                 this.reportEntity = entityId;
                 await this.loadCAMReport();
               } catch {}
               this.journeyStage = doneStage;
               this.notify(doneMessage, 'ok');
+              this.pushNotification('CAM ready for ' + this.companyLabel(entityId) + ' — ' + this.fmtRec(evt.recommendation) + ', grade ' + (evt.risk_grade || '--'), 'ok', entityId, 'cam');
               resolve(evt);
               return;
             }
@@ -685,10 +687,7 @@ function camJourney() {
     async openJourneyWorkspace() {
       const entityId = this.journeyEntityId();
       if (!entityId) return;
-      this.reportEntity = entityId;
-      this.reportTab = 'cam';
-      this.navigate('reports');
-      await this.loadCAMReport();
+      await this.openWorkspace(entityId, 'cam');
     },
 
     async previewResolve() {

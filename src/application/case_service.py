@@ -95,9 +95,47 @@ class CaseService:
         return case
 
     def run_history(self, entity_id: str, limit: int = 20) -> list[dict]:
-        """Every pipeline attempt for a company, including failed ones."""
+        """Every pipeline attempt for a company, newest first, including failed ones.
+
+        A completed attempt carries its run's outcome (grade, score, recommendation)
+        and that run's approval status; ``is_current`` marks the run the case now
+        shows. Runs saved before attempts were tracked appear as completed attempts.
+        """
         self.companies.require(entity_id)
-        return self.persistence.list_pipeline_runs(entity_id, limit)
+        attempts = self.persistence.list_pipeline_runs(entity_id, limit)
+        outcomes = self.persistence.list_case_run_summaries(entity_id)
+        decisions = self.persistence.run_decision_statuses(entity_id)
+        current_run_id = (self.get(entity_id) or {}).get("run_id")
+
+        tracked = {a["case_run_id"] for a in attempts if a.get("case_run_id")}
+        for run_id, outcome in outcomes.items():
+            if run_id not in tracked:
+                attempts.append({"run_id": run_id, "entity_id": entity_id, "status": "completed",
+                                 "started_at": outcome.get("run_at"), "finished_at": None, "error": None,
+                                 "llm_provider": None, "llm_model": None, "case_run_id": run_id})
+        attempts.sort(key=lambda a: a.get("started_at") or "", reverse=True)
+
+        for attempt in attempts:
+            case_run_id = attempt.get("case_run_id")
+            outcome = outcomes.get(case_run_id) or {}
+            attempt.update({
+                "risk_grade": outcome.get("risk_grade"),
+                "composite_score": outcome.get("composite_score"),
+                "recommendation": outcome.get("recommendation"),
+                "workflow_status": decisions.get(case_run_id, "draft") if outcome else None,
+                "is_current": bool(case_run_id) and case_run_id == current_run_id,
+            })
+        return attempts[:limit]
+
+    def get_run(self, entity_id: str, run_id: str | None) -> dict:
+        """The case as a given run produced it; the latest case when ``run_id`` is empty."""
+        current = self.require(entity_id)
+        if not run_id or run_id == current.get("run_id"):
+            return current
+        case = self.persistence.get_case_run(run_id)
+        if not case or case.get("entity_id") != entity_id:
+            raise NotFoundError(f"Run {run_id} not found for {entity_id}")
+        return repair_mojibake(case)
 
     def summaries(self) -> list[dict]:
         keys = ("entity_id", "company_name", "sector", "case_type", "facility_type",
@@ -131,17 +169,18 @@ class CaseService:
         # Human decisions on each company's latest run (metrics above are system recommendations).
         current_runs = {c.get("entity_id"): c.get("run_id") for c in cases}
         workflow_status: dict[str, int] = {}
-        decided = set()
+        workflows: dict[str, dict] = {}
         for wf in self.persistence.list_workflows():
             if current_runs.get(wf["entity_id"]) == wf["case_run_id"]:
                 workflow_status[wf["status"]] = workflow_status.get(wf["status"], 0) + 1
-                decided.add(wf["entity_id"])
-        undecided_drafts = sum(1 for eid in current_runs if eid not in decided)
+                workflows[wf["entity_id"]] = wf
+        undecided_drafts = sum(1 for eid in current_runs if eid not in workflows)
         if undecided_drafts:
             workflow_status["draft"] = workflow_status.get("draft", 0) + undecided_drafts
 
         return {
             "workflow_status": workflow_status,
+            "portfolio": self._portfolio_rows(cases, workflows),
             "metrics": {
                 "total_cases": len(cases),
                 "approved": sum(1 for c in cases if c.get("recommendation") in ("approve", "conditional_approve")),
@@ -155,6 +194,49 @@ class CaseService:
                 for c in recent
             ],
         }
+
+    def _portfolio_rows(self, cases: list[dict], workflows: dict[str, dict]) -> list[dict]:
+        """One row per company with a case or a pipeline attempt, for the Summary view.
+
+        ``workflow_status`` is the human decision on the latest run (draft when none);
+        ``last_run`` is the latest pipeline attempt, so a failed or running re-run of a
+        company that already has a case is visible too.
+        """
+        last_runs = self.persistence.latest_pipeline_runs()
+        rows = {}
+        for c in cases:
+            eid = c.get("entity_id")
+            wf = workflows.get(eid) or {}
+            rows[eid] = {
+                "entity_id": eid,
+                "company_name": c.get("company_name"),
+                "sector": c.get("sector"),
+                "case_type": c.get("case_type"),
+                "facility_type": c.get("facility_type"),
+                "requested_amount_cr": c.get("requested_amount_cr") or 0,
+                "risk_grade": c.get("risk_grade"),
+                "composite_score": c.get("composite_score"),
+                "recommendation": c.get("recommendation"),
+                "run_at": c.get("run_at"),
+                "workflow_status": wf.get("status", "draft"),
+                "workflow_updated_at": wf.get("updated_at"),
+            }
+        for eid, run in last_runs.items():
+            if eid not in rows:
+                company = self.state.companies.get(eid)
+                if not company:
+                    continue
+                borrower, facility = company.get("borrower"), company.get("facility")
+                sector = getattr(borrower, "sector", None)
+                rows[eid] = {
+                    "entity_id": eid,
+                    "company_name": getattr(borrower, "company_name", eid),
+                    "sector": getattr(sector, "value", sector),
+                    "requested_amount_cr": getattr(facility, "amount_requested_cr", 0) or 0,
+                    "workflow_status": None,
+                }
+            rows[eid]["last_run"] = {k: run.get(k) for k in ("status", "started_at", "finished_at", "error")}
+        return list(rows.values())
 
     # ── Pipeline execution ───────────────────────────────────────────────
 
@@ -170,8 +252,10 @@ class CaseService:
             raise ConflictError("Case is with the approving authority — recall it before re-running")
 
         tracking_id = uuid4().hex
+        provider = config.get_active_llm_provider()
         self.persistence.start_pipeline_run(tracking_id, entity_id,
-                                            llm_provider=config.get("llm_providers", "active_provider"))
+                                            llm_provider=config.get("llm_providers", "active_provider"),
+                                            llm_model=provider.get("model") or provider.get("deployment"))
         try:
             company = self.companies.ensure_enriched(entity_id) if enrich else self.companies.get(entity_id)
             pipeline = self._pipeline_factory()

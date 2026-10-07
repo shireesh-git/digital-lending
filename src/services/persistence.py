@@ -408,6 +408,7 @@ class PersistenceService:
                 """
             )
             self._migrate_section_edits_to_runs(conn)
+            self._migrate_pipeline_run_model(conn)
             now = _utc_now()
             conn.execute(
                 """
@@ -624,6 +625,17 @@ class PersistenceService:
         )
         conn.execute("INSERT INTO schema_migrations(name, applied_at) VALUES (?, ?)", (name, _utc_now()))
 
+    @staticmethod
+    def _migrate_pipeline_run_model(conn) -> None:
+        """Record which LLM model each pipeline attempt used (the provider alone is ambiguous)."""
+        name = "2026_10_pipeline_run_model"
+        if conn.execute("SELECT 1 FROM schema_migrations WHERE name = ?", (name,)).fetchone():
+            return
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(pipeline_runs)").fetchall()}
+        if "llm_model" not in columns:
+            conn.execute("ALTER TABLE pipeline_runs ADD COLUMN llm_model TEXT")
+        conn.execute("INSERT INTO schema_migrations(name, applied_at) VALUES (?, ?)", (name, _utc_now()))
+
     # ── RM section edits, scoped to one pipeline run ─────────────────────
 
     def load_run_section_edits(self, run_id: str | None) -> dict[str, dict[str, str]]:
@@ -665,12 +677,13 @@ class PersistenceService:
 
     # ── Pipeline run tracking ────────────────────────────────────────────
 
-    def start_pipeline_run(self, run_id: str, entity_id: str, llm_provider: str | None) -> None:
+    def start_pipeline_run(self, run_id: str, entity_id: str, llm_provider: str | None,
+                           llm_model: str | None = None) -> None:
         with self._connect() as conn:
             conn.execute(
-                "INSERT INTO pipeline_runs(run_id, entity_id, status, started_at, llm_provider) "
-                "VALUES (?, ?, 'running', ?, ?)",
-                (run_id, entity_id, _utc_now(), llm_provider),
+                "INSERT INTO pipeline_runs(run_id, entity_id, status, started_at, llm_provider, llm_model) "
+                "VALUES (?, ?, 'running', ?, ?, ?)",
+                (run_id, entity_id, _utc_now(), llm_provider, llm_model),
             )
 
     def finish_pipeline_run(self, run_id: str, status: str, error: str | None = None,
@@ -684,11 +697,51 @@ class PersistenceService:
     def list_pipeline_runs(self, entity_id: str, limit: int = 20) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT run_id, entity_id, status, started_at, finished_at, error, llm_provider, case_run_id "
+                "SELECT run_id, entity_id, status, started_at, finished_at, error, llm_provider, llm_model, case_run_id "
                 "FROM pipeline_runs WHERE entity_id = ? ORDER BY started_at DESC LIMIT ?",
                 (entity_id, limit),
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def get_case_run(self, run_id: str) -> dict[str, Any] | None:
+        """The full case record a completed run produced."""
+        with self._connect() as conn:
+            row = conn.execute("SELECT payload_json FROM case_runs WHERE run_id = ?", (run_id,)).fetchone()
+        if not row:
+            return None
+        try:
+            return json.loads(row["payload_json"])
+        except Exception:
+            return None
+
+    def list_case_run_summaries(self, entity_id: str) -> dict[str, dict[str, Any]]:
+        """Outcome columns of every completed run for a company, keyed by run_id (no payload)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT run_id, recommendation, risk_grade, composite_score, run_at "
+                "FROM case_runs WHERE entity_id = ?",
+                (entity_id,),
+            ).fetchall()
+        return {row["run_id"]: dict(row) for row in rows}
+
+    def run_decision_statuses(self, entity_id: str) -> dict[str, str]:
+        """Each run's latest approval-workflow status, from the decision audit trail."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT case_run_id, to_status FROM case_decisions WHERE entity_id = ? ORDER BY decision_id",
+                (entity_id,),
+            ).fetchall()
+        return {row["case_run_id"]: row["to_status"] for row in rows}
+
+    def latest_pipeline_runs(self) -> dict[str, dict[str, Any]]:
+        """Each company's most recent pipeline attempt, keyed by entity_id."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT run_id, entity_id, status, started_at, finished_at, error, llm_provider, llm_model, case_run_id "
+                "FROM pipeline_runs p WHERE started_at = "
+                "(SELECT MAX(started_at) FROM pipeline_runs WHERE entity_id = p.entity_id)"
+            ).fetchall()
+        return {row["entity_id"]: dict(row) for row in rows}
 
     # ── Approval workflow ────────────────────────────────────────────────
 

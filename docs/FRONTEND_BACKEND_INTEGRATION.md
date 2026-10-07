@@ -44,9 +44,9 @@ flowchart LR
 
 | Layer | Location | Responsibility |
 |---|---|---|
-| Markup | `src/ui/templates/index.html` | All screens in one page; `x-show` picks the visible one |
+| Markup | `src/ui/templates/index.html` (shell: top bar, nav, icon set, tour) + `src/ui/templates/pages/*.html` (one file per screen) | `render_spa()` (`src/core/ui_paths.py`) inlines each `<!-- include: pages/…html -->` when `/` is served; `x-show` picks the visible screen |
 | Core | `src/ui/static/js/app.js` | Shared state, start-up, navigation, `api()` helper, company/case lists |
-| Screen modules | `src/ui/static/js/modules/` | `dashboard`, `journey`, `documents`, `pipeline`, `case-detail`, `reports`, `approvals`, `settings`, plus `formatters` (no API calls) |
+| Screen modules | `src/ui/static/js/modules/` | `summary`, `journey`, `documents`, `pipeline`, `case-detail`, `reports`, `approvals`, `settings`, plus `formatters` and `shell` (app-wide tools; no API calls) |
 | Routers | `src/api/routers/` | One per area; translate HTTP to service calls, no business logic |
 | Services | `src/application/` | Own state and orchestration; raise `ApplicationError` → HTTP status |
 | Pipeline | `src/agents/` | Agents run in dependency order (independent ones in parallel) |
@@ -77,7 +77,7 @@ flowchart LR
     NAV -- "sets location.hash" --> HASH["hashchange"]
     BACK["Browser back /<br/>bookmark"] --> HASH
     HASH --> ONHASH["onHash()"]
-    ONHASH -- "#case/ID" --> VIEW["viewCase(ID)"]
+    ONHASH -- "#case/ID/tab" --> VIEW["openWorkspace(ID, tab)"]
     ONHASH -- "#page" --> LOAD["loadPage(page)"]
 ```
 
@@ -90,7 +90,20 @@ flowchart LR
   used everywhere: config, LLM providers, engines, agent list, enums, Probe42 status,
   companies that support document packs, and the approval authority matrix.
 
-### 2.3 Forms
+### 2.3 App-wide tools — `modules/shell.js`
+
+| Tool | Frontend | Data | Notes |
+|---|---|---|---|
+| Borrower search (top bar; press `/`) | `searchResults()`, `openSearchResult()` | company + case lists | name, ID, CIN, PAN or sector; ↑ ↓ Enter; opens the workspace, or Run CAM if not analysed |
+| Notifications bell | `pushNotification()`, `openNotification()` | this browser only (`localStorage`) | raised when a CAM run (Run CAM, journey, Run all) finishes or fails; a click opens the borrower's CAM or Runs tab |
+| Guided tour | `startTour()`, `maybeStartTour()` | `localStorage` flag | shown on the first visit; the help (?) button replays it |
+| Sortable columns | `toggleSort()`, `sortRows()` | — | Summary and Cases tables; *Back to most urgent first* / *Clear sort* restores the default order |
+| Export to Excel | `exportCsv()` | — | CSV with a UTF-8 BOM; cells starting with `= + - @` are escaped |
+| Term definitions | `term()`, `termFor()` | built-in glossary | ⓘ tooltips on grade, score and key ratios; keyboard-focusable |
+| Decision TAT | `isOverdue()`, `overdueCount()` | `decision_tat_days` in `config/approval.yaml` via `GET /api/approvals/authority-matrix` | overdue cases are flagged on Summary (tile, chip, badge), Approvals and the nav |
+| Board pack | `printSummary()` | — | print stylesheet: Summary only, A4 landscape; choose *Save as PDF* |
+
+### 2.4 Forms
 
 - Mandatory fields use `<label class="required">` — red label with a red `*`. Optional
   fields are unmarked. Submit buttons stay disabled until mandatory fields are filled, and
@@ -105,19 +118,18 @@ flowchart LR
 Each table lists the screen's controls in the order a user meets them.
 `→` = what the control calls; *service* = the backend method that does the work.
 
-### 3.1 Dashboard — `#dashboard` · `modules/dashboard.js`
+### 3.1 Summary — `#summary` · `modules/summary.js`
 
-**Purpose:** portfolio overview — how many CAMs exist, their outcomes and risk, and where
-cases stand in the approval workflow.
+**Purpose:** executive (GM / Head of Bank) view of all credit proposals — headline numbers,
+where the money sits by risk grade, decision status and sector, and the proposals that need
+attention. Every tile, bar and chip filters the proposals table; a row opens a side-panel preview.
 
 | Component | Frontend | Endpoint | Backend |
 |---|---|---|---|
-| Metric tiles (completed, average score, approval rate, high-risk) | `loadDashboard()` + case list | `GET /api/dashboard`, `GET /api/cases` | `CaseService.dashboard()`, `CaseService.summaries()` |
-| Active CAM pipeline board, risk alerts, insights | computed from the case list | (case list) | summaries include scores, exception counts, top exception |
-| Recent CAM activity | case list sorted by `run_at` | (case list) | — |
-| Decision Status table | `workflowStatusRows()` | `GET /api/dashboard` → `workflow_status` | counts of `case_workflow` rows for each company's latest run |
-| Risk grade chart, latest-case score chart | `drawCharts()` (Chart.js) | dashboard `grade_distribution`, case-summary scores | — |
-| *Create New CAM*, *Open Final CAM Workspace*, *Open Approvals* | navigation | — | — |
+| Headline tiles (proposals, awaiting decision, approved, high risk, amount-weighted score) | `summaryKpis()` | `GET /api/dashboard` → `portfolio` | `CaseService.dashboard()` / `_portfolio_rows()` |
+| By risk grade / decision status / sector bars (sized by amount requested) | `gradeBars()`, `statusBars()`, `sectorBars()` | (portfolio) | — |
+| Proposals table, most urgent first, with filter chips | `summaryTableRows()`, `summaryChips()` | (portfolio) | row = latest case + workflow status + latest pipeline attempt (`latest_pipeline_runs()`); the router adds the sanctioning authority from `ApprovalService.required_authority()` |
+| Row click → side panel preview (amount, grade, score, status, authority, points to note); *Open workspace* / *Read CAM* / *Decide*, or *Go to Run CAM* when there is no case yet | `openSummaryRow()`, `previewCase()`, `openFromPreview(tab)` | (portfolio + case list) | — |
 
 ### 3.2 CAM Journey — `#onboard` · `modules/journey.js`
 
@@ -132,10 +144,10 @@ stateDiagram-v2
     aggregating --> retrieved: POST /api/onboard ok
     aggregating --> entity: error
     retrieved --> prebuilt: Review CAM Inputs
-    prebuilt --> drafting: Generate CAM with Latest Data
+    prebuilt --> drafting: Generate CAM
     drafting --> ready: SSE "done"
     drafting --> retrieved: SSE "error"
-    ready --> [*]: Open Final CAM / Analyst Chat
+    ready --> [*]: Open CAM / Ask AI Analyst (workspace)
 ```
 
 | Step / component | Frontend | Endpoint | Backend |
@@ -151,85 +163,83 @@ stateDiagram-v2
 | Verified data panel | `journeyRetrievedInfo()`, `journeySourceBadges()` | onboard response, `GET /api/companies/{id}/probe` | badges appear only for data actually returned |
 | Document checklist — upload | `uploadJourneyFile()` | `POST /api/companies/{id}/upload` then `POST /api/companies/{id}/extract` | `doc_store.store_document()`; `extract_all_documents()` (per-file cache) |
 | Document checklist — remove | `deleteJourneyFile()` | `DELETE /api/companies/{id}/documents/{cat}/{file}` | `doc_store.delete_document()` |
-| *Generate CAM with Latest Data* | `generateJourneyCam()` → `runJourneyPipeline()` | `GET /api/cases/{id}/run-stream` (SSE) | `CaseService.run()` → `SuperAgent.execute_pipeline()` |
-| *Open Final CAM Workspace* / *Open Analyst Chat* | navigation | — | — |
+| *Generate CAM* (step 4 shows readiness and pending RM uploads) | `generateJourneyCam()` → `runJourneyPipeline()` | `GET /api/cases/{id}/run-stream` (SSE) | `CaseService.run()` → `SuperAgent.execute_pipeline()` |
+| *Open CAM* / *Ask AI Analyst* | `openJourneyWorkspace()`, `openWorkspace(id, 'chat')` | — | — |
 | *Add it manually* → Manual Entry form | `submitCompany()` | `POST /api/companies` | `CompanyService.create_from_payload()`; required: entity ID, name, sector, case type, facility, amount |
 
 Uploading or deleting a document marks the company's case as **documents changed**
 (`AppState.invalidate_derived`): cached extraction, ETB and fraud results are dropped, and
-Final CAM shows a re-run banner.
+the borrower workspace shows a re-run banner.
 
-### 3.3 Documents — `#documents` · `modules/documents.js`
+### 3.3 Approvals — `#approvals` · `modules/approvals.js`
 
-**Purpose:** the borrower's file workspace — coverage, uploads, extraction, verified
-public-record snapshot.
-
-| Component | Frontend | Endpoint | Backend |
-|---|---|---|---|
-| Company picker | `loadDocumentWorkspace()` | — | — |
-| Coverage tiles, category cards, missing items | `loadDocuments()` | `GET /api/companies/{id}/documents`, `/data-gaps`, `/extraction`, `/probe`, `GET /api/reference-documents?entity_id=` | `doc_store.list_company_documents()` + `DocumentWorkspaceService.augment()` |
-| Document history | `loadDocumentOperations()` | `GET /api/companies/{id}/document-operations` | `document_operations.list()` |
-| *Upload File* (+ category) | `uploadWorkspaceFile()` | `POST /api/companies/{id}/upload`, then `/extract` | as in the journey |
-| *Run Extraction* | `runExtraction()` | `POST /api/companies/{id}/extract`, `GET …/extraction` | `extract_all_documents()` — unchanged files come from `storage/cache/extractions/` |
-| *Open* (a file) | `previewDoc()` | `GET /api/companies/{id}/documents/{cat}/{file}` (new tab) | binary inline; text as JSON |
-| *Generate Document Pack* (supported companies only) | `generateDocumentsForWorkspace()` | `POST /api/companies/{id}/fetch-documents` | `download_company_documents()`; marks documents changed |
-| *Remove Verified Data* (when a snapshot exists) | `clearVerifiedPublicData()` | `DELETE /api/companies/{id}/verified-public-data` | `CompanyService.clear_verified_public_data()` |
-
-### 3.4 Pipeline — `#pipeline` · `modules/pipeline.js`
-
-**Purpose:** run the analysis for a borrower and watch it live; compare executed cases.
+**Purpose:** an approver's queue — cases submitted for a decision that the chosen authority
+level may decide, oldest waiting shown with its age. *Review* opens the borrower workspace on
+its **Decision** tab.
 
 | Component | Frontend | Endpoint | Backend |
 |---|---|---|---|
-| Agent list | `loadAgents()` | `GET /api/agents` | `SuperAgent.get_agent_list()` — name, critical, `requires`, `waits_for` |
-| Borrower picker + *Execute Pipeline* | `runPipelineSSE()` | `GET /api/cases/{id}/run-stream` | see §5 |
-| Live agent and CAM-section progress | SSE handler | (stream events) | `agent_*` / `section_*` events |
-| *Run All* | `runAllPipeline()` | `POST /api/pipeline/run-all` | runs each company in a worker thread; failures reported per company; cases with an approver are skipped |
-| Executed-case rows, *View* | `pipelineRows()`, `viewCase()` | (case list) | — |
+| Authority level picker | `approvalRole`, `loadApprovalQueue()` | `GET /api/approvals/queue?authority=` | submitted cases this level may decide (`ApprovalService.queue()`) |
+| Queue table, *Review* | `openWorkspace(id, 'decision')` | — | — |
 
-### 3.5 Cases list — `#cases`
+### 3.4 Run CAM — `#pipeline` · `modules/pipeline.js`
 
-**Purpose:** table of executed cases (ID, company, sector, type, amount, status, grade) with
-a link to each case's detail. Uses the shared company/case lists; *View* → `viewCase()`.
+**Purpose:** run the analysis for one borrower and follow each step live.
 
-### 3.6 Case detail — `#case/{id}` · `modules/case-detail.js`
+| Component | Frontend | Endpoint | Backend |
+|---|---|---|---|
+| Borrower picker + last result (grade, score, recommendation, run time) | `selectedPipelineCase()` | (case list) | — |
+| *Run CAM* | `runPipelineSSE()` | `GET /api/cases/{id}/run-stream` | see §5 |
+| Step list (one row per agent, in pipeline order; parallel agents can run together) | `runSteps()`, `agentLabel()`, `formatDuration()` | `GET /api/agents` for the order; stream `agent_*` events for status | `SuperAgent.get_agent_list()` |
+| CAM-writing progress on the *Write CAM* step ("8 of 21 sections written · writing: …") | `narrativeProgress()` | stream `section_*` events | `cam_llm_renderer` |
+| Result + *Open case* / *Open CAM* | `viewCase()`, `openCamFor()` | — | — |
+| *Run all borrowers* | `runAllPipeline()` | `POST /api/pipeline/run-all` | runs each company in turn; failures reported per company; cases with an approver are skipped |
 
-**Purpose:** everything the pipeline produced for one case, for analyst review.
+### 3.5 Cases — `#cases` · `modules/case-detail.js`
+
+**Purpose:** every borrower in one table — latest grade, score, system recommendation,
+workflow status, last run — with search. A row opens the case; *Run* / *Re-run* starts a run
+on the Run CAM page.
+
+| Component | Frontend | Endpoint | Backend |
+|---|---|---|---|
+| Table, search | `caseListRows()`, `casesQuery` | `GET /api/companies`, `GET /api/cases` | — |
+| Status column (workflow, run in progress, last run failed, not run) | `portfolioRow()` | `GET /api/dashboard` → `portfolio` | as on Summary |
+| *Run* / *Re-run* | `runCaseFromList()` → `runPipelineSSE()` | `GET /api/cases/{id}/run-stream` | — |
+
+### 3.6 Borrower workspace — `#case/{id}/{tab}` · `modules/case-detail.js`, `reports.js`, `documents.js`, `approvals.js`
+
+**Purpose:** one place per borrower for everything about its case. A sticky header shows who
+(name, ID, sector, NTB/ETB, facility), the amount, risk grade, score, system view, workflow
+status, sanctioning authority and last run, with *Download PDF*, *Re-run* and — when the
+borrower has more than one run — the run picker. Tabs load their data the first time they
+are opened (`setWorkspaceTab()`); the tab is part of the URL, so links and the back button
+work. `#reports` and `#documents` (old pages) redirect here.
 
 | Tab / component | Frontend | Endpoint | Backend |
 |---|---|---|---|
-| Header scores, Summary, CAM, Validation, Policy, Fact Pack | `viewCase()` | `GET /api/cases/{id}` | `CaseService.require()`; in-memory keys (`_…`) are not sent; `documents_changed` flag added |
-| Documents tab | `viewCase()` | `GET /api/companies/{id}/documents` | as on Documents |
-| *Generate Document Pack* | `generateDocumentsForDetail()` | `POST /api/companies/{id}/fetch-documents` | as on Documents |
-| Extraction tab, *Run Extraction* | `runExtractionForDetail()` | `POST …/extract`, `GET …/extraction` | `extract_all_documents()` |
-| ETB tab, *Run ETB Analytics* | `runETBForDetail()` | `POST`/`GET /api/companies/{id}/etb-analytics` | `run_etb_analytics()` on extracted conduct CSVs |
-| **Risk Checks** — fraud | `loadRiskChecks()`, `runFraudForDetail()` | `GET` / `POST /api/companies/{id}/fraud-analysis` | `run_fraud_scan()` — Beneish, Altman, Benford, governance, documents |
-| **Risk Checks** — PEP | `loadRiskChecks()` | `GET /api/companies/{id}/pep-screening` | `screen_directors()` |
-| Pipeline Log — run history | `loadRunHistory()` | `GET /api/cases/{id}/runs` | `pipeline_runs` table, failures included |
-| *Download .md* / *Download .json* | `downloadCAM()`, `downloadJSON()` | — (already loaded) | — |
-
-### 3.7 Final CAM — `#reports` · `modules/reports.js`, `modules/approvals.js`
-
-**Purpose:** the decision workspace: read and edit the CAM, export it, discuss it with the
-advisor, and take it through approval.
-
-| Tab / component | Frontend | Endpoint | Backend |
-|---|---|---|---|
-| Company picker (executed cases), snapshot card | `onReportEntityChange()`, `loadReportProbe()` | `GET /api/companies/{id}/probe` | `company_probe_snapshot()` |
-| "Documents changed" banner | case summary `documents_changed` | (case list) | set by `AppState.invalidate_derived` |
-| **CAM Report** — *Load Report*, section navigation | `loadCAMReport()` | `GET /api/cases/{id}/cam` (falls back to `/cam-html`) | `CamService.cam_text()` / `html()` |
+| Open the workspace (from Summary, Cases, Run CAM, Approvals, the journey) | `openWorkspace(id, tab, runId)`; `viewCase()` / `openCamFor()` are shortcuts | `GET /api/cases/{id}` | `CaseService.require()`; in-memory keys (`_…`) are not sent; `documents_changed` flag added |
+| Header status / authority | `workspaceRow()` | `GET /api/dashboard` → `portfolio` | as on Summary |
+| **Overview** — score breakdown, checks at a glance (open Risk checks), why this recommendation, conditions, covenants | `policyCounts()`, `severityCount()` | (case) | — |
+| **CAM** — sections with a table of contents, *Previous* / *Next*, *Reload*, *Open Full Page*, *Edit Mode* | `loadCAMReport()`, `stepCamSection()` | `GET /api/cases/{id}/cam` (falls back to `/cam-html`) | `CamService.cam_text()` / `html()` |
 | Section comments | `loadCAMComments()`, `saveCamComment()` | `GET`/`PUT /api/cases/{id}/comments` | stored per `run_id` |
-| *Edit Mode*, save / revert a section | `saveCamSectionEdit()`, `revertCamSectionEdit()` | `GET`/`PUT /api/cases/{id}/cam-section-edits` | stored per run; empty HTML deletes the edit |
-| *Download PDF* / *Open Full Page* | `downloadCAMPdf()`, `openCamNewTab()` | `GET /api/cases/{id}/cam-pdf`, `/cam-html` | both include RM section edits; PDF adds comments |
-| **One-Page Memo** | `loadOnePager()`, `openMemoNewTab()` | `GET /api/cases/{id}/one-pager` | `generate_one_pager_html()` |
-| **360° View** | `load360()` | `GET /api/companies/{id}/360` | `generate_360_view()` |
-| **Financial Advisor** — history, send, clear, suggested questions | `loadChatHistory()`, `sendChat()`, `clearChat()`, `chatSuggestions()` | `GET /api/chat/{id}/history`, `POST`/`DELETE /api/chat/{id}` | `analyst_chat.chat()` → active LLM provider; rule-based fallback |
-| **Approval** — status, required authority, history | `loadApproval()` | `GET /api/cases/{id}/workflow` | `ApprovalService.status()` |
-| **Acting Role \*** dropdown | `loadApprovalMatrix()` | `GET /api/approvals/authority-matrix` | levels + maker roles from `config/approval.yaml` |
-| Action buttons (only allowed ones shown) | `takeApprovalAction()` | `POST /api/cases/{id}/workflow/{action}` with `X-User-Id`, `X-User-Role` | `ApprovalService.act()` — maker-checker checks, authority, mandatory comments |
-| Awaiting your decision | `loadApprovalQueue()` | `GET /api/approvals/queue?authority=` | submitted cases this level may decide |
+| Section edits | `saveCamSectionEdit()`, `revertCamSectionEdit()` | `GET`/`PUT /api/cases/{id}/cam-section-edits` | stored per run; empty HTML deletes the edit |
+| *Download PDF* (header) | `downloadCAMPdf()` | `GET /api/cases/{id}/cam-pdf` | includes RM section edits and comments |
+| Run picker and earlier-run banner (CAM, One-pager) | `loadReportRuns()`, `onReportRunChange()`, `isOldRun()` | CAM reads take `?run_id=` (`runQuery()`) | an earlier run is read-only: edit mode and comment saving are off; writes always go to the latest run |
+| **One-pager** | `loadOnePager()`, `openMemoNewTab()` | `GET /api/cases/{id}/one-pager` | `generate_one_pager_html()` |
+| **360° view** | `load360()` | `GET /api/companies/{id}/360` | `generate_360_view()` |
+| **Risk checks** — policy hard rules, validation checks | (case) | — | `tier1_decisions`, `exceptions` on the case |
+| **Risk checks** — fraud scan, PEP screening | `loadRiskChecks()`, `runFraudForDetail()` | `GET` / `POST /api/companies/{id}/fraud-analysis`, `GET …/pep-screening` | `run_fraud_scan()` — Beneish, Altman, Benford, governance, documents; `screen_directors()` |
+| **Documents** — coverage, category cards, verified public data, data gaps, history | `loadDocumentWorkspace()`, `loadDocuments()` | `GET /api/companies/{id}/documents`, `/data-gaps`, `/extraction`, `/probe`, `/document-operations` | `doc_store.list_company_documents()` + `DocumentWorkspaceService.augment()` |
+| Documents — *Upload File*, *Run Extraction*, *Open*, *Generate Document Pack*, *Remove Verified Data* | `uploadWorkspaceFile()`, `runExtraction()`, `previewDoc()`, `generateDocumentsForWorkspace()`, `clearVerifiedPublicData()` | `POST …/upload` then `/extract`; `GET …/documents/{cat}/{file}`; `POST …/fetch-documents`; `DELETE …/verified-public-data` | uploads and packs mark documents changed |
+| Documents — extracted figures; account conduct (ETB only) | `loadWorkspaceExtras()`, `runExtractionForDetail()`, `runETBForDetail()` | `GET …/extraction`, `POST`/`GET …/etb-analytics` | `extract_all_documents()`; `run_etb_analytics()` |
+| **Ask AI** — history, send, clear, suggested questions | `loadChatHistory()`, `sendChat()`, `clearChat()`, `chatSuggestions()` | `GET /api/chat/{id}/history`, `POST`/`DELETE /api/chat/{id}` | `analyst_chat.chat()` → active LLM provider; rule-based fallback |
+| **Decision** — status, required authority, history | `loadApproval()` | `GET /api/cases/{id}/workflow` | `ApprovalService.status()` |
+| Decision — *Acting Role \**, action buttons (only allowed ones shown) | `loadApprovalMatrix()`, `takeApprovalAction()` | `GET /api/approvals/authority-matrix`; `POST /api/cases/{id}/workflow/{action}` with `X-User-Id`, `X-User-Role` | `ApprovalService.act()` — maker-checker checks, authority, mandatory comments |
+| **Runs** — every attempt (duration, status, model, grade, score, system view, decision, *Latest* / *Superseded*), latest run's agent log, *Fact pack (.json)* | `loadRunHistory()`, `runDuration()`, `downloadJSON()` | `GET /api/cases/{id}/runs` | `CaseService.run_history()` — `pipeline_runs` (failures included, `llm_model`) joined with `case_runs` outcomes and each run's last `case_decisions` status |
+| Runs — per-run *CAM* / *PDF* / *One-pager* | `openCamFor(id, runId)`, `runReportUrl()` | `…/cam-pdf?run_id=`, `…/one-pager?run_id=` | `CaseService.get_run()` loads that run's stored case |
 
-### 3.8 Settings — `#settings` · `modules/settings.js`
+### 3.7 Settings — `#settings` · `modules/settings.js`
 
 **Purpose:** administer the engine without code changes.
 
@@ -262,13 +272,13 @@ sequenceDiagram
     RM->>UI: upload latest documents
     UI->>API: POST /companies/{id}/upload + /extract
     API->>SVC: store file, mark case "documents changed", extract
-    RM->>UI: Generate CAM with Latest Data
+    RM->>UI: Generate CAM
     UI->>API: GET /api/cases/{id}/run-stream (SSE)
     API->>PIPE: CaseService.run() in a worker thread
     PIPE-->>UI: agent_start / agent_complete / section_* events
     PIPE->>SVC: case saved (SQLite), workflow reset to draft
     API-->>UI: done (recommendation, grade, score)
-    RM->>UI: Final CAM → review, comment, edit sections, PDF
+    RM->>UI: Workspace CAM tab → review, comment, edit sections, PDF
     RM->>UI: Approval → role = maker → Submit
     UI->>API: POST /cases/{id}/workflow/submit
     CHK->>UI: Approval → role = authority → queue → Approve / Reject / Return
@@ -310,7 +320,7 @@ stateDiagram-v2
 ### 4.4 Documents change after a CAM exists
 
 Upload / delete / generate pack → extraction, ETB and fraud caches dropped → case flagged
-`documents_changed` → Final CAM banner → re-run from Pipeline or the journey → fresh case,
+`documents_changed` → workspace banner → re-run from the workspace, Cases or Run CAM → fresh case,
 fresh draft workflow, fresh comment set.
 
 ---

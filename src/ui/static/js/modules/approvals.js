@@ -9,6 +9,7 @@ function camApprovals() {
         const r = await this.api('approvals/authority-matrix');
         this.approvalLevels = r.levels || [];
         this.approvalMakerRoles = r.maker_roles || [];
+        this.decisionTatDays = Number(r.decision_tat_days) || 3;
       } catch {
         this.approvalLevels = [];
         this.approvalMakerRoles = [];
@@ -30,6 +31,12 @@ function camApprovals() {
         const r = await this.api('approvals/queue?authority=' + encodeURIComponent(this.approvalRole));
         this.approvalQueue = r.cases || [];
       } catch { this.approvalQueue = []; }
+    },
+
+    /* A submitted case waiting longer than the configured decision TAT (config/approval.yaml). */
+    isOverdue(waitingSince) {
+      const days = this.daysSince(waitingSince);
+      return days !== null && days > this.decisionTatDays;
     },
 
     approvalCommentsRequired() {
@@ -62,7 +69,7 @@ function camApprovals() {
         this.approvalComments = '';
         this.approvalConditions = '';
         this.notify('Case ' + this.titleCase(this.approvalStatus?.status || action), 'ok');
-        await Promise.all([this.loadApprovalQueue(), this.loadDashboard()]);
+        await Promise.all([this.loadApprovalQueue(), this.loadSummary()]);
       } catch {} finally { this.loading = false; }
     },
   };

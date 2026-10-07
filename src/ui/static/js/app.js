@@ -13,7 +13,8 @@ function camApp() {
   return {
     /* Page modules (src/ui/static/js/modules/*.js, loaded before this file). */
     ...camFormatters(),
-    ...camDashboard(),
+    ...camShell(),
+    ...camSummary(),
     ...camJourney(),
     ...camPipeline(),
     ...camCaseDetail(),
@@ -23,7 +24,7 @@ function camApp() {
     ...camSettings(),
 
     /* ─── Core State ───────────────────────────────────────────────── */
-    page: 'dashboard',
+    page: 'summary',
     loading: false,
 
     /* Toast */
@@ -31,19 +32,20 @@ function camApp() {
     toastType: '',
     _toastTimer: null,
 
-    /* Dashboard */
+    /* Summary (GET /api/dashboard) */
     dash: {},
 
     /* Companies & Cases */
     companies: [],
     caseMap: {},
+    casesQuery: '',
 
-    /* Detail */
+    /* Borrower workspace (#case/{id}/{tab}) */
     detail: null,
-    dtab: 'summary',
+    wtab: 'overview',
+    _docLoadedFor: null,   /* borrower whose Documents tab data is loaded */
     detailExtraction: null,
     detailETB: null,
-    detailDocs: null,
     detailFraud: null,
     detailPep: null,
     detailRuns: [],
@@ -60,6 +62,7 @@ function camApp() {
     approvalComments: '',
     approvalConditions: '',
     approvalQueue: [],
+    decisionTatDays: 3,   /* overdue threshold, from config/approval.yaml */
 
     /* Config / Settings */
     cfg: {},
@@ -85,7 +88,6 @@ function camApp() {
     pipelineRunning: false,
     pipelineError: false,
     agentEvents: [],
-    agentViewOpen: true,
     agentProgress: '',
     agentPct: 0,
     pipelineDoneResult: null,
@@ -109,7 +111,8 @@ function camApp() {
 
     /* Reports */
     reportEntity: '',
-    reportTab: 'cam',
+    reportRunId: '',     /* '' = latest run; otherwise an earlier run shown read-only */
+    reportRuns: [],      /* completed runs of reportEntity, newest first */
     reportLoading: false,
     camHtml: '',
     camSections: [],
@@ -136,7 +139,6 @@ function camApp() {
     docGaps: null,
     docExtraction: null,
     docProbe: null,
-    refDocs: {},
     docOpsHistory: [],
     docUploadCategory: 'financials',
 
@@ -159,14 +161,12 @@ function camApp() {
       collateral_market_value: null, collateral_fsv: null,
     },
 
-    /* Charts */
-    _gradeChart: null,
-    _scoreChart: null,
-
     /* ─── Core: start-up, navigation, API helper, shared company/case data ─── */
     /* Alpine calls init() itself — the page must not also use x-init="init()". */
     async init() {
       window.addEventListener('hashchange', () => this.onHash());
+      window.addEventListener('keydown', event => this.focusSearchShortcut(event));
+      window.addEventListener('resize', () => { if (this.tourStep >= 0) this.positionTour(); });
       // Reference data used across pages, loaded once; the current page loads its own data.
       await Promise.all([
         this.onHash(),
@@ -178,17 +178,28 @@ function camApp() {
         this.loadProbeStatus(),
         this.loadSupportedDownloads(),
         this.loadApprovalMatrix(),
+        this.page === 'summary' ? null : this.loadSummary().catch(() => {}),  // nav overdue badge
       ]);
+      this.maybeStartTour();  // first visit only
     },
 
     /* The URL hash is the single trigger for page loads (navigate() only changes it). */
     onHash() {
-      const h = location.hash.slice(1) || 'dashboard';
+      let h = location.hash.slice(1) || 'summary';
+      if (h === 'dashboard') h = 'summary';  // old bookmarks
+      // Final CAM and Documents are tabs of the borrower workspace now.
+      if (h === 'reports' || h === 'documents') {
+        const eid = h === 'reports' ? this.reportEntity : this.docEntity;
+        h = eid ? 'case/' + eid + (h === 'reports' ? '/cam' : '/documents') : 'cases';
+        history.replaceState(null, '', '#' + h);
+      }
       if (h.startsWith('case/')) {
-        const eid = h.split('/')[1];
-        // viewCase() sets this hash itself; don't load the same case a second time.
-        if (this.page === 'detail' && this.detail?.entity_id === eid) return Promise.resolve();
-        return Promise.all([this.loadCompanies({ maxAgeMs: NAV_CACHE_MS }), this.viewCase(eid)]);
+        const [, eid, tab = 'overview'] = h.split('/');
+        // Same borrower already open (a tab click set this hash): just show the tab.
+        if (this.page === 'detail' && this.detail?.entity_id === eid) {
+          return tab === this.wtab ? Promise.resolve() : this.setWorkspaceTab(tab);
+        }
+        return Promise.all([this.loadCompanies({ maxAgeMs: NAV_CACHE_MS }), this.openWorkspace(eid, tab)]);
       }
       this.page = h;
       return this.loadPage(h);
@@ -205,17 +216,11 @@ function camApp() {
        (runs, uploads, onboarding) call loadCompanies()/loadCases() directly for fresh data. */
     async loadPage(p) {
       const shared = () => this.loadCompanies({ maxAgeMs: NAV_CACHE_MS });
-      if (p === 'dashboard') await Promise.all([this.loadDashboard(), shared()]);
-      if (p === 'cases' || p === 'pipeline') await shared();
-      if (p === 'documents') { await shared(); await this.loadDocumentWorkspace(); }
+      if (p === 'summary') await Promise.all([this.loadSummary(), shared()]);
+      if (p === 'cases') await Promise.all([shared(), this.loadSummary()]);
+      if (p === 'pipeline') await shared();
       if (p === 'onboard') await Promise.all([shared(), this.loadEnums(), this.loadProbeStatus()]);
-      if (p === 'reports') {
-        await shared();
-        const executed = this.companies.filter(c => this.caseMap[c.entity_id]);
-        if (!this.reportEntity && executed.length) this.reportEntity = executed[0].entity_id;
-        await this.loadReportProbe();
-        if (this.reportTab === 'approval') await this.loadApproval();
-      }
+      if (p === 'approvals') await this.loadApprovalQueue();
       if (p === 'settings') await Promise.all([this.loadConfig(), this.loadLLM(), this.loadEngines()]);
     },
 
@@ -298,8 +303,6 @@ function camApp() {
       this.caseMap = map;
       // Update has_result on companies
       for (const c of this.companies) c.has_result = !!map[c.entity_id];
-      // The score chart reads case summaries, which can arrive after the dashboard payload.
-      if (this.page === 'dashboard') this.$nextTick(() => this.drawCharts());
     },
 
     /* ─── Executed-case helpers (used across pages) ─── */

@@ -1,0 +1,1222 @@
+<section x-show="page==='detail'" x-cloak>
+  <!-- Borrower workspace header (sticky): who, how much, what the system says, where it stands -->
+  <div class="ws-header" x-show="detail">
+    <div class="ws-header-main">
+      <button class="btn btn-ghost btn-sm" @click="navigate('cases')">&larr; Cases</button>
+      <div class="ws-title">
+        <h1 x-text="displayCompanyName(detail?.company_name)"></h1>
+        <span class="ws-sub" x-text="workspaceSubtitle()"></span>
+      </div>
+      <div class="ws-actions">
+        <select class="input" x-show="reportRuns.length > 1" x-model="reportRunId" @change="onReportRunChange()"
+                title="Show the CAM an earlier run produced">
+          <template x-for="run in reportRuns" :key="run.case_run_id">
+            <option :value="run.is_current ? '' : run.case_run_id" :selected="(run.is_current ? '' : run.case_run_id) === reportRunId"
+                    x-text="reportRunLabel(run)"></option>
+          </template>
+        </select>
+        <button class="btn btn-sm btn-outline" @click="downloadCAMPdf()">Download PDF</button>
+        <button class="btn btn-sm btn-primary" @click="runCaseFromList(detail.entity_id)" :disabled="pipelineRunning">Re-run</button>
+      </div>
+    </div>
+    <div class="ws-facts">
+      <div class="ws-fact"><span>Amount</span><strong x-text="formatCurrencyCr(detail?.requested_amount_cr)"></strong></div>
+      <div class="ws-fact"><span>Risk grade <span class="tip" tabindex="0" role="note" :data-tip="term('grade')" :aria-label="term('grade')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong><span class="badge" :class="gradeCls(detail?.risk_grade)" x-text="detail?.risk_grade || '--'"></span></strong></div>
+      <div class="ws-fact"><span>Score <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong :class="scoreCls(detail?.composite_score)" x-text="displayScore(detail?.composite_score)"></strong></div>
+      <div class="ws-fact"><span>System view</span><strong><span class="badge" :class="recCls(detail?.recommendation)" x-text="fmtRec(detail?.recommendation) || '--'"></span></strong></div>
+      <div class="ws-fact"><span>Status</span><strong>
+        <span class="badge" :class="workflowStatusClass(workspaceRow()?.workflow_status)" x-text="workflowLabel(workspaceRow()?.workflow_status || 'draft')"></span>
+      </strong></div>
+      <div class="ws-fact"><span>Sanctioning authority</span><strong x-text="workspaceRow()?.required_authority || '--'"></strong></div>
+      <div class="ws-fact"><span>Last run</span><strong x-text="formatRunTime(detail?.run_at)"></strong></div>
+    </div>
+  </div>
+
+  <div class="tabs ws-tabs" x-show="detail" role="tablist" aria-label="Borrower workspace">
+    <template x-for="t in workspaceTabs()" :key="t.id">
+      <button role="tab" :aria-selected="wtab === t.id" :class="{'tab-active': wtab === t.id}" @click="setWorkspaceTab(t.id)">
+        <span x-text="t.label"></span><span class="tab-count" x-show="t.count" x-text="t.count"></span>
+      </button>
+    </template>
+  </div>
+
+  <!-- Banners: documents changed since the run; viewing an earlier run -->
+  <div x-show="reportEntity && caseMap[reportEntity]?.documents_changed" class="status-inline status-inline-error" style="margin-top:1rem">
+    <span>Documents changed since this CAM was generated. Re-run the pipeline to refresh the analysis.</span>
+  </div>
+
+  <div x-show="isOldRun() && (wtab==='cam' || wtab==='memo')" class="old-run-banner">
+    <span>
+      You are viewing an earlier run (<strong x-text="reportRunLabel(selectedReportRun() || {})"></strong>).
+      It is read-only; comments, edits and approval apply to the latest run.
+    </span>
+    <button class="btn btn-sm btn-outline" @click="reportRunId=''; onReportRunChange()">Back to latest run</button>
+  </div>
+
+  <!-- Overview tab: scores and the recommendation rationale -->
+  <div x-show="wtab==='overview'">
+  <!-- Score cards -->
+  <div class="metric-cards five" x-show="detail">
+    <div class="metric-card mini">
+      <div class="metric-label">Composite <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></div>
+      <div class="metric-value" :class="scoreCls(detail?.composite_score)" x-text="detail?.composite_score"></div>
+      <div class="metric-sub" x-text="'Grade '+detail?.risk_grade"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Financial</div>
+      <div class="metric-value" x-text="detail?.financial_score"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Conduct</div>
+      <div class="metric-value" x-text="detail?.conduct_score"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Governance</div>
+      <div class="metric-value" x-text="detail?.governance_score"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Market</div>
+      <div class="metric-value" x-text="detail?.market_score"></div>
+    </div>
+  </div>
+
+  <!-- Checks at a glance: each opens the Risk checks tab -->
+  <div class="glance-grid" x-show="detail">
+    <button type="button" class="glance-card" @click="setWorkspaceTab('risk')">
+      <span class="glance-label">Policy hard rules</span>
+      <strong x-text="policyCounts().fail ? policyCounts().fail + ' failed' : 'All passed'"
+              :class="policyCounts().fail ? 'text-red' : 'text-green'"></strong>
+      <span class="glance-sub" x-text="policyCounts().total + ' rules checked'"></span>
+    </button>
+    <button type="button" class="glance-card" @click="setWorkspaceTab('risk')">
+      <span class="glance-label">Validation exceptions</span>
+      <strong x-text="(detail?.exceptions || []).length || 'None'"
+              :class="severityCount(detail?.exceptions, ['critical', 'high']) ? 'text-red' : ''"></strong>
+      <span class="glance-sub" x-text="severityCount(detail?.exceptions, ['critical', 'high']) + ' critical / high'"></span>
+    </button>
+    <button type="button" class="glance-card" @click="setWorkspaceTab('risk')">
+      <span class="glance-label">Fraud &amp; PEP screening</span>
+      <strong x-text="detailFraud ? ('Fraud risk ' + (detailFraud.risk_grade || '--')) : 'Not loaded'"></strong>
+      <span class="glance-sub">Open Risk checks for the full scan</span>
+    </button>
+  </div>
+
+  <div class="card" x-show="detail">
+    <h3>Why this recommendation</h3>
+    <p class="rationale" x-text="detail?.rationale || 'No rationale recorded for this run.'"></p>
+    <template x-if="detail?.conditions?.length">
+      <div><h4>Conditions</h4>
+        <ul><template x-for="c in detail.conditions"><li x-text="c"></li></template></ul>
+      </div>
+    </template>
+    <template x-if="detail?.covenants_proposed?.length">
+      <div><h4>Proposed Covenants</h4>
+        <ul><template x-for="c in detail.covenants_proposed"><li x-text="c"></li></template></ul>
+      </div>
+    </template>
+  </div>
+  </div>
+
+  <!-- Risk checks tab: policy hard rules, validation checks, fraud scan and PEP screening -->
+  <div class="card" x-show="wtab==='risk'">
+    <div class="summary-table-head">
+      <h3>Policy hard rules</h3>
+      <span class="badge" :class="policyCounts().fail ? 'badge-red' : 'badge-green'"
+            x-text="policyCounts().fail ? policyCounts().fail + ' of ' + policyCounts().total + ' failed' : 'All ' + policyCounts().total + ' passed'"></span>
+    </div>
+    <table class="data-table" x-show="detail?.tier1_decisions?.length">
+      <thead><tr><th>Check</th><th>Result</th><th>Details</th></tr></thead>
+      <tbody>
+        <template x-for="d in detail?.tier1_decisions||[]">
+          <tr>
+            <td>
+              <div style="font-weight:600" x-text="policyRuleLabel(d.rule_code, d.rule_description)"></div>
+              <div class="text-muted" style="font-size:0.75rem" x-text="d.rule_code"></div>
+            </td>
+            <td><span class="badge" :class="d.result==='pass'?'badge-green':'badge-red'" x-text="d.result.toUpperCase()"></span></td>
+            <td x-text="presentationText(d.details)"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" x-show="wtab==='risk'">
+    <div class="summary-table-head">
+      <h3>Validation checks</h3>
+      <span class="badge" :class="(detail?.exceptions || []).length ? 'badge-amber' : 'badge-green'"
+            x-text="(detail?.exceptions || []).length ? (detail.exceptions.length + ' exceptions') : 'No exceptions'"></span>
+    </div>
+    <table class="data-table" x-show="detail?.exceptions?.length">
+      <thead><tr><th>Check</th><th>Severity</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody>
+        <template x-for="e in detail?.exceptions||[]">
+          <tr>
+            <td>
+              <div style="font-weight:600" x-text="exceptionLabel(e.exception_code)"></div>
+              <div class="text-muted" style="font-size:0.75rem" x-text="e.exception_code"></div>
+            </td>
+            <td><span class="badge" :class="sevCls(e.severity)" x-text="e.severity"></span></td>
+            <td x-text="presentationText(e.description)"></td>
+            <td x-text="e.resolution_status"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+    <p class="empty-state" x-show="!detail?.exceptions?.length">No validation exceptions.</p>
+  </div>
+
+  <!-- Fraud scan + PEP screening -->
+  <div class="card" x-show="wtab==='risk'">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem">
+      <h3 style="margin:0">Fraud Detection</h3>
+      <button class="btn btn-sm btn-primary" @click="runFraudForDetail()" :disabled="loading">
+        <span x-show="!loading" x-text="detailFraud ? 'Re-run Fraud Scan' : 'Run Fraud Scan'"></span>
+        <span x-show="loading">Scanning&hellip;</span>
+      </button>
+    </div>
+    <div x-show="detailFraud">
+      <div class="metric-cards five">
+        <div class="metric-card mini">
+          <div class="metric-label">Fraud Risk</div>
+          <div class="metric-value" x-text="detailFraud?.risk_grade || '--'"></div>
+          <div class="metric-sub" x-text="'Score ' + (detailFraud?.composite_score ?? '--')"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Beneish M</div>
+          <div class="metric-value" x-text="detailFraud?.beneish_m_score ?? '--'"></div>
+          <div class="metric-sub" x-text="detailFraud?.beneish_probability || ''"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Altman Z</div>
+          <div class="metric-value" x-text="detailFraud?.altman_z_score ?? '--'"></div>
+          <div class="metric-sub" x-text="detailFraud?.altman_zone || ''"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Benford</div>
+          <div class="metric-value" x-text="detailFraud?.benford_chi_sq ?? '--'"></div>
+          <div class="metric-sub" x-text="detailFraud?.benford_verdict || ''"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Governance</div>
+          <div class="metric-value" x-text="detailFraud?.governance_score ?? '--'"></div>
+        </div>
+      </div>
+      <p style="line-height:1.6; margin-top:1rem" x-text="detailFraud?.summary"></p>
+      <table class="data-table" x-show="detailFraud?.flags?.length">
+        <thead><tr><th>Category</th><th>Indicator</th><th>Severity</th><th>Details</th></tr></thead>
+        <tbody>
+          <template x-for="(f, i) in detailFraud?.flags || []" :key="i">
+            <tr>
+              <td x-text="titleCase(f.category)"></td>
+              <td x-text="f.indicator"></td>
+              <td><span class="badge" :class="sevCls(f.severity)" x-text="f.severity"></span></td>
+              <td class="text-muted" x-text="f.details"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-state" x-show="!detailFraud">No fraud scan for this case yet. Run the scan to check financial manipulation, distress and document signals.</p>
+
+    <h3 style="margin:1.5rem 0 1rem">PEP &amp; Sanctions Screening</h3>
+    <div x-show="detailPep">
+      <div class="detail-grid">
+        <div><strong>Status</strong><br><span x-text="titleCase(detailPep?.status || 'not screened')"></span></div>
+        <div><strong>Overall Risk</strong><br><span x-text="titleCase(detailPep?.overall_risk || '--')"></span></div>
+        <div><strong>Persons Screened</strong><br><span x-text="detailPep?.total_persons_screened ?? 0"></span></div>
+        <div><strong>PEP Hits</strong><br><span x-text="(detailPep?.pep_hits || []).length"></span></div>
+        <div><strong>Sanctions Hits</strong><br><span x-text="Array.isArray(detailPep?.sanctions_hits) ? detailPep.sanctions_hits.length : (detailPep?.sanctions_hits ?? 0)"></span></div>
+        <div><strong>Adverse Media</strong><br><span x-text="Array.isArray(detailPep?.adverse_media) ? detailPep.adverse_media.length : (detailPep?.adverse_media_hits ?? 0)"></span></div>
+      </div>
+      <p class="text-muted" x-text="detailPep?.remarks || detailPep?.summary || ''"></p>
+      <table class="data-table" x-show="detailPep?.pep_hits?.length">
+        <thead><tr><th>Person</th><th>Category</th><th>Designation</th><th>Risk</th></tr></thead>
+        <tbody>
+          <template x-for="(h, i) in detailPep?.pep_hits || []" :key="i">
+            <tr>
+              <td x-text="h.person_name"></td>
+              <td x-text="titleCase(h.pep_category)"></td>
+              <td x-text="h.pep_designation"></td>
+              <td><span class="badge" :class="sevCls(h.risk_level)" x-text="h.risk_level"></span></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-state" x-show="!detailPep">Screening loads when this tab opens.</p>
+  </div>
+
+  <!-- Documents tab: the borrower's file workspace, extracted figures and account conduct -->
+  <div x-show="wtab==='documents'">
+  <div class="ws-toolbar">
+    <select class="input" x-model="docUploadCategory">
+      <option value="financials">Upload to Financials</option>
+      <option value="kyc">Upload to KYC</option>
+      <option value="banking">Upload to Banking</option>
+      <option value="request">Upload to Request</option>
+      <option value="collateral">Upload to Collateral</option>
+      <option value="legal">Upload to Legal</option>
+      <option value="gst">Upload to GST</option>
+      <option value="exchange">Upload to Exchange</option>
+    </select>
+    <input id="doc-workspace-upload" type="file" style="display:none" @change="uploadWorkspaceFile($event)">
+    <button class="btn btn-primary btn-sm" @click="document.getElementById('doc-workspace-upload').click()" :disabled="docLoading || docUploading || !docEntity">
+      <span x-show="!docUploading">Upload File</span>
+      <span x-show="docUploading">Uploading&hellip;</span>
+    </button>
+    <button class="btn btn-outline btn-sm" @click="runExtraction()" :disabled="docLoading || docExtracting || !docEntity">
+      <span x-show="!docExtracting">Run Extraction</span>
+      <span x-show="docExtracting">Extracting&hellip;</span>
+    </button>
+    <button class="btn btn-outline btn-sm" x-show="supportsDocumentPack(docEntity)"
+            @click="generateDocumentsForWorkspace()" :disabled="docLoading || loading || !docEntity">Generate Document Pack</button>
+    <button class="btn btn-ghost btn-sm" x-show="docProbe?.available"
+            @click="clearVerifiedPublicData()" :disabled="docLoading || loading || !docEntity">Remove Verified Data</button>
+  </div>
+
+  <div class="metric-cards">
+    <div class="metric-card mini">
+      <div class="metric-label">Visible Files</div>
+      <div class="metric-value" x-text="docLoading ? '--' : (docData?.document_file_count ?? '--')"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Upload Coverage</div>
+      <div class="metric-value" :class="documentUploadCoverageClass(docData?.upload_coverage_pct || 0)" x-text="docLoading ? '--' : ((docData?.upload_coverage_pct || 0) + '%')"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Verified Records</div>
+      <div class="metric-value" x-text="docLoading ? '--' : availableProbeRecordCount(docProbe)"></div>
+    </div>
+    <div class="metric-card mini">
+      <div class="metric-label">Extractions</div>
+      <div class="metric-value" x-text="docLoading ? '--' : (docExtraction?.document_count ?? 0)"></div>
+    </div>
+  </div>
+  <div class="card card-alt" x-show="docLoading">
+    <div class="spinner"></div>
+    <p class="text-muted" style="text-align:center">Loading document workspace...</p>
+  </div>
+  <p class="text-muted" style="margin:0.75rem 0 0" x-show="!docLoading && docData?.hidden_artifact_count">
+    <span x-text="'Showing ' + (docData?.document_file_count || 0) + ' borrower/reference files. ' + (docData?.hidden_artifact_count || 0) + ' additional source/system files are also available in the workspace.'"></span>
+  </p>
+
+  <div class="grid-2" x-show="!docLoading">
+    <div class="card">
+      <h3>Borrower File Workspace</h3>
+      <template x-if="docData?.categories">
+        <div>
+          <template x-for="[cat, info] in documentCategoryEntries(docData.categories)" :key="cat">
+            <div class="card" style="background:var(--bg-card-alt); margin-top:0.75rem">
+              <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center">
+                <div>
+                  <h4 style="margin:0; text-transform:capitalize" x-text="info.description || cat"></h4>
+                  <p class="text-muted" style="margin:0.25rem 0 0; font-size:0.8rem" x-text="info.source_hint"></p>
+                </div>
+                <span class="badge" :class="documentCategoryStatusClass(info)" x-text="documentCategoryStatus(info)"></span>
+              </div>
+              <div style="margin-top:0.5rem">
+                <p class="text-muted" style="margin:0 0 0.5rem; font-size:0.8rem" x-text="info.public_record_note"></p>
+                <template x-for="item in (info.items || []).filter(item => item.file_type === 'document')" :key="cat + '-' + item.filename">
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0; gap:0.75rem">
+                    <div style="min-width:0">
+                      <div style="font-size:0.85rem; overflow-wrap:anywhere" x-text="item.filename"></div>
+                      <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.2rem">
+                        <span class="badge badge-green">document</span>
+                        <span class="text-muted" style="font-size:0.75rem" x-text="item.source_label"></span>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-ghost" @click="previewDoc(docEntity, cat, item.filename)">Open</button>
+                  </div>
+                </template>
+                <template x-for="item in [...(info.legacy_items || []), ...(info.system_items || [])]" :key="cat + '-extra-' + item.filename">
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0; gap:0.75rem">
+                    <div style="min-width:0">
+                      <div style="font-size:0.85rem; overflow-wrap:anywhere" x-text="item.filename"></div>
+                      <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.2rem">
+                        <span class="badge badge-info" x-text="item.file_type === 'document' ? 'reference' : 'data'"></span>
+                        <span class="text-muted" style="font-size:0.75rem" x-text="item.source_label"></span>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-ghost" @click="previewDoc(docEntity, cat, item.filename)">Open</button>
+                  </div>
+                </template>
+                <template x-if="!(info.items || []).filter(item => item.file_type === 'document').length && !(info.legacy_items || []).length && !(info.system_items || []).length">
+                  <p class="text-muted" style="margin:0.5rem 0 0" x-text="documentCategoryEmptyMessage(info)"></p>
+                </template>
+                <template x-if="documentCategorySuggestedItems(info).length">
+                  <div style="margin-top:0.5rem">
+                    <div class="text-muted" style="font-size:0.8rem; margin-bottom:0.25rem" x-text="documentCategorySuggestionLabel(info)"></div>
+                    <template x-for="m in documentCategorySuggestedItems(info)" :key="cat + '-missing-' + m">
+                      <div style="font-size:0.8rem; opacity:0.7" x-text="m"></div>
+                    </template>
+                  </div>
+                </template>
+                <p class="text-muted" style="margin:0.5rem 0 0; font-size:0.8rem" x-show="(info.legacy_items || []).length || (info.system_items || []).length">
+                  <span x-text="documentCategoryArchiveNote(info)"></span>
+                </p>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Verified Public Data</h3>
+        <template x-if="docProbe?.available">
+          <div>
+            <div class="text-muted" style="margin-bottom:0.75rem">
+              Verified public-record baseline retained for this borrower. Ratings, GST, legal history, charges, KYC, and freshness come from this source layer.
+            </div>
+            <template x-for="row in probeRecordRows(docProbe)" :key="row.key">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:0.35rem 0; border-bottom:1px solid var(--border)">
+                <div x-text="row.label"></div>
+                <span class="badge" :class="sourceStatusClass(row.status)" x-text="sourceStatusLabel(row.status)"></span>
+              </div>
+            </template>
+          </div>
+        </template>
+        <p class="text-muted" x-show="!docProbe?.available">No verified public-record snapshot is attached to this company yet.</p>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <h3>Data Gaps</h3>
+        <template x-if="(docGaps?.required_missing_documents || []).length || (docGaps?.source_gaps || []).length">
+          <div>
+            <template x-for="gap in docGaps.required_missing_documents || []" :key="'rm-' + gap.type">
+              <div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid var(--border)">
+                <div>
+                  <div x-text="gap.description"></div>
+                  <div class="text-muted" style="font-size:0.75rem; text-transform:capitalize" x-text="gap.category"></div>
+                </div>
+                <span class="badge badge-red">RM upload</span>
+              </div>
+            </template>
+            <template x-for="gap in docGaps.source_gaps || []" :key="'source-' + gap.type">
+              <div style="display:flex; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid var(--border)">
+                <div>
+                  <div x-text="gap.description"></div>
+                  <div class="text-muted" style="font-size:0.75rem; text-transform:capitalize" x-text="gap.category"></div>
+                </div>
+                <span class="badge badge-amber">public data gap</span>
+              </div>
+            </template>
+          </div>
+        </template>
+        <p class="text-muted" x-show="!(docGaps?.required_missing_documents || []).length && !(docGaps?.source_gaps || []).length">No active RM upload or source gaps detected for this company.</p>
+        <p class="text-muted" style="margin-top:0.75rem" x-show="(docGaps?.hidden_legacy_files || 0) || (docGaps?.hidden_system_files || 0)">
+          Additional source/system files are available separately and do not count toward RM upload coverage.
+        </p>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <h3>Operation History</h3>
+        <template x-if="docOpsHistory?.length">
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Status</th><th>When</th><th>Summary</th></tr></thead>
+            <tbody>
+              <template x-for="op in docOpsHistory" :key="op.operation_id">
+                <tr>
+                  <td x-text="op.operation_type"></td>
+                  <td><span class="badge" :class="op.status==='success'?'badge-green':op.status==='partial'?'badge-amber':'badge-red'" x-text="op.status"></span></td>
+                  <td x-text="new Date(op.completed_at).toLocaleString()"></td>
+                  <td x-text="op.summary"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+        <p class="text-muted" x-show="!docOpsHistory?.length">No recorded document operations yet.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tab: Extraction Results -->
+  <div class="card" x-show="detail">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+      <h3>Document Extraction</h3>
+      <button class="btn btn-sm btn-primary" @click="runExtractionForDetail()" :disabled="loading">
+        <span x-show="!loading"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Run Extraction</span>
+        <span x-show="loading">Extracting&hellip;</span>
+      </button>
+    </div>
+    <div x-show="detailExtraction">
+      <div class="metric-cards">
+        <div class="metric-card mini">
+          <div class="metric-label">Documents</div>
+          <div class="metric-value" x-text="detailExtraction?.document_count||0"></div>
+        </div>
+      </div>
+      <template x-if="detailExtraction?.financials && Object.keys(detailExtraction.financials).length">
+        <div style="margin-top:1rem">
+          <h4>Financial Extractions</h4>
+          <template x-for="[src, data] in Object.entries(detailExtraction.financials||{})" :key="src">
+            <div class="card" style="background:var(--bg-card-alt); margin-top:0.5rem">
+              <h5 style="text-transform:capitalize" x-text="src"></h5>
+              <div class="form-grid" style="font-size:0.85rem">
+                <template x-for="[k,v] in Object.entries(data)" :key="k">
+                  <div><strong x-text="k.replace(/_/g,' ')"></strong>: <span x-text="typeof v==='number'?v.toFixed(2):v"></span></div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+    <p class="empty-state" x-show="!detailExtraction">No extraction data. Click "Run Extraction" to extract from documents.</p>
+  </div>
+
+  <!-- Tab: ETB Analytics Detail -->
+  <div class="card" x-show="isEtbCase()">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+      <h3>ETB Behavioral Analytics</h3>
+      <button class="btn btn-sm btn-primary" @click="runETBForDetail()" :disabled="loading">
+        <span x-show="!loading"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Run ETB Analytics</span>
+        <span x-show="loading">Analysing&hellip;</span>
+      </button>
+    </div>
+    <div x-show="detailETB">
+      <div class="metric-cards five">
+        <div class="metric-card mini">
+          <div class="metric-label">Composite</div>
+          <div class="metric-value" :class="(detailETB?.composite_score||0)>=60?'score-good':'score-bad'"
+               x-text="detailETB?.composite_score?.toFixed(1)"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Risk Grade</div>
+          <div class="metric-value" x-text="detailETB?.risk_grade||'--'"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Conduct</div>
+          <div class="metric-value" x-text="detailETB?.conduct?.score?.toFixed(1)||'--'"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Repayment</div>
+          <div class="metric-value" x-text="detailETB?.repayment?.score?.toFixed(1)||'--'"></div>
+        </div>
+        <div class="metric-card mini">
+          <div class="metric-label">Covenant</div>
+          <div class="metric-value" x-text="detailETB?.covenant?.score?.toFixed(1)||'--'"></div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--bg-card-alt); margin-top:1rem" x-show="detailETB?.summary">
+        <h4>Summary</h4>
+        <p style="line-height:1.6" x-text="detailETB?.summary"></p>
+      </div>
+    </div>
+    <p class="empty-state" x-show="!detailETB">No ETB data. Only available for ETB case types with conduct history.</p>
+  </div>
+
+  </div>
+
+  <!-- â”€â”€ CAM Report Tab â”€â”€â”€ -->
+  <div x-show="wtab==='cam'">
+    <div style="display:flex; gap:0.5rem; margin:1rem 0; align-items:center">
+      <button class="btn btn-ghost btn-sm" @click="loadCAMReport()" :disabled="!reportEntity||loading">
+        <span x-show="!loading">Reload</span><span x-show="loading">Loading&hellip;</span>
+      </button>
+      <button class="btn btn-outline btn-sm" @click="openCamNewTab()" :disabled="!reportEntity">Open Full Page</button>
+      <button class="btn btn-sm" :class="camEditMode ? 'btn-primary' : 'btn-outline'" @click="toggleCamEditMode()"
+              :disabled="!camSections.length || isOldRun()" x-text="camEditMode ? 'Editing on' : 'Edit Mode'"></button>
+      <span x-show="camSections.length" class="chip" style="margin-left:auto" x-text="camSections.length + ' sections'"></span>
+    </div>
+
+    <!-- Sectioned navigation view -->
+    <div x-show="camSections.length" class="cam-layout">
+      <nav class="cam-nav">
+        <div class="cam-nav-section-label">Sections</div>
+        <template x-for="(sec, idx) in camSections" :key="idx">
+          <div class="cam-nav-item"
+               :class="camActiveSection === idx ? 'cam-nav-active' : ''"
+               @click="camActiveSection = idx">
+            <span x-text="sec.title"></span>
+            <span x-show="sec.editedBy" class="cam-nav-note cam-nav-note-edited">Edited</span>
+            <span x-show="camComments[sec.key]" class="cam-nav-note">Note</span>
+          </div>
+        </template>
+      </nav>
+      <div class="cam-content-panel cam-viewer">
+        <div class="cam-section-bar">
+          <button class="btn btn-sm btn-ghost" @click="stepCamSection(-1)" :disabled="camActiveSection === 0">&larr; Previous</button>
+          <span class="cam-section-pos" x-text="'Section ' + (camActiveSection + 1) + ' of ' + camSections.length"></span>
+          <button class="btn btn-sm btn-ghost" @click="stepCamSection(1)" :disabled="camActiveSection >= camSections.length - 1">Next &rarr;</button>
+        </div>
+        <!-- Edited by RM indicator -->
+        <div x-show="camSections[camActiveSection]?.editedBy" class="cam-edited-banner">
+          <span><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> <strong>Edited by <span x-text="camSections[camActiveSection]?.editedBy || 'RM'"></span></strong></span>
+          <span class="text-muted" x-text="camSections[camActiveSection]?.editedAt ? '— ' + new Date(camSections[camActiveSection].editedAt).toLocaleString() : ''"></span>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto; font-size:0.75rem" x-show="!isOldRun()" @click="revertCamSectionEdit()">Revert to Original</button>
+        </div>
+        <!-- View mode: show original or edited HTML -->
+        <div x-show="!camEditMode" x-html="camSections[camActiveSection]?.editedHtml || camSections[camActiveSection]?.html || ''"></div>
+        <!-- Edit mode: contenteditable area -->
+        <div x-show="camEditMode">
+          <div id="cam-edit-area" contenteditable="true"
+               class="cam-edit-area"
+               x-html="camSections[camActiveSection]?.editedHtml || camSections[camActiveSection]?.html || ''"
+               x-effect="if(camEditMode) { const el = document.getElementById('cam-edit-area'); if(el) el.innerHTML = camSections[camActiveSection]?.editedHtml || camSections[camActiveSection]?.html || ''; }">
+          </div>
+          <div style="margin-top:0.75rem; display:flex; gap:0.5rem">
+            <button class="btn btn-primary btn-sm" @click="saveCamSectionEdit()" :disabled="camEditSaving">
+              <span x-show="!camEditSaving"><svg class="icon" aria-hidden="true"><use href="#i-save"/></svg> Save Edit</span>
+              <span x-show="camEditSaving">Saving...</span>
+            </button>
+            <button class="btn btn-outline btn-sm" @click="revertCamSectionEdit()"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg> Revert</button>
+          </div>
+        </div>
+        <div x-show="camSections[camActiveSection]" class="cam-user-comment-panel">
+          <div class="cam-user-comment-head">
+            <div>
+              <div class="cam-user-comment-title">Reviewer Comment</div>
+              <div class="cam-user-comment-sub">Saved comments are included in the downloaded CAM PDF.</div>
+            </div>
+            <span x-show="camComments[camSections[camActiveSection]?.key]" class="chip">Saved</span>
+          </div>
+          <textarea class="cam-comment-input" :readonly="isOldRun()"
+                    x-model="camCommentDrafts[((camSections[camActiveSection] || {}).key) || '_draft']"
+                    :placeholder="isOldRun() ? 'No comment on this section in this run.' : 'Add your note for this section.'"></textarea>
+          <div class="cam-user-comment-actions" x-show="!isOldRun()">
+            <button class="btn btn-primary btn-sm" @click="saveCamComment()" :disabled="camCommentSaving">
+              <span x-show="!camCommentSaving">Save Comment</span>
+              <span x-show="camCommentSaving">Saving...</span>
+            </button>
+            <button class="btn btn-outline btn-sm" @click="resetCamComment()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fallback iframe -->
+    <div x-show="!camSections.length && camHtml" class="card" style="padding:0; overflow:hidden">
+      <iframe id="camFrame" style="width:100%; min-height:80vh; border:none; background:#fff"
+              :srcdoc="camHtml"></iframe>
+    </div>
+
+    <div x-show="!camSections.length && !camHtml" class="empty-state">
+      <div class="empty-state-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></div>
+      <div class="empty-state-title">No CAM Report Loaded</div>
+      <div class="empty-state-sub">Select a company and click &ldquo;Load Report&rdquo;.</div>
+    </div>
+
+  </div>
+
+  <!-- â”€â”€ One-Page Memo Tab â”€â”€â”€ -->
+  <div x-show="wtab==='memo'">
+    <div style="display:flex; gap:0.5rem; margin:1rem 0; align-items:center">
+      <button class="btn btn-primary" @click="loadOnePager()" :disabled="!reportEntity||loading">View Memo</button>
+      <button class="btn btn-ghost" @click="openMemoNewTab()" :disabled="!reportEntity"><svg class="icon" aria-hidden="true"><use href="#i-print"/></svg> Print</button>
+    </div>
+    <div x-show="memoHtml" class="card" style="padding:0; overflow:hidden">
+      <iframe id="memoFrame" style="width:100%; min-height:85vh; border:none; background:#fff"
+              :srcdoc="memoHtml"></iframe>
+    </div>
+    <p x-show="!memoHtml" class="text-muted" style="text-align:center; padding:3rem">
+      Select a company with completed analysis to view the one-page credit summary.
+    </p>
+  </div>
+
+  <!-- â”€â”€ 360Â° View Tab â”€â”€â”€ -->
+  <div x-show="wtab==='view360'">
+    <div style="display:flex; gap:0.5rem; margin:1rem 0; align-items:center">
+      <button class="btn btn-primary" @click="load360()" :disabled="!reportEntity || loading">
+        <span x-show="!loading">Load 360&deg;</span><span x-show="loading">Loading&hellip;</span>
+      </button>
+    </div>
+
+    <div x-show="view360Data">
+      <div class="hero-panel" style="margin-top:0">
+        <div>
+          <div class="section-kicker">360 Snapshot</div>
+          <h2 x-text="displayCompanyName(view360Data?.overview?.company_name || reportEntity)"></h2>
+          <p x-text="presentationText(view360Data?.executive_summary?.narrative || '360 snapshot not available yet.')"></p>
+          <div class="hero-sequence">
+            <span x-text="'Recommendation: ' + humanizeText(view360Data?.executive_summary?.recommendation || 'pending')"></span>
+            <span x-text="'Market stance: ' + (view360Data?.market_intelligence?.summary?.stance || 'Not assessed')"></span>
+            <span x-text="'Rating: ' + (view360Data?.credit_risk?.rating?.long_term || 'Not rated')"></span>
+            <span x-text="'Open charges: ' + (view360Data?.credit_risk?.charges?.open ?? '--')"></span>
+          </div>
+        </div>
+        <div class="hero-panel-side">
+          <div class="summary-grid compact">
+            <div class="summary-card">
+              <div class="summary-label">Recommendation</div>
+              <div class="summary-value" style="font-size:20px" x-text="humanizeText(view360Data?.executive_summary?.recommendation || 'pending')"></div>
+              <div class="summary-meta">Current case decision</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Risk Grade</div>
+              <div class="summary-value" x-text="view360Data?.executive_summary?.risk_grade || '--'"></div>
+              <div class="summary-meta">Composite credit outcome</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Composite Score</div>
+              <div class="summary-value" x-text="displayScore(view360Data?.executive_summary?.composite_score)"></div>
+              <div class="summary-meta">Financial, conduct, governance, market</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">High Severity Flags</div>
+              <div class="summary-value" x-text="severityCount(view360Data?.red_flags, ['critical', 'high'])"></div>
+              <div class="summary-meta">Critical and high watch items</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 360 sub-tabs -->
+      <div class="tabs" style="margin:1rem 0">
+        <button :class="{'tab-active':v360tab==='overview'}" @click="v360tab='overview'">Overview</button>
+        <button :class="{'tab-active':v360tab==='financials'}" @click="v360tab='financials'">Financials</button>
+        <button :class="{'tab-active':v360tab==='credit'}" @click="v360tab='credit'">Credit Risk</button>
+        <button :class="{'tab-active':v360tab==='banking'}" @click="v360tab='banking'">Banking</button>
+        <button :class="{'tab-active':v360tab==='market'}" @click="v360tab='market'">Market Intel</button>
+        <button :class="{'tab-active':v360tab==='flags'}" @click="v360tab='flags'">Red Flags</button>
+      </div>
+
+      <!-- 360 OVERVIEW -->
+      <div x-show="v360tab==='overview'" class="card">
+        <div class="surface-heading">
+          <div>
+            <div class="section-kicker">Identity</div>
+            <h3>Company Overview</h3>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card card-alt">
+            <h4>Corporate Identity</h4>
+            <div class="detail-grid">
+              <div><strong>CIN:</strong><br><span x-text="view360Data?.overview?.cin || '--'"></span></div>
+              <div><strong>PAN:</strong><br><span x-text="view360Data?.overview?.pan || '--'"></span></div>
+              <div><strong>GSTIN:</strong><br><span x-text="view360Data?.overview?.gstin || '--'"></span></div>
+              <div><strong>Status:</strong><br><span x-text="view360Data?.overview?.status || '--'"></span></div>
+              <div><strong>Incorporated:</strong><br><span x-text="view360Data?.overview?.date_of_incorporation || '--'"></span></div>
+              <div><strong>Listed:</strong><br><span x-text="view360Data?.overview?.listing_status || '--'"></span></div>
+              <div><strong>Registered State:</strong><br><span x-text="view360Data?.overview?.registered_state || '--'"></span></div>
+              <div><strong>Employees:</strong><br><span x-text="Number(view360Data?.overview?.employee_count || 0).toLocaleString('en-IN') || '--'"></span></div>
+            </div>
+          </div>
+          <div class="card card-alt">
+            <h4>Management & Positioning</h4>
+            <div class="detail-grid">
+              <div><strong>Entity ID:</strong><br><span x-text="view360Data?.overview?.entity_id || '--'"></span></div>
+              <div><strong>Sector:</strong><br><span x-text="view360Data?.overview?.industrial_class || '--'"></span></div>
+              <div style="grid-column:1 / -1"><strong>Registered Office:</strong><br><span x-text="view360Data?.overview?.registered_office || '--'"></span></div>
+              <div style="grid-column:1 / -1"><strong>Market Position:</strong><br><span x-text="view360Data?.market_intelligence?.market_position || '--'"></span></div>
+              <div style="grid-column:1 / -1"><strong>Relationship View:</strong><br><span x-text="view360Data?.sell_perspective?.relationship_value || '--'"></span></div>
+            </div>
+          </div>
+        </div>
+        <h4 style="margin-top:1.5rem">Management & Board</h4>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Designation</th><th>DIN</th><th>Status</th><th>Other Directorships</th></tr></thead>
+            <tbody>
+              <template x-for="d in view360Data?.overview?.directors||[]">
+                <tr>
+                  <td x-text="displayCompanyName(d.name)"></td>
+                  <td x-text="d.designation || '--'"></td>
+                  <td x-text="d.din || '--'"></td>
+                  <td><span class="badge" :class="d.is_promoter ? 'badge-amber' : 'badge-info'" x-text="d.is_promoter ? 'Promoter / Executive' : 'Board / KMP'"></span></td>
+                  <td x-text="d.other_companies_count || 0"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <p x-show="!(view360Data?.overview?.directors||[]).length" class="text-muted" style="margin-top:1rem">Director details are not available for this case snapshot.</p>
+      </div>
+
+      <!-- 360 FINANCIALS -->
+      <div x-show="v360tab==='financials'" class="card">
+        <h3>Financial Health</h3>
+        <div class="metric-cards" style="margin-bottom:1.5rem">
+          <div class="metric-card"><div><div class="metric-label">Financial Score</div><div class="metric-value" x-text="view360Data?.financials?.financial_score||'--'"></div></div></div>
+          <div class="metric-card"><div><div class="metric-label">Revenue (Cr)</div><div class="metric-value" x-text="(view360Data?.financials?.key_metrics?.revenue_cr||0).toLocaleString()"></div></div></div>
+          <div class="metric-card"><div><div class="metric-label">EBITDA (Cr)</div><div class="metric-value" x-text="(view360Data?.financials?.key_metrics?.ebitda_cr||0).toLocaleString()"></div></div></div>
+          <div class="metric-card"><div><div class="metric-label">PAT (Cr)</div><div class="metric-value" x-text="(view360Data?.financials?.key_metrics?.pat_cr||0).toLocaleString()"></div></div></div>
+        </div>
+        <div class="card" style="margin-top:0.5rem">
+          <h4>Key Ratios</h4>
+          <div class="form-grid">
+            <template x-for="[k,v] in Object.entries(view360Data?.financials?.ratios||{})">
+              <div><strong x-text="k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())+':'"></strong>
+                   <template x-if="termFor(k)"><span class="tip" tabindex="0" role="note" :data-tip="termFor(k)" :aria-label="termFor(k)"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></template>
+                   <span x-text="typeof v==='number'?v.toFixed(2):v"></span></div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 360 CREDIT RISK -->
+      <div x-show="v360tab==='credit'" class="card">
+        <h3>Credit Risk Profile</h3>
+        <div class="grid-2">
+          <div class="card" style="margin-top:0.5rem">
+            <h4>Public Record Snapshot</h4>
+            <div class="form-grid">
+              <div><strong>Open Charges:</strong> <span x-text="view360Data?.credit_risk?.charges?.open"></span></div>
+              <div><strong>Total Charges:</strong> <span x-text="view360Data?.credit_risk?.charges?.total"></span></div>
+              <div><strong>Satisfied Charges:</strong> <span x-text="view360Data?.credit_risk?.charges?.satisfied"></span></div>
+              <div><strong>Case Recommendation:</strong> <span x-text="view360Data?.credit_risk?.policy?.recommendation"></span></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:0.5rem">
+            <h4>Credit Rating</h4>
+            <div class="form-grid">
+              <div><strong>Agency:</strong> <span x-text="view360Data?.credit_risk?.rating?.agency"></span></div>
+              <div><strong>Long-term:</strong> <span x-text="view360Data?.credit_risk?.rating?.long_term"></span></div>
+              <div><strong>Short-term:</strong> <span x-text="view360Data?.credit_risk?.rating?.short_term"></span></div>
+              <div><strong>Outlook:</strong> <span x-text="view360Data?.credit_risk?.rating?.outlook"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 360 BANKING -->
+      <div x-show="v360tab==='banking'" class="card">
+        <h3>Banking &amp; Debt Exposure</h3>
+        <div class="summary-grid compact">
+          <div class="summary-card">
+            <div class="summary-label">Total Existing</div>
+            <div class="summary-value" x-text="displayScore(view360Data?.banking_exposure?.total_existing_cr)"></div>
+            <div class="summary-meta">Sanctioned banking lines (Cr)</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Current Outstanding</div>
+            <div class="summary-value" x-text="displayScore(view360Data?.sell_perspective?.wallet_share_potential?.current_outstanding_cr)"></div>
+            <div class="summary-meta">Live utilization base (Cr)</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Total Debt</div>
+            <div class="summary-value" x-text="displayScore(view360Data?.banking_exposure?.total_debt_cr)"></div>
+            <div class="summary-meta">Latest reported debt (Cr)</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Debt / Equity</div>
+            <div class="summary-value" x-text="formatDecimal(view360Data?.banking_exposure?.debt_equity || 0, 2)"></div>
+            <div class="summary-meta">Latest leverage ratio</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card card-alt">
+            <h4>Existing Facilities</h4>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead><tr><th>Facility</th><th>Sanctioned</th><th>Outstanding</th><th>Utilization</th><th>Status</th></tr></thead>
+                <tbody>
+                  <template x-for="facility in view360Data?.banking_exposure?.existing_limits||[]">
+                    <tr>
+                      <td x-text="facility.facility_type || '--'"></td>
+                      <td x-text="displayScore(facility.sanctioned_cr)"></td>
+                      <td x-text="displayScore(facility.outstanding_cr)"></td>
+                      <td x-text="formatDecimal(facility.utilization_pct || 0, 1) + '%'"></td>
+                      <td x-text="facility.classification || '--'"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card card-alt">
+            <h4>Banking Commentary</h4>
+            <div class="info-row"><span class="lbl">Proposed Facility</span><span class="val" x-text="humanizeText(view360Data?.banking_exposure?.proposed_facility?.facility_type || '--')"></span></div>
+            <div class="info-row"><span class="lbl">Requested Amount</span><span class="val" x-text="formatCurrencyCr(view360Data?.banking_exposure?.proposed_facility?.amount_requested_cr || 0)"></span></div>
+            <div class="info-row"><span class="lbl">Existing Facilities</span><span class="val" x-text="(view360Data?.banking_exposure?.existing_limits||[]).length"></span></div>
+            <div class="info-row"><span class="lbl">Conduct View</span><span class="val" x-text="view360Data?.etb_conduct?.available ? 'ETB conduct available' : (view360Data?.etb_conduct?.note || 'NTB case')"></span></div>
+          </div>
+        </div>
+        <p x-show="!view360Data?.banking_exposure?.existing_limits?.length" class="text-muted">No existing facility data is available for this case snapshot.</p>
+      </div>
+
+      <!-- 360 MARKET INTEL -->
+      <div x-show="v360tab==='market'" class="card">
+        <div class="surface-heading">
+          <div>
+            <div class="section-kicker">Market View</div>
+            <h3>Market Intelligence</h3>
+            <div class="section-subtitle">Sector outlook, peer position, and live public signals that shape the credit narrative.</div>
+          </div>
+        </div>
+        <div class="summary-grid compact">
+          <div class="summary-card">
+            <div class="summary-label">Market Stance</div>
+            <div class="summary-value" style="font-size:18px" x-text="view360Data?.market_intelligence?.summary?.stance || '--'"></div>
+            <div class="summary-meta">Current 360 market posture</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Market Score</div>
+            <div class="summary-value" x-text="displayScore(view360Data?.market_intelligence?.summary?.market_score)"></div>
+            <div class="summary-meta">Case market component</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Signals Reviewed</div>
+            <div class="summary-value" x-text="view360Data?.market_intelligence?.summary?.signals_reviewed || 0"></div>
+            <div class="summary-meta">Ratings, legal, public records</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Watch Items</div>
+            <div class="summary-value" x-text="view360Data?.market_intelligence?.summary?.watch_items || 0"></div>
+            <div class="summary-meta">Negative medium/high signals</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card card-alt">
+            <h4>Industry Outlook</h4>
+            <p class="section-subtitle" style="max-width:none" x-text="view360Data?.market_intelligence?.industry?.overview || view360Data?.market_intelligence?.industry_outlook || 'Industry narrative not available.'"></p>
+            <div class="divider"></div>
+            <h5>Growth Drivers</h5>
+            <ul class="insight-list">
+              <template x-for="driver in view360Data?.market_intelligence?.industry?.growth_drivers||[]">
+                <li x-text="driver"></li>
+              </template>
+            </ul>
+            <div class="divider"></div>
+            <h5>Regulatory Environment</h5>
+            <p class="section-subtitle" style="max-width:none" x-text="view360Data?.market_intelligence?.industry?.regulatory_environment || 'Not captured in the current case.'"></p>
+          </div>
+          <div class="card card-alt">
+            <h4>Positioning & Headwinds</h4>
+            <p class="section-subtitle" style="max-width:none" x-text="view360Data?.market_intelligence?.market_position || '--'"></p>
+            <div class="divider"></div>
+            <h5>Headwinds To Monitor</h5>
+            <ul class="insight-list">
+              <template x-for="item in view360Data?.market_intelligence?.industry?.headwinds||[]">
+                <li x-text="item"></li>
+              </template>
+            </ul>
+            <div class="divider"></div>
+            <h5>Current Read</h5>
+            <span class="badge badge-lg" :class="stanceClass(view360Data?.market_intelligence?.summary?.stance)" x-text="view360Data?.market_intelligence?.summary?.stance || 'Not assessed'"></span>
+            <div class="divider"></div>
+            <h5>Why It Needs Watching</h5>
+            <ul class="insight-list">
+              <template x-for="item in view360Data?.market_intelligence?.watch_items||[]">
+                <li>
+                  <strong x-text="presentationText(item.headline || 'Watch item')"></strong>
+                  <div class="text-muted text-sm" x-text="presentationText(item.detail || item.source || '')"></div>
+                </li>
+              </template>
+            </ul>
+            <p x-show="!(view360Data?.market_intelligence?.watch_items||[]).length" class="text-muted text-sm">No live medium or high market watch items are attached to this case.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h4>Market Signals</h4>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead><tr><th>Date</th><th>Type</th><th>Headline</th><th>Severity</th><th>Source</th></tr></thead>
+                <tbody>
+                  <template x-for="signal in view360Data?.market_intelligence?.signals||[]">
+                    <tr>
+                      <td x-text="signal.date || '--'"></td>
+                      <td x-text="humanizeText(signal.type || 'signal')"></td>
+                      <td>
+                        <div x-text="presentationText(signal.headline || '--')"></div>
+                        <div class="text-muted text-sm" x-show="signal.details" x-text="presentationText(signal.details || '')"></div>
+                      </td>
+                      <td><span class="badge" :class="severityClass(signal.severity)" x-text="humanizeText(signal.severity || 'low')"></span></td>
+                      <td x-text="signal.source || '--'"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <p x-show="!(view360Data?.market_intelligence?.signals||[]).length" class="text-muted">No explicit market/public signals are attached to this case.</p>
+          </div>
+          <div class="card">
+            <h4>Peer Benchmarks</h4>
+            <div style="overflow-x:auto">
+              <table class="data-table">
+                <thead><tr><th>Peer</th><th>Revenue (Cr)</th><th>Market Share</th><th>Rating</th></tr></thead>
+                <tbody>
+                  <template x-for="peer in view360Data?.market_intelligence?.competitors||[]">
+                    <tr>
+                      <td x-text="peer.name || '--'"></td>
+                      <td x-text="displayScore(peer.revenue_cr)"></td>
+                      <td x-text="peer.market_share_pct ? formatDecimal(peer.market_share_pct, 1) + '%' : '--'"></td>
+                      <td x-text="peer.rating || '--'"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <p x-show="!(view360Data?.market_intelligence?.competitors||[]).length" class="text-muted">Peer comparison data is not available for this case.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 360 RED FLAGS -->
+      <div x-show="v360tab==='flags'" class="card">
+        <div class="surface-heading">
+          <div>
+            <div class="section-kicker">Watchlist</div>
+            <h3>Red Flags (<span x-text="(view360Data?.red_flags||[]).length"></span>)</h3>
+            <div class="section-subtitle">Aggregated validation breaks, public-record alerts, and market/legal watch items that require analyst attention.</div>
+          </div>
+        </div>
+        <div class="summary-grid compact">
+          <div class="summary-card">
+            <div class="summary-label">Critical / High</div>
+            <div class="summary-value" x-text="severityCount(view360Data?.red_flags, ['critical', 'high'])"></div>
+            <div class="summary-meta">Priority issues requiring action</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Medium</div>
+            <div class="summary-value" x-text="severityCount(view360Data?.red_flags, 'medium')"></div>
+            <div class="summary-meta">Watch items for committee note</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Low</div>
+            <div class="summary-value" x-text="severityCount(view360Data?.red_flags, 'low')"></div>
+            <div class="summary-meta">Background observations</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Decision Context</div>
+            <div class="summary-value" style="font-size:18px" x-text="humanizeText(view360Data?.executive_summary?.recommendation || 'pending')"></div>
+            <div class="summary-meta">Current case stance</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Severity</th><th>Category</th><th>Flag</th><th>Source</th></tr></thead>
+            <tbody>
+              <template x-for="f in view360Data?.red_flags||[]">
+                <tr>
+                  <td><span :class="severityClass(f.severity)" class="badge" x-text="humanizeText(f.severity || 'info')"></span></td>
+                  <td x-text="humanizeText(f.category)"></td>
+                  <td>
+                    <div x-text="presentationText(f.flag)"></div>
+                    <div class="text-muted text-sm" x-show="f.detail" x-text="presentationText(f.detail || '')"></div>
+                  </td>
+                  <td x-text="humanizeText(f.source)"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <p x-show="!(view360Data?.red_flags||[]).length" class="text-muted">No red flags identified.</p>
+      </div>
+    </div>
+
+    <p x-show="!view360Data && reportEntity" class="text-muted" style="text-align:center; padding:3rem">
+      Click <strong>Load 360&deg;</strong> to view the comprehensive company assessment.
+    </p>
+    <p x-show="!reportEntity" class="text-muted" style="text-align:center; padding:3rem">
+      Select a company to view 360&deg; report.
+    </p>
+  </div>
+
+  <!-- â”€â”€ Financial Advisor Chat Tab â”€â”€â”€ -->
+  <div x-show="wtab==='chat'">
+    <div x-show="reportEntity" class="chat-workspace" style="margin-top:1rem">
+      <div class="chat-sidebar">
+        <div class="card card-alt">
+          <h3 style="margin-top:0">Analyst Focus</h3>
+          <div class="info-row"><span class="lbl">Recommendation</span><span class="val" x-text="humanizeText(caseMap[reportEntity]?.recommendation || 'pending')"></span></div>
+          <div class="info-row"><span class="lbl">Risk Grade</span><span class="val" x-text="caseMap[reportEntity]?.risk_grade || '--'"></span></div>
+          <div class="info-row"><span class="lbl">Composite Score</span><span class="val" x-text="displayScore(caseMap[reportEntity]?.composite_score)"></span></div>
+          <div class="info-row"><span class="lbl">External Rating</span><span class="val" x-text="reportProbe?.summary?.rating || 'Not rated'"></span></div>
+          <div class="info-row"><span class="lbl">Legal Matters</span><span class="val" x-text="reportProbe?.summary?.legal_case_count ?? '--'"></span></div>
+          <div class="info-row"><span class="lbl">Snapshot</span><span class="val" x-text="reportProbe?.available ? 'Ready' : 'Not attached'"></span></div>
+        </div>
+        <div class="card card-alt">
+          <h4 style="margin-top:0">Suggested Questions</h4>
+          <div style="display:flex; flex-direction:column; gap:0.5rem">
+            <template x-for="s in chatSuggestions()" :key="s.label">
+              <button class="btn btn-sm btn-secondary" @click="chatQuick(s.question)" :disabled="chatLoading" x-text="s.label"></button>
+            </template>
+          </div>
+        </div>
+      </div>
+      <div class="chat-container">
+        <div class="chat-header">
+          <div>
+            <strong>Analyst Assistant</strong>
+            <div class="text-muted text-sm">Answers reuse the same verified case snapshot and latest CAM output.</div>
+          </div>
+          <button class="btn btn-sm btn-ghost" @click="clearChat()" :disabled="!chatMessages.length">Clear chat</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <template x-if="!chatMessages.length">
+            <div class="chat-welcome">
+              <div class="chat-welcome-icon"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg></div>
+              <h3>Ask anything about this company</h3>
+              <p class="text-muted">I can explain the CAM report, financial metrics, credit decision rationale, risks, and the verified public-record context attached to this case.</p>
+            </div>
+          </template>
+          <template x-for="(m, i) in chatMessages" :key="i">
+            <div class="chat-msg" :class="m.role==='user'?'chat-user':'chat-assistant'">
+              <div class="chat-avatar" x-text="m.role==='user' ? 'RM' : 'AI'"></div>
+              <div class="chat-bubble" x-html="chatMessageHtml(m.content, m.role)"></div>
+            </div>
+          </template>
+          <div class="chat-msg chat-assistant" x-show="chatLoading">
+            <div class="chat-avatar">AI</div>
+            <div class="chat-bubble">Analysing the case snapshot and CAM context...</div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input class="input chat-input" x-model="chatInput" placeholder="Ask about financials, risk, conduct..."
+                 @keydown.enter="sendChat()" :disabled="chatLoading || !reportEntity">
+          <button class="btn btn-primary" @click="sendChat()" :disabled="chatLoading || !chatInput.trim() || !reportEntity" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <p x-show="!reportEntity" class="text-muted" style="text-align:center; padding:3rem">
+      Select a company to start the analyst chat.
+    </p>
+  </div>
+
+  <!-- Decision tab: approval workflow for the latest run -->
+  <div x-show="wtab==='decision'">
+    <div class="card" style="margin-top:1rem" x-show="!reportEntity">
+      <p class="empty-state">Select a company with an executed case to see its approval workflow.</p>
+    </div>
+    <div class="grid-2" style="margin-top:1rem" x-show="reportEntity">
+      <div class="card">
+        <h3>Workflow Status</h3>
+        <div class="detail-grid" x-show="approvalStatus">
+          <div><strong>Status</strong><br><span class="badge" :class="workflowStatusClass(approvalStatus?.status)" x-text="titleCase(approvalStatus?.status || '')"></span></div>
+          <div><strong>Required Authority</strong><br><span x-text="approvalStatus?.required_authority?.name || '--'"></span></div>
+          <div><strong>System Recommendation</strong><br><span class="badge" :class="recCls(approvalStatus?.system_recommendation)" x-text="fmtRec(approvalStatus?.system_recommendation || '')"></span></div>
+          <div><strong>Risk Grade</strong><br><span x-text="approvalStatus?.risk_grade || '--'"></span></div>
+          <div><strong>Amount</strong><br><span x-text="formatCurrencyCr(approvalStatus?.requested_amount_cr || 0)"></span></div>
+          <div><strong>Submitted By</strong><br><span x-text="approvalStatus?.submitted_by || '--'"></span></div>
+        </div>
+        <p class="status-inline status-inline-error" x-show="approvalStatus?.is_deviation_route">
+          <span>The system recommends DECLINE. Approving is a deviation and needs a justification in the comments.</span>
+        </p>
+        <p class="empty-state" x-show="!approvalStatus">Workflow status loads when this tab opens.</p>
+      </div>
+
+      <div class="card">
+        <h3>Take Action</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label required">Acting Role</label>
+            <select class="input" x-model="approvalRole" @change="loadApprovalQueue()">
+              <option value="">Select role</option>
+              <optgroup label="Maker">
+                <template x-for="role in approvalMakerRoles" :key="role">
+                  <option :value="role" x-text="titleCase(role)"></option>
+                </template>
+              </optgroup>
+              <optgroup label="Approving authority">
+                <template x-for="level in approvalLevels" :key="level.id">
+                  <option :value="level.id" x-text="level.name"></option>
+                </template>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label required">User ID</label>
+            <input class="input" x-model="approvalUserId" placeholder="Your staff ID">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label" :class="{'required': approvalCommentsRequired()}">Comments</label>
+          <textarea class="input" rows="3" x-model="approvalComments" placeholder="Required to reject, return, or approve against a system decline"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Sanction Conditions (one per line)</label>
+          <textarea class="input" rows="2" x-model="approvalConditions"></textarea>
+        </div>
+        <div class="action-row">
+          <template x-for="action in (approvalStatus?.allowed_actions || [])" :key="action">
+            <button class="btn btn-sm" :class="approvalActionClass(action)" @click="takeApprovalAction(action)"
+                    :disabled="loading || !approvalRole || !approvalUserId.trim()" x-text="titleCase(action)"></button>
+          </template>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem; margin-top:0.75rem">Identity is taken from the role and user ID above until single sign-on is in place.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem" x-show="reportEntity">
+      <h3>Decision History</h3>
+      <table class="data-table" x-show="approvalStatus?.history?.length">
+        <thead><tr><th>When</th><th>Action</th><th>From &rarr; To</th><th>By</th><th>Comments</th></tr></thead>
+        <tbody>
+          <template x-for="(h, i) in approvalStatus?.history || []" :key="i">
+            <tr>
+              <td x-text="formatRunTime(h.created_at)"></td>
+              <td x-text="titleCase(h.action)"></td>
+              <td x-text="titleCase(h.from_status) + ' → ' + titleCase(h.to_status)"></td>
+              <td x-text="(h.actor_id || '--') + ' (' + titleCase(h.actor_role || '') + ')'"></td>
+              <td class="text-muted" x-text="h.comments || '--'"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+      <p class="empty-state" x-show="!approvalStatus?.history?.length">No decisions recorded for this case run.</p>
+    </div>
+
+  </div>
+
+  <!-- Tab: Runs (every pipeline attempt, then the latest run's agent log) -->
+  <div class="card" x-show="wtab==='runs'">
+    <div class="summary-table-head">
+      <h3>Run history</h3>
+      <button class="btn btn-sm btn-ghost" @click="downloadJSON()"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Fact pack (.json)</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table summary-table" x-show="detailRuns.length">
+        <thead><tr>
+          <th>Run</th><th>Started</th><th class="num">Duration</th><th>Status</th><th>Model</th>
+          <th>Grade</th><th class="num">Score</th><th>System view</th><th>Decision</th><th>Reports</th>
+        </tr></thead>
+        <tbody>
+          <template x-for="(run, idx) in detailRuns" :key="run.run_id">
+            <tr :class="{ 'row-current': run.is_current }">
+              <td>
+                <strong x-text="'#' + (detailRuns.length - idx)"></strong>
+                <span class="badge badge-blue" x-show="run.is_current">Latest</span>
+              </td>
+              <td x-text="formatRunTime(run.started_at)"></td>
+              <td class="num" x-text="runDuration(run)"></td>
+              <td>
+                <span class="badge" :class="runStatusClass(run.status)" x-text="titleCase(run.status)"></span>
+                <span class="row-sub run-error" x-show="run.error" :title="run.error" x-text="run.error"></span>
+              </td>
+              <td x-text="run.llm_model || run.llm_provider || '--'"></td>
+              <td><span class="badge" :class="gradeCls(run.risk_grade)" x-text="run.risk_grade || '--'"></span></td>
+              <td class="num" x-text="displayScore(run.composite_score)"></td>
+              <td><span class="badge" :class="recCls(run.recommendation)" x-text="fmtRec(run.recommendation) || '--'"></span></td>
+              <td>
+                <span class="badge" x-show="run.workflow_status" :class="workflowStatusClass(run.workflow_status)" x-text="workflowLabel(run.workflow_status)"></span>
+                <span class="badge badge-grey" x-show="run.workflow_status && !run.is_current">Superseded</span>
+              </td>
+              <td class="action-cell">
+                <template x-if="run.case_run_id && run.status === 'completed'">
+                  <span class="run-report-links">
+                    <button class="btn btn-sm btn-outline" @click="openCamFor(detail.entity_id, run.case_run_id)">CAM</button>
+                    <a class="btn btn-sm btn-ghost" target="_blank" :href="runReportUrl(run, 'cam-pdf')">PDF</a>
+                    <a class="btn btn-sm btn-ghost" target="_blank" :href="runReportUrl(run, 'one-pager')">One-pager</a>
+                  </span>
+                </template>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-state" x-show="!detailRuns.length">No recorded pipeline attempts for this company.</p>
+
+    <h4 style="margin-top:1.5rem">Latest run &mdash; agent log</h4>
+    <table class="data-table">
+      <thead><tr><th>Agent</th><th>Status</th><th class="num">Duration</th><th>Error</th></tr></thead>
+      <tbody>
+        <template x-for="l in detail?.pipeline_log||[]">
+          <tr>
+            <td x-text="agentLabel(l.agent_name)"></td>
+            <td><span class="badge" :class="l.status==='completed'?'badge-green':'badge-red'" x-text="titleCase(l.status)"></span></td>
+            <td class="num" x-text="formatDuration(l.duration_ms)"></td>
+            <td class="text-muted" x-text="l.error||'--'"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+</section>

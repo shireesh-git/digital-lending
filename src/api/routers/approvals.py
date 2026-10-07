@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Header, Request
 from src.api.dependencies import get_container
 from src.application.approval_service import Actor
 from src.application.container import ServiceContainer
+from src.core.config_manager import config
 
 router = APIRouter(prefix="/api", tags=["approvals"])
 
@@ -21,9 +22,10 @@ def get_actor(x_user_id: str = Header(default=""), x_user_role: str = Header(def
 
 @router.get("/approvals/authority-matrix")
 async def authority_matrix(svc: ServiceContainer = Depends(get_container)):
-    """Delegation-of-powers levels and maker roles from config/approval.yaml."""
+    """Delegation-of-powers levels, maker roles and the decision TAT from config/approval.yaml."""
     return {"levels": svc.approvals.authority_matrix(),
-            "maker_roles": list(svc.approvals.matrix.maker_roles)}
+            "maker_roles": list(svc.approvals.matrix.maker_roles),
+            "decision_tat_days": int(config.get("approval", "decision_tat_days", default=3) or 3)}
 
 
 @router.get("/approvals/queue")

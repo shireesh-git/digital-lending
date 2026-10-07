@@ -32,6 +32,7 @@
     "keys": [
       "grade_distribution",
       "metrics",
+      "portfolio",
       "recent_cases",
       "workflow_status"
     ]
@@ -301,6 +302,7 @@
     "keys": [
       "grade_distribution",
       "metrics",
+      "portfolio",
       "recent_cases",
       "workflow_status"
     ]
