@@ -36,26 +36,26 @@ The CAM Intelligence Platform automates the end-to-end credit appraisal process 
 ### Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.com) with `qwen3:8b` (the configured LLM) — or switch to another
+- [Ollama](https://ollama.com) with `qwen2.5:3b` (the configured LLM) — or switch to another
   provider in `config/llm_providers.yaml`
 - (Optional) Docker for containerized deployment
 
-### Local LLM (Ollama + qwen3:8b)
+### Local LLM (Ollama + qwen2.5:3b)
 
 ```bash
-ollama pull qwen3:8b        # ~5.2 GB, one-time
+ollama pull qwen2.5:3b      # ~1.9 GB, one-time
 ollama serve                # if Ollama is not already running as a service
 ```
 
-`config/llm_providers.yaml` sets `active_provider: ollama` with `model: qwen3:8b` and
-`think: false`. qwen3 normally writes a long hidden reasoning pass before answering; turning
-it off makes CAM generation several times faster on CPU and keeps the token budget for the
-memo itself.
+`config/llm_providers.yaml` sets `active_provider: ollama` with `model: qwen2.5:3b`, the
+fastest of the tested local models (qwen2.5:3b, qwen2.5:7b, qwen3:8b, gemma4:e4b) on CPU.
+For richer narrative at the cost of speed, switch to `qwen3:8b` and add `think: false` (qwen3
+otherwise writes a long hidden reasoning pass before answering).
 
-On a CPU-only laptop (16 GB RAM) expect roughly 3–5 tokens/second; a full CAM (14 LLM-written
-sections) was measured at **35–50 minutes** before the Ollama optimizations below (one context
-size per run, compact prompts, shorter output limits for table-led sections, keep-alive), so
-expect less — re-measure on your machine. Sections are written one at a time on Ollama. Each
+With qwen3:8b on a CPU-only laptop (16 GB RAM), a full CAM (14 LLM-written sections) was
+measured at **35–50 minutes** before the Ollama optimizations below (one context size per
+run, compact prompts, shorter output limits for table-led sections, keep-alive). qwen2.5:3b
+should be roughly 2–3× faster — re-measure on your machine. Sections are written one at a time on Ollama. Each
 section is saved as soon as it is written, so if a run fails part-way, running it again resumes
 from the finished sections. Timeouts are set per section (`timeout_seconds`) and per chat reply
 (`chat_timeout_seconds`).

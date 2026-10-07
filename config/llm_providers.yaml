@@ -62,16 +62,15 @@ providers:
   ollama:
     name: Ollama (Local)
     type: ollama
-    # Install first:  ollama pull qwen3:8b   (~5.2 GB; runs on CPU with 16 GB RAM)
-    model: qwen3:8b
+    # Install first:  ollama pull qwen2.5:3b   (~1.9 GB; fastest of the local models on CPU)
+    model: qwen2.5:3b
     base_url: http://localhost:11434    # OLLAMA_HOST env var overrides this
     temperature: 0.15
     max_tokens: 4000
     num_ctx: 8192                       # starting context window (tokens)
     max_num_ctx: 32768                  # grown per prompt up to this, so long sections are never truncated
-    # qwen3 "thinks" before answering by default; off = much faster on CPU and
-    # the whole token budget goes to the CAM text. Leave unset for non-thinking models.
-    think: false
+    # Reasoning models (qwen3, deepseek-r1) "think" before answering by default; set
+    # think: false for those. Leave unset for non-thinking models like qwen2.5.
     # Responses are streamed, so this is the longest *silence* allowed (e.g. while a long
     # prompt is read), not a cap on the whole section: a slow but working section finishes.
     timeout_seconds: 1800
@@ -80,14 +79,15 @@ providers:
     max_parallel_sections: 1
     # Keep the model loaded this long after the last call (CAM sections and chat),
     # so the next run or chat reply skips a cold load. While loaded it holds about
-    # 5 GB of RAM plus its context; 0 unloads at once, remove for Ollama's 5m default.
+    # 2 GB of RAM plus its context; 0 unloads at once, remove for Ollama's 5m default.
     keep_alive: 15m
     chat_timeout_seconds: 600           # per Financial Advisor chat reply
     # Route table-led CAM sections to a smaller, faster model; the rest use `model`.
     # Routed sections run first as one group and that model is then unloaded, so the run
     # switches model once and both are never in RAM together. verify_figures: a routed
     # section whose figures are not all in its data is rewritten by `model`.
-    # Install first: ollama pull qwen2.5:3b (~1.9 GB). Compare a few CAMs before enabling.
+    # Not needed while `model` is already qwen2.5:3b; to use it, set `model` back to a
+    # larger model (e.g. qwen3:8b with think: false) and enable this.
     model_routing:
       enabled: false
       verify_figures: true
