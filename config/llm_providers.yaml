@@ -43,10 +43,15 @@ providers:
     api_key_env: NVIDIA_NIM_API_KEY     # set in .env.local (never committed)
     temperature: 0.15
     max_tokens: 4000
-    timeout_seconds: 60                 # per request; timeouts are retried (max_retries)
+    # Per request; timeouts are retried (max_retries, default 4). Long sections from a
+    # reasoning model on NIM's shared endpoint can take several minutes — 60s was too short.
+    timeout_seconds: 300
+    # Sections written at once. NIM's free endpoint throttles bursts; 2 keeps retries rare.
+    max_parallel_sections: 2
     # gpt-oss reasons before answering, and that reasoning counts against each section's
-    # max_tokens. If sections come back cut short or empty, try reasoning_effort: low.
-    # reasoning_effort: low
+    # max_tokens. low = shorter reasoning, faster sections, more of the budget for CAM text.
+    # If NIM rejects the request with an error naming reasoning_effort, remove this line.
+    reasoning_effort: low
   anthropic:
     name: Anthropic Claude
     type: anthropic
