@@ -280,6 +280,11 @@ function camSummary() {
       this.navigate('pipeline');
     },
 
+    /* top_exception is a message, or an exception code when the check has no message. */
+    issueText(value) {
+      return /^[A-Z0-9_]+$/.test(String(value || '')) ? this.exceptionLabel(value) : this.presentationText(value);
+    },
+
     /* Review indicators for the preview, from the case list (GET /api/cases). */
     previewCase() {
       return this.caseMap[this.summaryPreview?.entity_id] || {};

@@ -437,7 +437,7 @@
     </div>
     <div style="display:flex; gap:1rem; margin-top:1rem">
       <button class="btn btn-primary" @click="submitCompany()" :disabled="loading">
-        <span x-show="!loading"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Add Company</span>
+        <span x-show="!loading"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-plus"/></svg> Add Company</span>
         <span x-show="loading">Submitting&hellip;</span>
       </button>
       <button class="btn btn-secondary" @click="resetCompanyForm()">Reset</button>

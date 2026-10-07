@@ -7,6 +7,8 @@ def test_every_include_is_inlined():
     html = render_spa()
     assert html.startswith("<!DOCTYPE html>")  # no byte-order mark before it (quirks mode)
     assert "<!-- include:" not in html
+    assert 'href="/static/css/dashboard.css?v=' in html  # cache-busted
+    assert 'src="/static/js/app.js?v=' in html
     for page in ("summary", "cases", "detail", "onboard", "pipeline", "approvals", "settings"):
         assert f"page==='{page}'" in html
 

@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<!-- Icon set: <svg class="icon" aria-hidden="true"><use href="#i-NAME"/></svg>; strokes follow the text colour -->
+<!-- Icon set: <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-NAME"/></svg>; strokes follow the text colour -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <symbol id="i-play" viewBox="0 0 24 24"><path class="icon-solid" d="M7 4v16l13-8z"/></symbol>
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></symbol>
@@ -50,7 +50,7 @@
     <div class="topbar-actions">
       <!-- Find a borrower (press / anywhere) -->
       <div class="global-search" data-tour="search" @click.outside="searchOpen=false">
-        <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg>
         <input type="search" x-ref="globalSearch" x-model="searchQuery" placeholder="Find a borrower   ( / )"
                aria-label="Find a borrower by name, ID, CIN or PAN" autocomplete="off"
                role="combobox" :aria-expanded="searchOpen && !!searchQuery.trim()" aria-controls="global-search-results"
@@ -77,7 +77,7 @@
       <div class="topbar-menu" @click.outside="notificationsOpen=false">
         <button class="icon-btn" @click="toggleNotifications()" :aria-expanded="notificationsOpen"
                 :aria-label="unreadCount() ? unreadCount() + ' unread notifications' : 'Notifications'">
-          <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>
+          <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-bell"/></svg>
           <span class="icon-btn-count" x-show="unreadCount()" x-text="unreadCount()"></span>
         </button>
         <div class="menu-panel" x-show="notificationsOpen" x-transition x-cloak>
@@ -102,10 +102,10 @@
       </div>
 
       <button class="icon-btn" @click="startTour()" aria-label="Take the guided tour" title="Guided tour">
-        <svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>
+        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-help"/></svg>
       </button>
       <button class="btn btn-gold create-cam-btn" data-tour="new" :class="{'is-active': page==='onboard'}" @click="startCamJourney()">
-        <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> Create New CAM
+        <svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-plus"/></svg> Create New CAM
       </button>
       <div class="profile-badge" aria-hidden="true">CO</div>
     </div>
@@ -123,11 +123,8 @@
   </nav>
 
   <!-- Guided tour -->
-  <div class="tour-layer" :class="{'tour-dim': !tourPosition.highlight}" x-show="tourStep >= 0" x-cloak @keydown.escape.window="endTour()">
-    <div class="tour-highlight" x-show="tourPosition.highlight"
-         :style="tourPosition.highlight && `top:${tourPosition.highlight.top}px;left:${tourPosition.highlight.left}px;width:${tourPosition.highlight.width}px;height:${tourPosition.highlight.height}px`"></div>
-    <div class="tour-card" role="dialog" aria-modal="true" :aria-label="currentTourStep()?.title"
-         :style="`top:${tourPosition.top};left:${tourPosition.left}`" :class="{'tour-card-centred': !tourPosition.highlight}">
+  <div class="tour-layer" x-show="tourStep >= 0" x-cloak @keydown.escape.window="endTour()">
+    <div class="tour-card" role="dialog" aria-modal="true" :aria-label="currentTourStep()?.title">
       <span class="tour-step" x-text="'Step ' + (tourStep + 1) + ' of ' + tourSteps().length"></span>
       <h3 x-text="currentTourStep()?.title"></h3>
       <p x-text="currentTourStep()?.text"></p>

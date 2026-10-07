@@ -22,4 +22,18 @@ def render_spa() -> str:
         return path.read_text(encoding="utf-8-sig").rstrip("\n")
 
     shell = (root / "index.html").read_text(encoding="utf-8").lstrip("﻿")  # a stray BOM forces quirks mode
-    return _INCLUDE.sub(include, shell)
+    return _STATIC_REF.sub(_versioned, _INCLUDE.sub(include, shell))
+
+
+# href="/static/…" or src="/static/…": stamped with the file's modified time, so a browser
+# never pairs new HTML with a cached old stylesheet or script.
+_STATIC_REF = re.compile(r'(href|src)="/static/([^"?#]+)"')
+
+
+def _versioned(match: re.Match) -> str:
+    attr, rel = match.group(1), match.group(2)
+    try:
+        version = int((UI_ROOT / "static" / rel).stat().st_mtime)
+    except OSError:
+        return match.group(0)
+    return f'{attr}="/static/{rel}?v={version}"'

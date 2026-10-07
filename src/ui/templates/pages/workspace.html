@@ -21,8 +21,8 @@
     </div>
     <div class="ws-facts">
       <div class="ws-fact"><span>Amount</span><strong x-text="formatCurrencyCr(detail?.requested_amount_cr)"></strong></div>
-      <div class="ws-fact"><span>Risk grade <span class="tip" tabindex="0" role="note" :data-tip="term('grade')" :aria-label="term('grade')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong><span class="badge" :class="gradeCls(detail?.risk_grade)" x-text="detail?.risk_grade || '--'"></span></strong></div>
-      <div class="ws-fact"><span>Score <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong :class="scoreCls(detail?.composite_score)" x-text="displayScore(detail?.composite_score)"></strong></div>
+      <div class="ws-fact"><span>Risk grade <span class="tip" tabindex="0" role="note" :data-tip="term('grade')" :aria-label="term('grade')"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong><span class="badge" :class="gradeCls(detail?.risk_grade)" x-text="detail?.risk_grade || '--'"></span></strong></div>
+      <div class="ws-fact"><span>Score <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-info"/></svg></span></span><strong :class="scoreCls(detail?.composite_score)" x-text="displayScore(detail?.composite_score)"></strong></div>
       <div class="ws-fact"><span>System view</span><strong><span class="badge" :class="recCls(detail?.recommendation)" x-text="fmtRec(detail?.recommendation) || '--'"></span></strong></div>
       <div class="ws-fact"><span>Status</span><strong>
         <span class="badge" :class="workflowStatusClass(workspaceRow()?.workflow_status)" x-text="workflowLabel(workspaceRow()?.workflow_status || 'draft')"></span>
@@ -58,7 +58,7 @@
   <!-- Score cards -->
   <div class="metric-cards five" x-show="detail">
     <div class="metric-card mini">
-      <div class="metric-label">Composite <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></div>
+      <div class="metric-label">Composite <span class="tip" tabindex="0" role="note" :data-tip="term('composite')" :aria-label="term('composite')"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-info"/></svg></span></div>
       <div class="metric-value" :class="scoreCls(detail?.composite_score)" x-text="detail?.composite_score"></div>
       <div class="metric-sub" x-text="'Grade '+detail?.risk_grade"></div>
     </div>
@@ -439,7 +439,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
       <h3>Document Extraction</h3>
       <button class="btn btn-sm btn-primary" @click="runExtractionForDetail()" :disabled="loading">
-        <span x-show="!loading"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Run Extraction</span>
+        <span x-show="!loading"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg> Run Extraction</span>
         <span x-show="loading">Extracting&hellip;</span>
       </button>
     </div>
@@ -474,7 +474,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
       <h3>ETB Behavioral Analytics</h3>
       <button class="btn btn-sm btn-primary" @click="runETBForDetail()" :disabled="loading">
-        <span x-show="!loading"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Run ETB Analytics</span>
+        <span x-show="!loading"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg> Run ETB Analytics</span>
         <span x-show="loading">Analysing&hellip;</span>
       </button>
     </div>
@@ -546,7 +546,7 @@
         </div>
         <!-- Edited by RM indicator -->
         <div x-show="camSections[camActiveSection]?.editedBy" class="cam-edited-banner">
-          <span><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg> <strong>Edited by <span x-text="camSections[camActiveSection]?.editedBy || 'RM'"></span></strong></span>
+          <span><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-edit"/></svg> <strong>Edited by <span x-text="camSections[camActiveSection]?.editedBy || 'RM'"></span></strong></span>
           <span class="text-muted" x-text="camSections[camActiveSection]?.editedAt ? '— ' + new Date(camSections[camActiveSection].editedAt).toLocaleString() : ''"></span>
           <button class="btn btn-outline btn-sm" style="margin-left:auto; font-size:0.75rem" x-show="!isOldRun()" @click="revertCamSectionEdit()">Revert to Original</button>
         </div>
@@ -561,10 +561,10 @@
           </div>
           <div style="margin-top:0.75rem; display:flex; gap:0.5rem">
             <button class="btn btn-primary btn-sm" @click="saveCamSectionEdit()" :disabled="camEditSaving">
-              <span x-show="!camEditSaving"><svg class="icon" aria-hidden="true"><use href="#i-save"/></svg> Save Edit</span>
+              <span x-show="!camEditSaving"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-save"/></svg> Save Edit</span>
               <span x-show="camEditSaving">Saving...</span>
             </button>
-            <button class="btn btn-outline btn-sm" @click="revertCamSectionEdit()"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg> Revert</button>
+            <button class="btn btn-outline btn-sm" @click="revertCamSectionEdit()"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-undo"/></svg> Revert</button>
           </div>
         </div>
         <div x-show="camSections[camActiveSection]" class="cam-user-comment-panel">
@@ -596,7 +596,7 @@
     </div>
 
     <div x-show="!camSections.length && !camHtml" class="empty-state">
-      <div class="empty-state-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></div>
+      <div class="empty-state-icon"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-file"/></svg></div>
       <div class="empty-state-title">No CAM Report Loaded</div>
       <div class="empty-state-sub">Select a company and click &ldquo;Load Report&rdquo;.</div>
     </div>
@@ -607,7 +607,7 @@
   <div x-show="wtab==='memo'">
     <div style="display:flex; gap:0.5rem; margin:1rem 0; align-items:center">
       <button class="btn btn-primary" @click="loadOnePager()" :disabled="!reportEntity||loading">View Memo</button>
-      <button class="btn btn-ghost" @click="openMemoNewTab()" :disabled="!reportEntity"><svg class="icon" aria-hidden="true"><use href="#i-print"/></svg> Print</button>
+      <button class="btn btn-ghost" @click="openMemoNewTab()" :disabled="!reportEntity"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-print"/></svg> Print</button>
     </div>
     <div x-show="memoHtml" class="card" style="padding:0; overflow:hidden">
       <iframe id="memoFrame" style="width:100%; min-height:85vh; border:none; background:#fff"
@@ -742,7 +742,7 @@
           <div class="form-grid">
             <template x-for="[k,v] in Object.entries(view360Data?.financials?.ratios||{})">
               <div><strong x-text="k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())+':'"></strong>
-                   <template x-if="termFor(k)"><span class="tip" tabindex="0" role="note" :data-tip="termFor(k)" :aria-label="termFor(k)"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span></template>
+                   <template x-if="termFor(k)"><span class="tip" tabindex="0" role="note" :data-tip="termFor(k)" :aria-label="termFor(k)"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-info"/></svg></span></template>
                    <span x-text="typeof v==='number'?v.toFixed(2):v"></span></div>
             </template>
           </div>
@@ -1042,7 +1042,7 @@
         <div class="chat-messages" id="chatMessages">
           <template x-if="!chatMessages.length">
             <div class="chat-welcome">
-              <div class="chat-welcome-icon"><svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg></div>
+              <div class="chat-welcome-icon"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-chat"/></svg></div>
               <h3>Ask anything about this company</h3>
               <p class="text-muted">I can explain the CAM report, financial metrics, credit decision rationale, risks, and the verified public-record context attached to this case.</p>
             </div>
@@ -1061,7 +1061,7 @@
         <div class="chat-input-bar">
           <input class="input chat-input" x-model="chatInput" placeholder="Ask about financials, risk, conduct..."
                  @keydown.enter="sendChat()" :disabled="chatLoading || !reportEntity">
-          <button class="btn btn-primary" @click="sendChat()" :disabled="chatLoading || !chatInput.trim() || !reportEntity" aria-label="Send"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button>
+          <button class="btn btn-primary" @click="sendChat()" :disabled="chatLoading || !chatInput.trim() || !reportEntity" aria-label="Send"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-send"/></svg></button>
         </div>
       </div>
     </div>
@@ -1159,7 +1159,7 @@
   <div class="card" x-show="wtab==='runs'">
     <div class="summary-table-head">
       <h3>Run history</h3>
-      <button class="btn btn-sm btn-ghost" @click="downloadJSON()"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Fact pack (.json)</button>
+      <button class="btn btn-sm btn-ghost" @click="downloadJSON()"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-download"/></svg> Fact pack (.json)</button>
     </div>
     <div class="table-scroll">
       <table class="data-table summary-table" x-show="detailRuns.length">

@@ -138,17 +138,16 @@ function camShell() {
 
     startTour() {
       this.notificationsOpen = false;
-      this.tourStep = 0;
-      this.$nextTick(() => this.positionTour());
+      this.showTourStep(0);
     },
 
     nextTourStep() {
       if (this.tourStep >= this.tourSteps().length - 1) return this.endTour();
-      this.tourStep += 1;
-      this.$nextTick(() => this.positionTour());
+      this.showTourStep(this.tourStep + 1);
     },
 
     endTour() {
+      this.highlightTourTarget(null);
       this.tourStep = -1;
       writeStore(TOUR_SEEN_KEY, true);
     },
@@ -157,21 +156,20 @@ function camShell() {
       return this.tourSteps()[this.tourStep] || null;
     },
 
-    /* Place the tour card under the highlighted element (or centred if it is not visible). */
-    tourPosition: { top: '30%', left: '50%', highlight: null },
-
-    positionTour() {
+    /* The card stays put (bottom centre); the step's element gets a highlight class, so the
+       highlight moves with the page instead of being drawn at fixed coordinates. */
+    showTourStep(index) {
+      this.tourStep = index;
       const step = this.currentTourStep();
       const el = step && document.querySelector(step.target);
-      const rect = el && el.offsetParent !== null ? el.getBoundingClientRect() : null;
-      if (!rect) { this.tourPosition = { top: '30%', left: '50%', highlight: null }; return; }
-      const cardWidth = 320;
-      const left = Math.min(Math.max(12, rect.left), window.innerWidth - cardWidth - 12);
-      this.tourPosition = {
-        top: (rect.bottom + 12) + 'px',
-        left: left + 'px',
-        highlight: { top: rect.top - 4, left: rect.left - 4, width: rect.width + 8, height: rect.height + 8 },
-      };
+      this.highlightTourTarget(el && el.offsetParent !== null ? el : null);
+    },
+
+    highlightTourTarget(el) {
+      document.querySelectorAll('.tour-target').forEach(node => node.classList.remove('tour-target'));
+      if (!el) return;
+      el.classList.add('tour-target');
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
 
     /* ─── Sortable tables ────────────────────────────────────────────── */

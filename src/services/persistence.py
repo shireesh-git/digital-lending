@@ -409,6 +409,12 @@ class PersistenceService:
             )
             self._migrate_section_edits_to_runs(conn)
             self._migrate_pipeline_run_model(conn)
+            # Runs execute in-process: any still 'running' at start-up died with the old process.
+            conn.execute(
+                "UPDATE pipeline_runs SET status = 'failed', finished_at = ?, "
+                "error = 'Interrupted: the server stopped before this run finished' WHERE status = 'running'",
+                (_utc_now(),),
+            )
             now = _utc_now()
             conn.execute(
                 """

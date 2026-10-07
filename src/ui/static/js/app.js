@@ -164,9 +164,10 @@ function camApp() {
     /* ─── Core: start-up, navigation, API helper, shared company/case data ─── */
     /* Alpine calls init() itself — the page must not also use x-init="init()". */
     async init() {
+      // One page app: the browser's own scroll restoration lands reloads mid-page.
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       window.addEventListener('hashchange', () => this.onHash());
       window.addEventListener('keydown', event => this.focusSearchShortcut(event));
-      window.addEventListener('resize', () => { if (this.tourStep >= 0) this.positionTour(); });
       // Reference data used across pages, loaded once; the current page loads its own data.
       await Promise.all([
         this.onHash(),
@@ -201,11 +202,13 @@ function camApp() {
         }
         return Promise.all([this.loadCompanies({ maxAgeMs: NAV_CACHE_MS }), this.openWorkspace(eid, tab)]);
       }
+      if (this.page !== h) window.scrollTo({ top: 0 });
       this.page = h;
       return this.loadPage(h);
     },
 
     navigate(p) {
+      if (this.page !== p) window.scrollTo({ top: 0 });  // a new page opens at its top
       this.page = p;
       if (location.hash.slice(1) !== p) location.hash = p;  // fires hashchange → onHash → loadPage
       else this.loadPage(p);                                 // same page clicked again: refresh it

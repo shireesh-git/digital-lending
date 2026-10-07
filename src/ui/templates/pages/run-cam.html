@@ -31,7 +31,7 @@
       <span class="text-muted" x-show="!selectedPipelineCase()">Not analysed yet &mdash; this run creates the first CAM.</span>
     </div>
     <button class="btn btn-primary" @click="runPipelineSSE()" :disabled="pipelineRunning || !pipelineTarget">
-      <span x-show="!pipelineRunning"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Run CAM</span>
+      <span x-show="!pipelineRunning"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-play"/></svg> Run CAM</span>
       <span x-show="pipelineRunning">Running&hellip;</span>
     </button>
   </div>
@@ -50,9 +50,9 @@
         <li class="run-step" :class="'run-step-' + step.status">
           <span class="run-step-icon">
             <span x-show="step.status === 'running'" class="spinner-sm"></span>
-            <span x-show="step.status === 'done'"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
-            <span x-show="step.status === 'failed'"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></span>
-            <span x-show="step.status === 'pending'"><svg class="icon" aria-hidden="true"><use href="#i-circle"/></svg></span>
+            <span x-show="step.status === 'done'"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-check"/></svg></span>
+            <span x-show="step.status === 'failed'"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-x"/></svg></span>
+            <span x-show="step.status === 'pending'"><svg class="icon" width="16" height="16" aria-hidden="true"><use href="#i-circle"/></svg></span>
           </span>
           <div class="run-step-body">
             <strong x-text="agentLabel(step.name)"></strong>

@@ -93,6 +93,7 @@ function camCaseDetail() {
           this._docLoadedFor = null;
         }
         this.detail = detail;
+        if (this.page !== 'detail') window.scrollTo({ top: 0 });
         this.page = 'detail';
         this.docEntity = eid;
         if (this.reportEntity !== eid) {
@@ -131,6 +132,7 @@ function camCaseDetail() {
       const eid = this.detail?.entity_id;
       if (!eid) return;
       if (!this.workspaceTabs().some(t => t.id === tab)) tab = 'overview';
+      if (tab !== this.wtab) window.scrollTo({ top: 0 });  // a tab opens at its top
       this.wtab = tab;
       const hash = 'case/' + eid + (tab === 'overview' ? '' : '/' + tab);
       if (location.hash.slice(1) !== hash) location.hash = hash;
